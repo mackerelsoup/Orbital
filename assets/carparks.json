@@ -1,6 +1,7 @@
 [
   {
     "name": "Eusoff carpark",
+    "id": 15,
     "latitude": 1.2933116586433435,
     "longitude": 103.77220570282495,
     "latitudeDelta": 0.01,
@@ -8,6 +9,7 @@
   },
   {
     "name": "LT16 carpark",
+    "id": 16,
     "latitude": 1.295480242514761, 
     "longitude": 103.77094951546032,
     "latitudeDelta": 0.01,

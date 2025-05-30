@@ -1,0 +1,29 @@
+//watch the location -> even though function is only called once on mount, this persists
+      /*
+      const subscription = await Location.watchPositionAsync(
+        {
+          accuracy: Location.Accuracy.Highest,
+          distanceInterval: 10
+        },
+        (newLocation) => {
+          setLocation(newLocation)
+          
+          
+          const {
+            coords: { latitude, longitude }
+          } = newLocation!;
+
+          setRegion({
+            latitude,
+            longitude,
+            latitudeDelta: 0.01,
+            longitudeDelta: 0.01,
+          })
+
+          console.log("inside")
+          console.log("Updated Location:", newLocation);
+        },
+
+
+      )
+       causing some errors, maybe do pull to refresh instead */
