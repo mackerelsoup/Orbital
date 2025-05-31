@@ -18,14 +18,18 @@ const CarparkList = ({ carparks, onItemPress }: CarparkListProps) => (
     )}
     keyExtractor={(item) => item.id.toString()}
     style={styles.list}
+    contentContainerStyle = {styles.content}
   />
 );
 
 const styles = StyleSheet.create({
   list: {
     flex: 1,
-    backgroundColor: 'blue',
+    backgroundColor: 'white',
   },
+  content: {
+    paddingTop: 10,
+  }
 });
 
 export default CarparkList;

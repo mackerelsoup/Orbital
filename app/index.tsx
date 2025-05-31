@@ -19,6 +19,7 @@ export default function App() {
       
       // Immediately set last known position if available
       if (locationData?.lastKnown) {
+
         const { latitude, longitude } = locationData.lastKnown.coords;
         setRegion({
           latitude,
@@ -49,6 +50,7 @@ export default function App() {
 
   const handleCarparkSelect = (carpark: Carpark) => {
     const marker = markerRefs.current[carpark.id];
+    //console.log(marker)
     marker?.showCallout();
     mapRef.current?.animateToRegion({
       latitude: carpark.latitude,
@@ -63,6 +65,7 @@ export default function App() {
       <MapComponent
         region={region}
         mapRef={mapRef}
+        markerRefs ={markerRefs}
         carparks={carparks}
         onMarkerPress={handleCarparkSelect}
       />

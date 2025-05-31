@@ -13,7 +13,6 @@ export default function Button({ label, theme, onPress }: Props) {
             <View
                 style={[
                     styles.buttonContainer,
-                    { borderWidth: 4, borderColor: '#ffd33d', borderRadius: 18 },
                 ]}>
                 <Pressable
                     //inline style, override the style  defined the stylesheet
@@ -30,7 +29,7 @@ export default function Button({ label, theme, onPress }: Props) {
 
     return (
         <View style={[
-            styles.buttonContainer,
+            styles.buttonContainer
             //{ borderWidth: 4, borderColor: '#fff', borderRadius: 18 },
             ]}>
             <Pressable style={styles.button} onPress={onPress}>
@@ -47,16 +46,15 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         backgroundColor: 'black',
-        margin:10
+        margin:8,
+        borderRadius: 50,
     },
     button: {
-        borderRadius: 10,
         width: '100%',
         height: '100%',
         alignItems: 'center',
         justifyContent: 'center',
         flexDirection: 'row',
-        backgroundColor: "gray"
 
     },
     buttonIcon: {

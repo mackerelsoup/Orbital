@@ -27,3 +27,6 @@
 
       )
        causing some errors, maybe do pull to refresh instead */
+
+
+       //npm install --global eas-cli && eas init --id 63984ed9-8a10-4739-86ff-917cf1ea8505
