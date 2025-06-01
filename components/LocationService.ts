@@ -13,7 +13,7 @@ export const getLocation = async () => {
     
     // Start getting current position in background
     const currentPromise = Location.getCurrentPositionAsync({
-      accuracy: Location.Accuracy.Balanced,
+      accuracy: Location.Accuracy.High,
     }).catch(error => {
       console.error("Current location error:", error);
       return null;

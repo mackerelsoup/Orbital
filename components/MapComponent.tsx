@@ -1,6 +1,6 @@
 import React from 'react';
-import MapView, { Region, MapMarker } from 'react-native-maps';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet } from 'react-native';
+import MapView, { MapMarker, Region } from 'react-native-maps';
 import CarparkMarker from './CarparkMarker';
 
 
@@ -14,15 +14,15 @@ type MapComponentProps = {
 
 export default function MapComponent({ region, mapRef, markerRefs, carparks, onMarkerPress }: MapComponentProps) {
   return (
-    <View style={styles.container}>
       <MapView
         ref={mapRef}
         style={styles.map}
-        initialRegion={region}
         region={region}
         showsUserLocation
         showsMyLocationButton
         followsUserLocation
+        toolbarEnabled = {false}
+        provider= 'google'
       >
         {carparks.map((cp) => (
           <CarparkMarker
@@ -36,16 +36,13 @@ export default function MapComponent({ region, mapRef, markerRefs, carparks, onM
             onPress={onMarkerPress}
           />
         ))}
+
       </MapView>
-    </View>
+      
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    width: '100%',
-    height: '60%',
-  },
   map: {
     ...StyleSheet.absoluteFillObject,
   },

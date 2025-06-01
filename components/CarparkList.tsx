@@ -25,7 +25,7 @@ const CarparkList = ({ carparks, onItemPress }: CarparkListProps) => (
 const styles = StyleSheet.create({
   list: {
     flex: 1,
-    backgroundColor: 'white',
+    //backgroundColor: 'white',
   },
   content: {
     paddingTop: 10,
