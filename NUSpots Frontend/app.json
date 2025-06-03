@@ -1,0 +1,55 @@
+{
+  "expo": {
+    "name": "NUSpots",
+    "slug": "NUSpots",
+    "version": "1.0.0",
+    "orientation": "default",
+    "icon": "./assets/images/icon.png",
+    "scheme": "nuspots",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyBlpfhlltO7iyG99riZPN_XOvLxO_VQEvo"
+        }
+      },
+      "edgeToEdgeEnabled": true,
+      "package": "com.mackerelsoup.NUSpots"
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static",
+      "favicon": "./assets/images/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/images/splash-icon.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#ffffff"
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "984ed6b9-2f16-4b80-b7b8-53d546a4e489"
+      }
+    },
+    "owner": "mackerelsoup"
+  }
+}
