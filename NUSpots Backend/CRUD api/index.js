@@ -1,0 +1,104 @@
+require('dotenv').config()
+const {Client} = require('pg')
+const express = require('express')
+
+const app = express()
+//parses incoming request 
+app.use(express.json())
+
+const connection = new Client()
+
+//log that we are connected to the database
+connection.connect().then(() => console.log("connected"))
+
+
+//simple post function
+app.post('/postData', (request, response) => {
+
+  //request is of that json format
+  const {name, id} = request.body
+
+  //sql query, $1 and $2 are placeholder values that correspond to index of arrays
+  const insert_query = 'INSERT INTO demotable (name,id) VALUES ($1, $2)'
+
+  //$1 corresponds to name and $2 corresponds to id
+  connection.query(insert_query, [name, id], (err, result) => {
+    if (err) {
+      response.send(err)
+      console.error(err)
+    }
+    else {
+      console.log(result)
+      response.send("Posted Data")
+    }
+  })
+})
+
+
+
+//simple get function
+app.get('/fetchData', (request, response) => {
+  const fetch_query = "SELECT * FROM demotable"
+  //result will be the data from the table
+  connection.query(fetch_query, (err, result) => {
+    if (err) {
+      response.send(err)
+      console.error(err)
+    }
+    else {
+      response.send(result.rows)
+    }
+  })
+})
+
+//:id is a route param, acts as a placeholder for any value that is part of the URL
+app.get('/fetchbyId/:id', (request, response) => {
+  const id = request.params.id
+  //$1 takes the first index in an array
+  const fetch_id_query ="SELECT * FROM demotable WHERE id = $1"
+  connection.query(fetch_id_query, [id], (err, result) => {
+    if (err){
+      response.send(err)
+      console.error(err)
+    }
+    else {
+      response.send(result.rows)
+    }
+  })
+})
+
+app.put('/update/:id', (request, response) => {
+  const id = request.params.id
+  const name = request.body.name
+
+  const update_query = "UPDATE demotable SET name = $1 WHERE id = $2"
+  connection.query(update_query, [name, id], (err, result) => {
+    if (err){
+      response.send(err)
+      console.error(err)
+    }
+    else {
+      response.send("Value updated")
+    }
+  })
+})
+
+app.delete('/delete/:id', (request,response) => {
+  const id = request.params.id
+  
+  const delete_query = "DELETE FROM demotable WHERE id = $1"
+  connection.query(delete_query, [id], (err, result) => {
+    if (err){
+      response.send(err)
+      console.error(err)
+    }
+    else {
+      response.send(result)
+    }
+  })
+})
+
+
+app.listen(3000, () => {
+  console.log("server is running")
+})
