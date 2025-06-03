@@ -1,0 +1,53 @@
+[
+  {
+    "name": "College of Design and Engineering Carpark",
+    "id": 1,
+    "type": "open",
+    "staff": false,
+    "latitude": 1.2975642874426618, 
+    "longitude": 103.77066903901553,
+    "latitudeDelta": 0.01,
+    "longitudeDelta": 0.01
+  },
+  {
+    "name": "Eusoff carpark",
+    "id": 15,
+    "type": "open",
+    "staff": false,
+    "latitude": 1.2933116586433435,
+    "longitude": 103.77220570282495,
+    "latitudeDelta": 0.01,
+    "longitudeDelta": 0.01
+  },
+  {
+    "name": "LT16 carpark",
+    "id": 16,
+    "type": "open",
+    "staff": false,
+    "latitude": 1.295480242514761, 
+    "longitude": 103.77094951546032,
+    "latitudeDelta": 0.01,
+    "longitudeDelta": 0.01
+  },
+  {
+    "name": "Information Technology Carpark",
+    "id": 32,
+    "type": "sheltered",
+    "staff": false,
+    "latitude": 1.2979501852182853, 
+    "longitude": 103.77217613452534,
+    "latitudeDelta": 0.01,
+    "longitudeDelta": 0.01
+  },
+  {
+    "name": "Stephen Riady Centre Carpark",
+    "id": 34,
+    "type": "sheltered",
+    "staff": false,
+    "latitude": 1.3048568266916158, 
+    "longitude": 103.77186170705313,
+    "latitudeDelta": 0.01,
+    "longitudeDelta": 0.01
+  }
+  
+]
