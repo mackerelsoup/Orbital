@@ -80,12 +80,14 @@ export default function App() {
         </MapComponent>
         {coordinateSelected &&
           <View style={styles.navigationPopupContainer}>
-            <Pressable style = {{marginBottom: 2}}>
-              <Link 
+            <Link
               href={`https://www.google.com/maps/dir/?api=1&destination=${coordinateSelected.latitude},${coordinateSelected.longitude}`}
-              style= {{color: "white", fontSize: 15}} >
-                Open google Maps</Link>
-            </Pressable>
+              asChild
+            >
+              <Pressable style={{ marginBottom: 2 }}>
+                <Text style={{ color: 'white', fontSize: 15 }}>Open Google Maps</Text>
+              </Pressable>
+            </Link>
           </View>}
 
       </View>
