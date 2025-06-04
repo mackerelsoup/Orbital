@@ -52,16 +52,17 @@ app.get('/fetchData', (request, response) => {
 })
 
 //:id is a route param, acts as a placeholder for any value that is part of the URL
-app.get('/fetchbyId/:id', (request, response) => {
-  const id = request.params.id
+app.get('/fetchbyUsername/:username', (request, response) => {
+  const username = request.params.username
   //$1 takes the first index in an array
-  const fetch_id_query ="SELECT * FROM demotable WHERE id = $1"
-  connection.query(fetch_id_query, [id], (err, result) => {
+  const fetch_id_query ="SELECT * FROM login WHERE username = $1"
+  connection.query(fetch_id_query, [username], (err, result) => {
     if (err){
       response.send(err)
       console.error(err)
     }
     else {
+      console.log("called")
       response.send(result.rows)
     }
   })

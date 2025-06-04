@@ -1,3 +1,4 @@
+import { parseAsync } from "@babel/core";
 import React, { useState } from "react";
 import {
   View,
@@ -11,19 +12,53 @@ import {
 } from "react-native";
 
 type FormErrors = {
-  username? :string;
-  password? : string;
+  username?: string;
+  password?: string;
 }
 
-const LoginForm = () => {
+export default function LoginForm() {
+  //currently just username, will implement email soon
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  
+  const [errors, setErrors] = useState<FormErrors>({});
+
+  //check if the user submitted the right info
+  const validateLogin = () => {
+    let tempErrors: FormErrors = {}
+    if (!username) {
+      tempErrors.username = "Username is required";
+    }
+
+    //setErrors(errors)
+    //setErrors({})
+    console.log(Object.keys(errors))
+    return Object.keys(errors).length === 0;
+  }
+
+  //API request
+  const handleLogin = () => {
+  if (validateLogin()) {
+    console.log("here");
+    fetch("http://192.168.68.60:3000/fetchbyUsername/testing")
+      .then(response => {
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+        return response.json(); // or .text() if the server returns plain text
+      })
+      .then(data => {
+        console.log("Response from server:", data);
+      })
+      .catch(error => {
+        console.error("Fetch error:", error);
+      });
+  }
+};
+
 
   return (
     <KeyboardAvoidingView
       behavior="padding"
-      keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0}
       style={styles.container}
     >
       <View style={styles.form}>
@@ -31,6 +66,7 @@ const LoginForm = () => {
         <TextInput
           style={styles.input}
           placeholder="Enter your username"
+          placeholderTextColor={"black"}
           value={username}
           onChangeText={setUsername}
         />
@@ -39,12 +75,13 @@ const LoginForm = () => {
         <TextInput
           style={styles.input}
           placeholder="Enter your password"
+          placeholderTextColor={"black"}
           value={password}
           onChangeText={setPassword}
           secureTextEntry
         />
 
-        <Button title="Login"  />
+        <Button title="Login" onPress={handleLogin} />
       </View>
     </KeyboardAvoidingView>
   );
@@ -88,5 +125,3 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
 });
-
-export default LoginForm;
