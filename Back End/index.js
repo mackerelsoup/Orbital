@@ -1,5 +1,5 @@
 require('dotenv').config()
-const {Client} = require('pg')
+const { Client } = require('pg')
 const express = require('express')
 
 const app = express()
@@ -16,7 +16,7 @@ connection.connect().then(() => console.log("connected"))
 app.post('/postData', (request, response) => {
 
   //request is of that json format
-  const {name, id} = request.body
+  const { name, id } = request.body
 
   //sql query, $1 and $2 are placeholder values that correspond to index of arrays
   const insert_query = 'INSERT INTO demotable (name,id) VALUES ($1, $2)'
@@ -24,6 +24,7 @@ app.post('/postData', (request, response) => {
   //$1 corresponds to name and $2 corresponds to id
   connection.query(insert_query, [name, id], (err, result) => {
     if (err) {
+      console.log("hello")
       response.send(err)
       console.error(err)
     }
@@ -38,14 +39,16 @@ app.post('/postData', (request, response) => {
 
 //simple get function
 app.get('/fetchData', (request, response) => {
-  const fetch_query = "SELECT * FROM demotable"
+  const fetch_query = "SELECT * FROM public.login"
   //result will be the data from the table
   connection.query(fetch_query, (err, result) => {
+    console.log("testing")
     if (err) {
       response.send(err)
-      console.error(err)
+      console.log("test")
     }
     else {
+      console.log("tesdting")
       response.send(result.rows)
     }
   })
@@ -55,18 +58,46 @@ app.get('/fetchData', (request, response) => {
 app.get('/fetchbyUsername/:username', (request, response) => {
   const username = request.params.username
   //$1 takes the first index in an array
-  const fetch_id_query ="SELECT * FROM login WHERE username = $1"
+  const fetch_id_query = "SELECT * FROM login WHERE username = $1"
   connection.query(fetch_id_query, [username], (err, result) => {
-    if (err){
+    if (err) {
       response.send(err)
       console.error(err)
     }
     else {
-      console.log("called")
-      response.send(result.rows)
+      if (result.rowCount === 0) {
+        response.status(404).send("User not found")
+      }
+      else {
+        console.log("Userfound")
+        response.send(result.rows)
+      }
+
     }
   })
 })
+
+app.get('/fetchbyEmail/:email', (request, response) => {
+  const email = request.params.email
+  const fetch_id_query = "SELECT * FROM login WHERE email = $1"
+  connection.query(fetch_id_query, [email], (err, result) => {
+    if (err) {
+      response.send(err)
+      console.error(err)
+    }
+    else {
+      if (result.rowCount === 0) {
+        response.status(404).send("Email not found")
+      }
+      else {
+        console.log("Email Found")
+        response.send(result.rows)
+      }
+
+    }
+  })
+})
+
 
 app.put('/update/:id', (request, response) => {
   const id = request.params.id
@@ -74,7 +105,7 @@ app.put('/update/:id', (request, response) => {
 
   const update_query = "UPDATE demotable SET name = $1 WHERE id = $2"
   connection.query(update_query, [name, id], (err, result) => {
-    if (err){
+    if (err) {
       response.send(err)
       console.error(err)
     }
@@ -84,12 +115,12 @@ app.put('/update/:id', (request, response) => {
   })
 })
 
-app.delete('/delete/:id', (request,response) => {
+app.delete('/delete/:id', (request, response) => {
   const id = request.params.id
-  
+
   const delete_query = "DELETE FROM demotable WHERE id = $1"
   connection.query(delete_query, [id], (err, result) => {
-    if (err){
+    if (err) {
       response.send(err)
       console.error(err)
     }
