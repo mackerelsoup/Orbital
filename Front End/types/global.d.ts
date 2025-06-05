@@ -15,3 +15,9 @@ type Coordinates = {
   latitudeDelta? : number;
   longitudeDelta? : number;
 }
+
+type UserData = {
+  username? : string;
+  email? : string;
+  password: string;
+}
