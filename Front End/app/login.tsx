@@ -9,51 +9,96 @@ import {
   Text,
   Image,
   Platform,
+  Alert,
 } from "react-native";
+import { router } from "expo-router";
 
 type FormErrors = {
   username?: string;
   password?: string;
 }
 
+class ConnectionError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "Connection Error"
+  }
+}
+
+class UserNotFoundError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "User not found error"
+  }
+}
+
+
 export default function LoginForm() {
-  //currently just username, will implement email soon
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState<FormErrors>({});
 
+
+
   //check if the user submitted the right info
   const validateLogin = () => {
-    let tempErrors: FormErrors = {}
-    if (!username) {
-      tempErrors.username = "Username is required";
+    let tempErrors: FormErrors = {};
+    if (!username) tempErrors.username = "Username/Email is required";
+    if (!password) tempErrors.password = "Password is required";
+
+    setErrors(tempErrors)
+    if (Object.keys(tempErrors).length > 0) {
+      //console.log(errors)
+      Object.values(tempErrors).reverse().forEach(error => Alert.alert(error));
     }
 
-    //setErrors(errors)
-    //setErrors({})
-    console.log(Object.keys(errors))
-    return Object.keys(errors).length === 0;
+    return Object.values(tempErrors).length === 0;
+  };
+
+  const isEmail = () => {
+    let emailRegex = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/
+    return emailRegex.test(username)
   }
 
-  //API request
-  const handleLogin = () => {
-  if (validateLogin()) {
-    console.log("here");
-    fetch("http://192.168.68.60:3000/fetchbyUsername/testing")
-      .then(response => {
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
-        return response.json(); // or .text() if the server returns plain text
-      })
-      .then(data => {
-        console.log("Response from server:", data);
-      })
-      .catch(error => {
-        console.error("Fetch error:", error);
-      });
+
+
+  const handleLogin = async () => {
+    if (!validateLogin()) return;
+
+    try {
+      let response
+      if (isEmail()) response = await fetch(`http://192.168.68.60:3000/fetchbyEmail/${username}`);
+      else response = await fetch(`http://192.168.68.60:3000/fetchbyUsername/${username}`);
+
+      if (response.status === 404) throw new UserNotFoundError("User not found")
+      if (!response.ok) throw new ConnectionError("Network response was not ok")
+
+      const data = await response.json();
+
+      if (data[0].password !== password) {
+        Alert.alert("Error", "Incorrect password");
+        setPassword("");
+        return;
+      }
+
+      // Successful login
+      setUsername("");
+      setPassword("");
+      router.replace('/');
+    } catch (error) {
+      if (error instanceof ConnectionError) {
+        console.log("Connection error", error)
+        Alert.alert("Login failed. Please try again later.")
+      }
+      else if (error instanceof UserNotFoundError) {
+        console.log("User not found", error)
+        Alert.alert("Please enter a valid username or email")
+      }
+      setUsername("")
+      setPassword("")
+    }
   }
-};
+
 
 
   return (
