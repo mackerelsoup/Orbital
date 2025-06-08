@@ -1,6 +1,7 @@
 require('dotenv').config()
 const { Client } = require('pg')
 const express = require('express')
+const axios = require('axios')
 
 const app = express()
 //parses incoming request 
@@ -10,6 +11,49 @@ const connection = new Client()
 
 //log that we are connected to the database
 connection.connect().then(() => console.log("connected"))
+
+
+app.post('/computeDistance', async (request, response) => {
+  const { origin, destination } = request.body;
+  console.log('here')
+  try {
+    const res = await axios.post(
+      'https://routes.googleapis.com/directions/v2:computeRoutes',
+      {
+        origin: {
+          location: {
+            latLng: origin
+          }
+        },
+        destination: {
+          location: {
+            latLng: destination
+          }
+        },
+        travelMode: "DRIVE",
+        routingPreference: "TRAFFIC_AWARE",
+        languageCode: "en-US",
+        units: "METRIC"
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Goog-Api-Key': process.env.GOOGLE_MAPS_API_KEY,
+          'X-Goog-FieldMask': 'routes.duration,routes.distanceMeters'
+        }
+      }
+    );
+    console.log("here2")
+    const route = res.data.routes[0];
+    response.json({
+      distance: route.distanceMeters,
+      duration: route.duration
+    });
+  } catch (error) {
+
+  }
+}
+)
 
 
 //simple post function
@@ -97,6 +141,28 @@ app.get('/fetchbyEmail/:email', (request, response) => {
     }
   })
 })
+
+app.get('/fetchUserData/:username', (request, response) => {
+  const username = request.params.username
+  const fetch_id_query = "SELECT * FROM user_info WHERE username = $1"
+  connection.query(fetch_id_query, [username], (err, result) => {
+    if (err) {
+      response.send(err)
+      console.error(err)
+    }
+    else {
+      if (result.rowCount === 0) {
+        response.status(404).send("User info not found")
+      }
+      else {
+        console.log("User info extracted")
+        response.send(result.rows)
+      }
+
+    }
+  })
+})
+
 
 
 app.put('/update/:id', (request, response) => {
