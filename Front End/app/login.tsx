@@ -1,5 +1,5 @@
-import { parseAsync } from "@babel/core";
-import React, { useState } from "react";
+import { router } from "expo-router"
+import React, { useState , useContext} from "react";
 import {
   View,
   TextInput,
@@ -11,12 +11,21 @@ import {
   Platform,
   Alert,
 } from "react-native";
-import { router } from "expo-router";
+
+import { UserContext } from "@/context/userContext";
+
 
 type FormErrors = {
   username?: string;
   password?: string;
 }
+
+type userDataIncomplete = {
+  username: string
+  email: string
+  password: string
+}
+
 
 class ConnectionError extends Error {
   constructor(message: string) {
@@ -32,12 +41,20 @@ class UserNotFoundError extends Error {
   }
 }
 
+class userDataNotFoundError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "User data not found error"
+  }
+}
+
+
 
 export default function LoginForm() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState<FormErrors>({});
-
+  const {setUser} = useContext(UserContext)!
 
 
   //check if the user submitted the right info
@@ -73,7 +90,7 @@ export default function LoginForm() {
       if (response.status === 404) throw new UserNotFoundError("User not found")
       if (!response.ok) throw new ConnectionError("Network response was not ok")
 
-      const data = await response.json();
+      const data = await response.json() 
 
       if (data[0].password !== password) {
         Alert.alert("Error", "Incorrect password");
@@ -82,6 +99,7 @@ export default function LoginForm() {
       }
 
       // Successful login
+      setUserData(data[0]);
       setUsername("");
       setPassword("");
       router.replace('/');
@@ -99,74 +117,108 @@ export default function LoginForm() {
     }
   }
 
+  const setUserData = async (data: userDataIncomplete) => {
+    console.log(data)
+    try {
+      let response = await fetch(`http://192.168.68.60:3000/fetchUserData/${username}`)
+      if (response.status === 404) throw new userDataNotFoundError("User not found")
+      if (!response.ok) throw new ConnectionError("Network response was not ok")
 
+      const userdata = await response.json()
+      console.log(userdata)
+      console.log(data)
 
-  return (
-    <KeyboardAvoidingView
-      behavior="padding"
-      style={styles.container}
-    >
-      <View style={styles.form}>
-        <Text style={styles.label}>Username</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Enter your username"
-          placeholderTextColor={"black"}
-          value={username}
-          onChangeText={setUsername}
-        />
+      const mergedData = {
+        username: data.username,
+        email: data.email,
+        staff: userdata[0].is_staff,
+        season_parking: userdata[0].season_pass,
+        season_parking_type: userdata[0].season_pass_type
+      }
+      console.log(mergedData)
 
-        <Text style={styles.label}>Password</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Enter your password"
-          placeholderTextColor={"black"}
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-        />
+      setUser(mergedData)
 
-        <Button title="Login" onPress={handleLogin} />
-      </View>
-    </KeyboardAvoidingView>
-  );
-};
+    } catch (error) {
+      if (error instanceof ConnectionError) {
+        console.log("Connection error", error)
+        Alert.alert("Login failed. Please try again later.")
+      }
+      else if (error instanceof userDataNotFoundError) {
+        console.log("User info not found", error)
+        Alert.alert("User info not in database, contact support")
+      }
+      setUsername("")
+      setPassword("")
+    }
+  }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    paddingHorizontal: 20,
-    backgroundColor: "#f5f5f5",
-  },
-  form: {
-    backgroundColor: "#ffffff",
-    padding: 20,
-    borderRadius: 10,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
+    return (
+      <KeyboardAvoidingView
+        behavior="padding"
+        style={styles.container}
+      >
+        <View style={styles.form}>
+          <Text style={styles.label}>Username</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter your username"
+            placeholderTextColor={"black"}
+            value={username}
+            onChangeText={setUsername}
+          />
+
+          <Text style={styles.label}>Password</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter your password"
+            placeholderTextColor={"black"}
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+          />
+
+          <Button title="Login" onPress={handleLogin} />
+        </View>
+      </KeyboardAvoidingView>
+    );
+  };
+
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      justifyContent: "center",
+      paddingHorizontal: 20,
+      backgroundColor: "#f5f5f5",
     },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  label: {
-    fontSize: 16,
-    marginBottom: 5,
-    fontWeight: "bold",
-  },
-  input: {
-    height: 40,
-    borderColor: "#ddd",
-    borderWidth: 1,
-    marginBottom: 15,
-    padding: 10,
-    borderRadius: 5,
-  },
-  errorText: {
-    color: "red",
-    marginBottom: 10,
-  },
-});
+    form: {
+      backgroundColor: "#ffffff",
+      padding: 20,
+      borderRadius: 10,
+      shadowColor: "#000",
+      shadowOffset: {
+        width: 0,
+        height: 2,
+      },
+      shadowOpacity: 0.25,
+      shadowRadius: 3.84,
+      elevation: 5,
+    },
+    label: {
+      fontSize: 16,
+      marginBottom: 5,
+      fontWeight: "bold",
+    },
+    input: {
+      height: 40,
+      borderColor: "#ddd",
+      borderWidth: 1,
+      marginBottom: 15,
+      padding: 10,
+      borderRadius: 5,
+    },
+    errorText: {
+      color: "red",
+      marginBottom: 10,
+    },
+  });

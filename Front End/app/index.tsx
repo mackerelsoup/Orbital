@@ -1,19 +1,20 @@
 import CarparkList from '@/components/CarparkList';
 import { getLocation } from '@/components/LocationService';
 import MapComponent from '@/components/MapComponent';
-import React, { useEffect, useRef, useState } from 'react';
-import { StyleSheet, View, Text, Pressable, InteractionManager } from 'react-native';
+import React, { useContext, useEffect, useRef, useState } from 'react';
+import { StyleSheet, View, Text, Pressable, InteractionManager, } from 'react-native';
 import MapView, { MapMarker, Region } from 'react-native-maps';
 import carparks from '../assets/carparks.json';
 import { Link } from 'expo-router';
+import { UserContext } from '@/context/userContext';
 
 
 export default function App() {
   const [region, setRegion] = useState<Region | undefined>(undefined);
   const mapRef = useRef<MapView | null>(null)
   const markerRefs = useRef<(MapMarker | null)[]>([])
-  const [coordinateSelected, setCoords] = useState<Coordinates | null>(null)
-
+  const [coordinateSelected, setCoords] = useState<Region | null>(null)
+  const {user} = useContext(UserContext)!
 
 
   //retreiving user location data
@@ -25,7 +26,7 @@ export default function App() {
       if (locationData?.lastKnown) {
         console.log("last")
         const { latitude, longitude } = locationData.lastKnown.coords;
-        setRegion({
+        setCoords({
           latitude,
           longitude,
           latitudeDelta: 0.01,
@@ -39,7 +40,7 @@ export default function App() {
         const currentLocation = await locationData.currentPromise;
         if (currentLocation) {
           const { latitude, longitude } = currentLocation.coords;
-          setRegion({
+          setCoords({
             latitude,
             longitude,
             latitudeDelta: 0.01,
@@ -56,7 +57,7 @@ export default function App() {
   const handleCarparkSelect = (carpark: Carpark) => {
     const marker = markerRefs.current[carpark.id];
     //console.log(marker)
-    setCoords({ latitude: carpark.latitude, longitude: carpark.longitude });
+    setCoords({ latitude: carpark.latitude, longitude: carpark.longitude, longitudeDelta: 0.01, latitudeDelta: 0.01 });
     marker?.showCallout();
     mapRef.current?.animateToRegion({
       latitude: carpark.latitude,
@@ -95,6 +96,7 @@ export default function App() {
       <CarparkList
         carparks={carparks}
         onItemPress={handleCarparkSelect}
+        origin={region!}
       />
     </View>
   );
