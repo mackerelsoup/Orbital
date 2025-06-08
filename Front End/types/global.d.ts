@@ -19,5 +19,7 @@ type Coordinates = {
 type UserData = {
   username? : string;
   email? : string;
-  password: string;
+  staff: boolean;
+  season_parking: boolean;
+  season_parking_type: string
 }
