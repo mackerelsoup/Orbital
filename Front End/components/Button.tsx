@@ -3,10 +3,9 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 type Props = {
     label: string;
     onPress?: () => void;
-    children?: React.ReactElement
 };
 
-export default function Button({ label, onPress, children }: Props) {
+export default function Button({ label, onPress }: Props) {
 
     return (
         <View style={[
@@ -15,14 +14,10 @@ export default function Button({ label, onPress, children }: Props) {
             <Pressable
                 style={({ pressed }) => [
                     styles.button,
-                    { opacity: pressed ? 0.5 : 1 },
+                    { opacity: pressed ?  0.5 : 1},
                 ]}
                 onPress={onPress}>
-                <View style = {{flexDirection: 'column', justifyContent: 'center', alignItems: 'center'}}>
-                    <Text style={styles.buttonLabel}>{label}</Text>
-                    {children}
-                </View>
-
+                <Text style={styles.buttonLabel}>{label}</Text>
             </Pressable>
         </View>
     );
@@ -30,7 +25,7 @@ export default function Button({ label, onPress, children }: Props) {
 
 const styles = StyleSheet.create({
     buttonContainer: {
-        height: 70,
+        height: 40,
         marginHorizontal: 10,
         alignItems: 'center',
         justifyContent: 'center',
