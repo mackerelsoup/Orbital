@@ -15,7 +15,7 @@ connection.connect().then(() => console.log("connected"))
 
 app.post('/computeDistance', async (request, response) => {
   const { origin, destination } = request.body;
-  console.log('here')
+  console.log('computing distance')
   try {
     const res = await axios.post(
       'https://routes.googleapis.com/directions/v2:computeRoutes',
@@ -81,22 +81,6 @@ app.post('/postData', (request, response) => {
 
 
 
-//simple get function
-app.get('/fetchData', (request, response) => {
-  const fetch_query = "SELECT * FROM public.login"
-  //result will be the data from the table
-  connection.query(fetch_query, (err, result) => {
-    console.log("testing")
-    if (err) {
-      response.send(err)
-      console.log("test")
-    }
-    else {
-      console.log("tesdting")
-      response.send(result.rows)
-    }
-  })
-})
 
 //:id is a route param, acts as a placeholder for any value that is part of the URL
 app.get('/fetchbyUsername/:username', (request, response) => {
