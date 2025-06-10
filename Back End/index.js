@@ -56,47 +56,7 @@ app.post('/computeDistance', async (request, response) => {
 )
 
 
-//simple post function
-app.post('/postData', (request, response) => {
 
-  //request is of that json format
-  const { name, id } = request.body
-
-  //sql query, $1 and $2 are placeholder values that correspond to index of arrays
-  const insert_query = 'INSERT INTO demotable (name,id) VALUES ($1, $2)'
-
-  //$1 corresponds to name and $2 corresponds to id
-  connection.query(insert_query, [name, id], (err, result) => {
-    if (err) {
-      console.log("hello")
-      response.send(err)
-      console.error(err)
-    }
-    else {
-      console.log(result)
-      response.send("Posted Data")
-    }
-  })
-})
-
-
-
-//simple get function
-app.get('/fetchData', (request, response) => {
-  const fetch_query = "SELECT * FROM public.login"
-  //result will be the data from the table
-  connection.query(fetch_query, (err, result) => {
-    console.log("testing")
-    if (err) {
-      response.send(err)
-      console.log("test")
-    }
-    else {
-      console.log("tesdting")
-      response.send(result.rows)
-    }
-  })
-})
 
 //:id is a route param, acts as a placeholder for any value that is part of the URL
 app.get('/fetchbyUsername/:username', (request, response) => {

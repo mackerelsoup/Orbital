@@ -26,7 +26,7 @@ export default function App() {
       if (locationData?.lastKnown) {
         console.log("last")
         const { latitude, longitude } = locationData.lastKnown.coords;
-        setCoords({
+        setRegion({
           latitude,
           longitude,
           latitudeDelta: 0.01,
@@ -40,7 +40,7 @@ export default function App() {
         const currentLocation = await locationData.currentPromise;
         if (currentLocation) {
           const { latitude, longitude } = currentLocation.coords;
-          setCoords({
+          setRegion({
             latitude,
             longitude,
             latitudeDelta: 0.01,

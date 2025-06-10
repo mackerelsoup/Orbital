@@ -1,8 +1,8 @@
 import React, { createContext, useState } from 'react';
 
 type UserContextType = {
-  user:  UserData | null;
-  setUser: React.Dispatch<React.SetStateAction<UserData | null>>;
+  user:  UserData;
+  setUser: React.Dispatch<React.SetStateAction<UserData>>;
 };
 
 // Create context with the correct type
@@ -13,7 +13,10 @@ type UserProviderProps = {
 };
 
 export const UserProvider = ({ children }: UserProviderProps) => {
-  const [user, setUser] = useState<UserData | null>(null);
+  const [user, setUser] = useState<UserData>({
+    staff: false,
+    season_parking: false,
+  });
 
   const value = {
     user,

@@ -1,7 +1,8 @@
-import React from 'react';
-import { FlatList, StyleSheet , View, Text} from 'react-native';
+import React, {useMemo, useState} from 'react';
+import { FlatList, StyleSheet, View, Text } from 'react-native';
 import Button from '@/components/Button';
 import { Region } from 'react-native-maps';
+import CarparkItem from './CarparkItem';
 
 type CarparkListProps = {
   carparks: Carpark[];
@@ -9,45 +10,52 @@ type CarparkListProps = {
   origin: Region
 }
 
-const getDistance = async (carpark: Carpark, origin : Region) => {
-  try {
-    let response = await fetch("http://192.168.68.60:3000/computeDistance", {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        origin: {
-          latitude: origin.latitude,
-          longitude: origin.longitude
-        },
-        destination: {
-          latitude: carpark.latitude,
-          longitude: carpark.longitude
-        }
-      })
-    })
-    if (!response.ok) throw new Error("tf")
+
+const CarparkList = ({ carparks, onItemPress, origin }: CarparkListProps) => {
+  const [sortOption, setSortOption] = useState<String>('')
+  const [filterOption, setFilterOption] = useState<String>('')
 
 
-  } catch (error) {
+  const filteredCarparkList = useMemo(() => {
+    const carparkCopy = [...carparks]
+    
+    switch(filterOption) { 
+      case '': {
+        return carparkCopy
+      }
+      case 'season_parking': {
 
-  }
-}
+      }
+      case 'can_park': {
 
-const CarparkList = ({ carparks, onItemPress, origin }: CarparkListProps) => (
-  <FlatList
+      } 
+    }
+  }, [carparks, filterOption])
+
+  const sortedCarparkList = useMemo(() => {
+    switch(filterOption) {
+      //by default it will sort by distance
+      case '': {
+        return filteredCarparkList?.sort((a,b) => (a.distance ?? Infinity) - (b.distance ?? Infinity))
+      }
+      case 'distance': {
+        return filteredCarparkList?.sort((a,b) => (a.distance ?? Infinity) - (b.distance ?? Infinity))
+      }
+
+    }
+  }, [filteredCarparkList, filterOption])
+
+  return <FlatList
     data={carparks}
     //renaming item into carpark
     renderItem={({ item: carpark }) => (
       <View>
-        <Button
-          label={carpark.name}
-          onPress={() => onItemPress(carpark)}>
-        </Button>
-        <Text>
-          dsnmfsd
-        </Text>
+        <CarparkItem
+          carpark={carpark}
+          onPress={onItemPress}
+          origin={origin}
+        >
+        </CarparkItem>
       </View>
 
     )}
@@ -55,7 +63,7 @@ const CarparkList = ({ carparks, onItemPress, origin }: CarparkListProps) => (
     style={styles.list}
     contentContainerStyle={styles.content}
   />
-);
+  };
 
 const styles = StyleSheet.create({
   list: {
