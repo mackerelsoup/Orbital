@@ -1,8 +1,9 @@
-import React, {useMemo, useState} from 'react';
+import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { FlatList, StyleSheet, View, Text } from 'react-native';
 import Button from '@/components/Button';
 import { Region } from 'react-native-maps';
 import CarparkItem from './CarparkItem';
+import { UserContext } from '@/context/userContext';
 
 type CarparkListProps = {
   carparks: Carpark[];
@@ -11,47 +12,113 @@ type CarparkListProps = {
 }
 
 
+
+
 const CarparkList = ({ carparks, onItemPress, origin }: CarparkListProps) => {
   const [sortOption, setSortOption] = useState<String>('')
   const [filterOption, setFilterOption] = useState<String>('')
+  const { user } = useContext(UserContext)!
+  const [carparkDistances, setCarparkDistances] =  useState<Record<number, number>>({})
 
+  useEffect(() => {
+    // Only run if origin exists
+    if (!origin) return;
+
+    const getDistances = async (carparks: Carpark[], origin: Region) => {
+      try {
+        // Use Promise.all to wait for all requests
+        const distances = await Promise.all(
+          carparks.map(async (carpark) => {
+            try {
+              const response = await fetch("http://10.130.2.118:3000/computeDistance", {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                  origin: {
+                    latitude: origin.latitude,
+                    longitude: origin.longitude
+                  },
+                  destination: {
+                    latitude: carpark.latitude,
+                    longitude: carpark.longitude
+                  }
+                })
+              });
+
+              if (!response.ok) throw new Error("Failed to fetch");
+              const data = await response.json();
+              return { id: carpark.id, distance: data.distance };
+              //inner catch
+            } catch (error) {
+              console.error(error);
+              return { id: carpark.id, distance: null };
+            }
+          })
+        );
+
+        const tempCarparkDistances: Record<number, number> = {};
+        distances.forEach((distance) => {
+          tempCarparkDistances[distance.id] = distance.distance / 1000
+        })
+
+        setCarparkDistances(tempCarparkDistances);
+        //outer catch
+      } catch (error) {
+        console.error("Error fetching distances:", error);
+      }
+    };
+
+    getDistances(carparks, origin);
+  }, [carparks, origin]); // Add origin to dependencies
 
   const filteredCarparkList = useMemo(() => {
     const carparkCopy = [...carparks]
-    
-    switch(filterOption) { 
+    //console.log(carparkCopy)
+    switch (filterOption) {
       case '': {
         return carparkCopy
       }
       case 'season_parking': {
-
+        //implement season parking property, -> this button is availble only is user is a season pass holder
+        return carparkCopy.filter((carpark) => {
+          carpark.season_parking_type == user.season_parking_type
+        })
       }
       case 'can_park': {
-
-      } 
+        return carparkCopy.filter((carpark) => {
+          carpark.staff ? (carpark.staff == user.staff) : true
+        })
+      }
     }
   }, [carparks, filterOption])
 
   const sortedCarparkList = useMemo(() => {
-    switch(filterOption) {
+    switch (sortOption) {
       //by default it will sort by distance
       case '': {
-        return filteredCarparkList?.sort((a,b) => (a.distance ?? Infinity) - (b.distance ?? Infinity))
+        return filteredCarparkList?.sort((a, b) => (carparkDistances[a.id] - (carparkDistances[b.id])))
       }
       case 'distance': {
-        return filteredCarparkList?.sort((a,b) => (a.distance ?? Infinity) - (b.distance ?? Infinity))
+        return filteredCarparkList?.sort((a, b) => (a.distance ?? Infinity) - (b.distance ?? Infinity))
+      }
+      case 'availibility': {
+        //kiv for now
       }
 
     }
-  }, [filteredCarparkList, filterOption])
+  }, [filteredCarparkList, filterOption, carparkDistances])
+
 
   return <FlatList
-    data={carparks}
+    data={sortedCarparkList}
     //renaming item into carpark
     renderItem={({ item: carpark }) => (
       <View>
         <CarparkItem
           carpark={carpark}
+          distances={carparkDistances}
           onPress={onItemPress}
           origin={origin}
         >
@@ -63,7 +130,7 @@ const CarparkList = ({ carparks, onItemPress, origin }: CarparkListProps) => {
     style={styles.list}
     contentContainerStyle={styles.content}
   />
-  };
+};
 
 const styles = StyleSheet.create({
   list: {
