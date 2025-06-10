@@ -17,7 +17,7 @@ export default function RootLayout() {
             headerRight: () => {
               const { user } = useContext(UserContext)!
               return (
-                <Link href={user ? '/profile' : '/login'} asChild style={styles.profileContainer}>
+                <Link href={user.username ? '/profile' : '/login'} asChild style={styles.profileContainer}>
                   <Pressable>
                     <FontAwesome name="user-circle-o" size={28} />
                   </Pressable>
