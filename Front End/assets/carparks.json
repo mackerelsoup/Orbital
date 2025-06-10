@@ -10,6 +10,16 @@
     "longitudeDelta": 0.01
   },
   {
+    "name": "E6 Carpark",
+    "id": 5,
+    "type": "sheltered",
+    "staff": true,
+    "latitude": 1.299549206449149,  
+    "longitude": 103.77282114595357,
+    "latitudeDelta": 0.01,
+    "longitudeDelta": 0.01
+  },
+  {
     "name": "Eusoff carpark",
     "id": 15,
     "type": "open",
