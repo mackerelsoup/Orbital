@@ -3,6 +3,7 @@ type Carpark = {
   id: number;
   type: string;
   staff: boolean;
+  season_parking_type?: string[]
   latitude: number;
   longitude: number;
   latitudeDelta: number;
