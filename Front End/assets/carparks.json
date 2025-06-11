@@ -4,10 +4,14 @@
     "id": 1,
     "type": "open",
     "staff": false,
-    "latitude": 1.2975642874426618, 
+    "latitude": 1.2975642874426618,
     "longitude": 103.77066903901553,
     "latitudeDelta": 0.01,
-    "longitudeDelta": 0.01
+    "longitudeDelta": 0.01,
+    "pricing": {
+      "rate_per_minute": 0.0214,
+      "charged_hours": "Charges apply only from 0830H to 1930H (Mon\u2013Fri) and 0830H to 1700H (Sat)"
+    }
   },
   {
     "name": "CP2: Block E6/T-Lab",
@@ -17,18 +21,26 @@
     "latitude": 1.3007055855656473,
     "longitude": 103.77155245827925,
     "latitudeDelta": 0.01,
-    "longitudeDelta": 0.01
-  },  
+    "longitudeDelta": 0.01,
+    "pricing": {
+      "rate_per_minute": 0.0214,
+      "charged_hours": "Charges apply only from 0830H to 1930H (Mon\u2013Fri) and 0830H to 1700H (Sat)"
+    }
+  },
   {
     "name": "CP2A: Block E3A",
     "id": 3,
     "type": "open",
     "staff": false,
-    "latitude": 1.3000741872201027, 
+    "latitude": 1.3000741872201027,
     "longitude": 103.7719734989492,
     "latitudeDelta": 0.01,
-    "longitudeDelta": 0.01
-  },  
+    "longitudeDelta": 0.01,
+    "pricing": {
+      "rate_per_minute": 0.0214,
+      "charged_hours": "Charges apply only from 0830H to 1930H (Mon\u2013Fri) and 0830H to 1700H (Sat)"
+    }
+  },
   {
     "name": "CP2B: Block EA",
     "id": 4,
@@ -37,17 +49,25 @@
     "latitude": 1.3002396829913572,
     "longitude": 103.77036190154648,
     "latitudeDelta": 0.01,
-    "longitudeDelta": 0.01
+    "longitudeDelta": 0.01,
+    "pricing": {
+      "rate_per_minute": 0.0214,
+      "charged_hours": "Charges apply only from 0830H to 1930H (Mon\u2013Fri) and 0830H to 1700H (Sat)"
+    }
   },
   {
     "name": "CP2C: Block E6",
     "id": 5,
     "type": "sheltered",
     "staff": true,
-    "latitude": 1.2990088195806266, 
+    "latitude": 1.2990088195806266,
     "longitude": 103.77288819266548,
     "latitudeDelta": 0.01,
-    "longitudeDelta": 0.01
+    "longitudeDelta": 0.01,
+    "pricing": {
+      "penalty_rate_per_minute": 0.0856,
+      "remarks": "Penalty applies to non-staff season holders"
+    }
   },
   {
     "name": "CP3: University Cultural Centre/Yong Siew Toh Conservatory of Music",
@@ -57,7 +77,11 @@
     "latitude": 1.3022010350008428,
     "longitude": 103.77326902134361,
     "latitudeDelta": 0.01,
-    "longitudeDelta": 0.01
+    "longitudeDelta": 0.01,
+    "pricing": {
+      "rate_per_minute": 0.0214,
+      "charged_hours": "Charges apply only from 0830H to 1800H capped at $2.568 per exit per day for registered NUS staff and students, and from 1801H to 1930H (Mon\u2013Fri) and 0830H to 1700H (Sat)"
+    }
   },
   {
     "name": "CP3A: Lee Kong Chian Natural History Museum",
@@ -67,7 +91,11 @@
     "latitude": 1.3019172248250193,
     "longitude": 103.77347316228175,
     "latitudeDelta": 0.01,
-    "longitudeDelta": 0.01
+    "longitudeDelta": 0.01,
+    "pricing": {
+      "rate_per_minute": 0.0214,
+      "charged_hours": "Charges apply only from 0830H to 1930H (Mon\u2013Fri) and 0830H to 1700H (Sat)"
+    }
   },
   {
     "name": "CP4/4A: Raffles Hall/Runme Shaw CFA Studios",
@@ -77,7 +105,11 @@
     "latitude": 1.3000574185193354,
     "longitude": 103.774247337006,
     "latitudeDelta": 0.01,
-    "longitudeDelta": 0.01
+    "longitudeDelta": 0.01,
+    "pricing": {
+      "rate_per_minute": 0.0214,
+      "charged_hours": "Charges apply only from 0830H to 1930H (Mon\u2013Fri) and 0830H to 1700H (Sat)"
+    }
   },
   {
     "name": "CP5: Sports and Recreation Centre",
@@ -87,7 +119,11 @@
     "latitude": 1.3006468681731167,
     "longitude": 103.77458955714982,
     "latitudeDelta": 0.01,
-    "longitudeDelta": 0.01
+    "longitudeDelta": 0.01,
+    "pricing": {
+      "rate_per_minute": 0.0214,
+      "charged_hours": "Charges apply only from 0830H to 1930H (Mon\u2013Fri) and 0830H to 1700H (Sat)"
+    }
   },
   {
     "name": "CP6: Block S7 and S13",
@@ -97,7 +133,11 @@
     "latitude": 1.2969151084789985,
     "longitude": 103.77902056974419,
     "latitudeDelta": 0.01,
-    "longitudeDelta": 0.01
+    "longitudeDelta": 0.01,
+    "pricing": {
+      "penalty_rate_per_minute": 0.0856,
+      "remarks": "Penalty applies to non-staff season holders"
+    }
   },
   {
     "name": "CP6A: Block S1A/LT32",
@@ -107,7 +147,11 @@
     "latitude": 1.296675177741752,
     "longitude": 103.7783182356925,
     "latitudeDelta": 0.01,
-    "longitudeDelta": 0.01
+    "longitudeDelta": 0.01,
+    "pricing": {
+      "penalty_rate_per_minute": 0.0856,
+      "remarks": "Penalty applies to non-staff season holders"
+    }
   },
   {
     "name": "CP6B: University Hall",
@@ -117,7 +161,11 @@
     "latitude": 1.2973001821475358,
     "longitude": 103.77732916116676,
     "latitudeDelta": 0.01,
-    "longitudeDelta": 0.01
+    "longitudeDelta": 0.01,
+    "pricing": {
+      "rate_per_minute": 0.0214,
+      "charged_hours": "Charges apply only from 0830H to 1930H (Mon\u2013Fri) and 0830H to 1700H (Sat)"
+    }
   },
   {
     "name": "CP7: Block S10 and S14",
@@ -127,7 +175,11 @@
     "latitude": 1.296621448321872,
     "longitude": 103.7800619719786,
     "latitudeDelta": 0.01,
-    "longitudeDelta": 0.01
+    "longitudeDelta": 0.01,
+    "pricing": {
+      "penalty_rate_per_minute": 0.0856,
+      "remarks": "Penalty applies to non-staff season holders"
+    }
   },
   {
     "name": "CP8: Block S16",
@@ -137,7 +189,11 @@
     "latitude": 1.2973489237186926,
     "longitude": 103.78072831140625,
     "latitudeDelta": 0.01,
-    "longitudeDelta": 0.01
+    "longitudeDelta": 0.01,
+    "pricing": {
+      "penalty_rate_per_minute": 0.0856,
+      "remarks": "Penalty applies to non-staff season holders"
+    }
   },
   {
     "name": "CP9A: Block MD11",
@@ -147,7 +203,11 @@
     "latitude": 1.2964789163453476,
     "longitude": 103.78217067475377,
     "latitudeDelta": 0.01,
-    "longitudeDelta": 0.01
+    "longitudeDelta": 0.01,
+    "pricing": {
+      "penalty_rate_per_minute": 0.0856,
+      "remarks": "Penalty applies to non-staff season holders"
+    }
   },
   {
     "name": "CP10: Block S17/LT33/LT34 (Staff)",
@@ -157,7 +217,11 @@
     "latitude": 1.2981816759047808,
     "longitude": 103.78073828740352,
     "latitudeDelta": 0.01,
-    "longitudeDelta": 0.01
+    "longitudeDelta": 0.01,
+    "pricing": {
+      "penalty_rate_per_minute": 0.0856,
+      "remarks": "Penalty applies to non-staff season holders"
+    }
   },
   {
     "name": "CP10: Block S17/LT33/LT34 (Visitors)",
@@ -167,7 +231,11 @@
     "latitude": 1.2973971358074794,
     "longitude": 103.78198024126227,
     "latitudeDelta": 0.01,
-    "longitudeDelta": 0.01
+    "longitudeDelta": 0.01,
+    "pricing": {
+      "rate_per_minute": 0.0214,
+      "charged_hours": "Charges apply only from 0830H to 1930H (Mon\u2013Fri) and 0830H to 1700H (Sat)"
+    }
   },
   {
     "name": "CP10A: CRISP King Edward VII Hall/Squash Court",
@@ -177,7 +245,11 @@
     "latitude": 1.2923800420262388,
     "longitude": 103.7817692165017,
     "latitudeDelta": 0.01,
-    "longitudeDelta": 0.01
+    "longitudeDelta": 0.01,
+    "pricing": {
+      "rate_per_minute": 0.0214,
+      "charged_hours": "Charges apply only from 0830H to 1930H (Mon\u2013Fri) and 0830H to 1700H (Sat)"
+    }
   },
   {
     "name": "CP10B: Prince George's Park Residences",
@@ -187,7 +259,11 @@
     "latitude": 1.2909587674172158,
     "longitude": 103.78103154524663,
     "latitudeDelta": 0.01,
-    "longitudeDelta": 0.01
+    "longitudeDelta": 0.01,
+    "pricing": {
+      "rate_per_minute": 0.0214,
+      "charged_hours": "Charges apply only from 0830H to 1800H capped at $2.568 per exit per day for registered NUS staff and students, and from 1801H to 1930H (Mon\u2013Fri) and 0830H to 1700H (Sat)"
+    }
   },
   {
     "name": "CP10C: Centre for Life Sciences",
@@ -197,7 +273,11 @@
     "latitude": 1.294509263650491,
     "longitude": 103.78112287869033,
     "latitudeDelta": 0.01,
-    "longitudeDelta": 0.01
+    "longitudeDelta": 0.01,
+    "pricing": {
+      "penalty_rate_per_minute": 0.0856,
+      "remarks": "Penalty applies to non-staff season holders"
+    }
   },
   {
     "name": "CP11: COM3/Singapore Synchrotron Light Source",
@@ -207,7 +287,11 @@
     "latitude": 1.2943146121199929,
     "longitude": 103.77524663937615,
     "latitudeDelta": 0.01,
-    "longitudeDelta": 0.01
+    "longitudeDelta": 0.01,
+    "pricing": {
+      "rate_per_minute": 0.0214,
+      "charged_hours": "Charges apply only from 0830H to 1930H (Mon\u2013Fri) and 0830H to 1700H (Sat)"
+    }
   },
   {
     "name": "CP11A: Block BIZ2",
@@ -217,7 +301,11 @@
     "latitude": 1.2934594599382407,
     "longitude": 103.77556906275638,
     "latitudeDelta": 0.01,
-    "longitudeDelta": 0.01
+    "longitudeDelta": 0.01,
+    "pricing": {
+      "penalty_rate_per_minute": 0.0856,
+      "remarks": "Penalty applies to non-staff season holders"
+    }
   },
   {
     "name": "CP11B: Innovation 4.0",
@@ -227,7 +315,11 @@
     "latitude": 1.2942046369052516,
     "longitude": 103.77551975094634,
     "latitudeDelta": 0.01,
-    "longitudeDelta": 0.01
+    "longitudeDelta": 0.01,
+    "pricing": {
+      "rate_per_minute": 0.0214,
+      "charged_hours": "Charges apply only from 0830H to 1930H (Mon\u2013Fri) and 0830H to 1700H (Sat)"
+    }
   },
   {
     "name": "CP11C: TCOMS",
@@ -237,7 +329,11 @@
     "latitude": 1.293945636745416,
     "longitude": 103.7764586784134,
     "latitudeDelta": 0.01,
-    "longitudeDelta": 0.01
+    "longitudeDelta": 0.01,
+    "pricing": {
+      "rate_per_minute": 0.0214,
+      "charged_hours": "Charges apply only from 0830H to 1930H (Mon\u2013Fri) and 0830H to 1700H (Sat)"
+    }
   },
   {
     "name": "CP12: Hon Sui Sen Memorial Library",
@@ -247,7 +343,11 @@
     "latitude": 1.29261440600016,
     "longitude": 103.77461194122999,
     "latitudeDelta": 0.01,
-    "longitudeDelta": 0.01
+    "longitudeDelta": 0.01,
+    "pricing": {
+      "penalty_rate_per_minute": 0.0856,
+      "remarks": "Penalty applies to non-staff season holders"
+    }
   },
   {
     "name": "CP12A: Institute of Systems Science",
@@ -257,7 +357,11 @@
     "latitude": 1.2922835166147901,
     "longitude": 103.77677878238585,
     "latitudeDelta": 0.01,
-    "longitudeDelta": 0.01
+    "longitudeDelta": 0.01,
+    "pricing": {
+      "rate_per_minute": 0.0214,
+      "charged_hours": "Charges apply only from 0830H to 1930H (Mon\u2013Fri) and 0830H to 1700H (Sat)"
+    }
   },
   {
     "name": "CP12B: ICube",
@@ -267,7 +371,11 @@
     "latitude": 1.2917963674411732,
     "longitude": 103.77604504972837,
     "latitudeDelta": 0.01,
-    "longitudeDelta": 0.01
+    "longitudeDelta": 0.01,
+    "pricing": {
+      "rate_per_minute": 0.0214,
+      "charged_hours": "Charges apply only from 0830H to 1930H (Mon\u2013Fri) and 0830H to 1700H (Sat)"
+    }
   },
   {
     "name": "CP13: Block COM1",
@@ -277,7 +385,11 @@
     "latitude": 1.2943275189122354,
     "longitude": 103.77272987239988,
     "latitudeDelta": 0.01,
-    "longitudeDelta": 0.01
+    "longitudeDelta": 0.01,
+    "pricing": {
+      "penalty_rate_per_minute": 0.0856,
+      "remarks": "Penalty applies to non-staff season holders"
+    }
   },
   {
     "name": "CP14: Shaw Foundation Building/Block AS7",
@@ -287,7 +399,11 @@
     "latitude": 1.2947423230361466,
     "longitude": 103.7707624842903,
     "latitudeDelta": 0.01,
-    "longitudeDelta": 0.01
+    "longitudeDelta": 0.01,
+    "pricing": {
+      "penalty_rate_per_minute": 0.0856,
+      "remarks": "Penalty applies to non-staff season holders"
+    }
   },
   {
     "name": "CP15: Temasek & Eusoff Hall",
@@ -297,27 +413,39 @@
     "latitude": 1.2933116586433435,
     "longitude": 103.77220570282495,
     "latitudeDelta": 0.01,
-    "longitudeDelta": 0.01
+    "longitudeDelta": 0.01,
+    "pricing": {
+      "rate_per_minute": 0.0214,
+      "charged_hours": "Charges apply only from 0830H to 1930H (Mon\u2013Fri) and 0830H to 1700H (Sat)"
+    }
   },
   {
     "name": "CP16: LT11/Block AS2",
     "id": 31,
     "type": "open",
     "staff": false,
-    "latitude": 1.295480242514761, 
+    "latitude": 1.295480242514761,
     "longitude": 103.77094951546032,
     "latitudeDelta": 0.01,
-    "longitudeDelta": 0.01
+    "longitudeDelta": 0.01,
+    "pricing": {
+      "rate_per_minute": 0.0214,
+      "charged_hours": "Charges apply only from 0830H to 1930H (Mon\u2013Fri) and 0830H to 1700H (Sat)"
+    }
   },
   {
     "name": "CP17: Information Technology",
     "id": 32,
     "type": "sheltered",
     "staff": true,
-    "latitude": 1.2979501852182853, 
+    "latitude": 1.2979501852182853,
     "longitude": 103.77217613452534,
     "latitudeDelta": 0.01,
-    "longitudeDelta": 0.01
+    "longitudeDelta": 0.01,
+    "pricing": {
+      "penalty_rate_per_minute": 0.0856,
+      "remarks": "Penalty applies to non-staff season holders"
+    }
   },
   {
     "name": "CP18: Block AS8",
@@ -327,17 +455,24 @@
     "latitude": 1.295946128146834,
     "longitude": 103.77197499065359,
     "latitudeDelta": 0.01,
-    "longitudeDelta": 0.01
+    "longitudeDelta": 0.01,
+    "pricing": {
+      "penalty_rate_per_minute": 0.0856,
+      "remarks": "Penalty applies to non-staff season holders"
+    }
   },
   {
     "name": "Stephen Riady Centre Car Park",
     "id": 34,
     "type": "sheltered",
     "staff": false,
-    "latitude": 1.3048568266916158, 
+    "latitude": 1.3048568266916158,
     "longitude": 103.77186170705313,
     "latitudeDelta": 0.01,
-    "longitudeDelta": 0.01
+    "longitudeDelta": 0.01,
+    "pricing": {
+      "rate_per_minute": 0.0214,
+      "charged_hours": "Charges apply only from 0830H to 1930H (Mon\u2013Fri) and 0830H to 1700H (Sat)"
+    }
   }
-  
 ]
