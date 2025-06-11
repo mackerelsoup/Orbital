@@ -1,6 +1,6 @@
 [
   {
-    "name": "College of Design and Engineering Carpark",
+    "name": "CP1: College of Design & Engineering",
     "id": 1,
     "type": "open",
     "staff": false,
@@ -10,18 +10,288 @@
     "longitudeDelta": 0.01
   },
   {
-    "name": "E6 Carpark",
-    "id": 5,
-    "type": "sheltered",
-    "staff": true,
-    "latitude": 1.299549206449149,  
-    "longitude": 103.77282114595357,
+    "name": "CP2: Block E6/T-Lab",
+    "id": 2,
+    "type": "open",
+    "staff": false,
+    "latitude": 1.3007055855656473,
+    "longitude": 103.77155245827925,
+    "latitudeDelta": 0.01,
+    "longitudeDelta": 0.01
+  },  
+  {
+    "name": "CP2A: Block E3A",
+    "id": 3,
+    "type": "open",
+    "staff": false,
+    "latitude": 1.3000741872201027, 
+    "longitude": 103.7719734989492,
+    "latitudeDelta": 0.01,
+    "longitudeDelta": 0.01
+  },  
+  {
+    "name": "CP2B: Block EA",
+    "id": 4,
+    "type": "open",
+    "staff": false,
+    "latitude": 1.3002396829913572,
+    "longitude": 103.77036190154648,
     "latitudeDelta": 0.01,
     "longitudeDelta": 0.01
   },
   {
-    "name": "Eusoff carpark",
+    "name": "CP2C: Block E6",
+    "id": 5,
+    "type": "sheltered",
+    "staff": true,
+    "latitude": 1.2990088195806266, 
+    "longitude": 103.77288819266548,
+    "latitudeDelta": 0.01,
+    "longitudeDelta": 0.01
+  },
+  {
+    "name": "CP3: University Cultural Centre/Yong Siew Toh Conservatory of Music",
+    "id": 6,
+    "type": "sheltered",
+    "staff": false,
+    "latitude": 1.3022010350008428,
+    "longitude": 103.77326902134361,
+    "latitudeDelta": 0.01,
+    "longitudeDelta": 0.01
+  },
+  {
+    "name": "CP3A: Lee Kong Chian Natural History Museum",
+    "id": 7,
+    "type": "open",
+    "staff": false,
+    "latitude": 1.3019172248250193,
+    "longitude": 103.77347316228175,
+    "latitudeDelta": 0.01,
+    "longitudeDelta": 0.01
+  },
+  {
+    "name": "CP4/4A: Raffles Hall/Runme Shaw CFA Studios",
+    "id": 8,
+    "type": "open",
+    "staff": false,
+    "latitude": 1.3000574185193354,
+    "longitude": 103.774247337006,
+    "latitudeDelta": 0.01,
+    "longitudeDelta": 0.01
+  },
+  {
+    "name": "CP5: Sports and Recreation Centre",
+    "id": 9,
+    "type": "open",
+    "staff": false,
+    "latitude": 1.3006468681731167,
+    "longitude": 103.77458955714982,
+    "latitudeDelta": 0.01,
+    "longitudeDelta": 0.01
+  },
+  {
+    "name": "CP6: Block S7 and S13",
+    "id": 10,
+    "type": "open",
+    "staff": true,
+    "latitude": 1.2969151084789985,
+    "longitude": 103.77902056974419,
+    "latitudeDelta": 0.01,
+    "longitudeDelta": 0.01
+  },
+  {
+    "name": "CP6A: Block S1A/LT32",
+    "id": 11,
+    "type": "open",
+    "staff": true,
+    "latitude": 1.296675177741752,
+    "longitude": 103.7783182356925,
+    "latitudeDelta": 0.01,
+    "longitudeDelta": 0.01
+  },
+  {
+    "name": "CP6B: University Hall",
+    "id": 12,
+    "type": "sheltered",
+    "staff": false,
+    "latitude": 1.2973001821475358,
+    "longitude": 103.77732916116676,
+    "latitudeDelta": 0.01,
+    "longitudeDelta": 0.01
+  },
+  {
+    "name": "CP7: Block S10 and S14",
+    "id": 13,
+    "type": "open",
+    "staff": true,
+    "latitude": 1.296621448321872,
+    "longitude": 103.7800619719786,
+    "latitudeDelta": 0.01,
+    "longitudeDelta": 0.01
+  },
+  {
+    "name": "CP8: Block S16",
+    "id": 14,
+    "type": "open",
+    "staff": true,
+    "latitude": 1.2973489237186926,
+    "longitude": 103.78072831140625,
+    "latitudeDelta": 0.01,
+    "longitudeDelta": 0.01
+  },
+  {
+    "name": "CP9A: Block MD11",
     "id": 15,
+    "type": "open",
+    "staff": true,
+    "latitude": 1.2964789163453476,
+    "longitude": 103.78217067475377,
+    "latitudeDelta": 0.01,
+    "longitudeDelta": 0.01
+  },
+  {
+    "name": "CP10: Block S17/LT33/LT34 (Staff)",
+    "id": 16,
+    "type": "open",
+    "staff": true,
+    "latitude": 1.2981816759047808,
+    "longitude": 103.78073828740352,
+    "latitudeDelta": 0.01,
+    "longitudeDelta": 0.01
+  },
+  {
+    "name": "CP10: Block S17/LT33/LT34 (Visitors)",
+    "id": 17,
+    "type": "open",
+    "staff": false,
+    "latitude": 1.2973971358074794,
+    "longitude": 103.78198024126227,
+    "latitudeDelta": 0.01,
+    "longitudeDelta": 0.01
+  },
+  {
+    "name": "CP10A: CRISP King Edward VII Hall/Squash Court",
+    "id": 18,
+    "type": "open",
+    "staff": false,
+    "latitude": 1.2923800420262388,
+    "longitude": 103.7817692165017,
+    "latitudeDelta": 0.01,
+    "longitudeDelta": 0.01
+  },
+  {
+    "name": "CP10B: Prince George's Park Residences",
+    "id": 19,
+    "type": "sheltered",
+    "staff": false,
+    "latitude": 1.2909587674172158,
+    "longitude": 103.78103154524663,
+    "latitudeDelta": 0.01,
+    "longitudeDelta": 0.01
+  },
+  {
+    "name": "CP10C: Centre for Life Sciences",
+    "id": 20,
+    "type": "open",
+    "staff": true,
+    "latitude": 1.294509263650491,
+    "longitude": 103.78112287869033,
+    "latitudeDelta": 0.01,
+    "longitudeDelta": 0.01
+  },
+  {
+    "name": "CP11: COM3/Singapore Synchrotron Light Source",
+    "id": 21,
+    "type": "open",
+    "staff": false,
+    "latitude": 1.2943146121199929,
+    "longitude": 103.77524663937615,
+    "latitudeDelta": 0.01,
+    "longitudeDelta": 0.01
+  },
+  {
+    "name": "CP11A: Block BIZ2",
+    "id": 22,
+    "type": "open",
+    "staff": true,
+    "latitude": 1.2934594599382407,
+    "longitude": 103.77556906275638,
+    "latitudeDelta": 0.01,
+    "longitudeDelta": 0.01
+  },
+  {
+    "name": "CP11B: Innovation 4.0",
+    "id": 23,
+    "type": "open",
+    "staff": false,
+    "latitude": 1.2942046369052516,
+    "longitude": 103.77551975094634,
+    "latitudeDelta": 0.01,
+    "longitudeDelta": 0.01
+  },
+  {
+    "name": "CP11C: TCOMS",
+    "id": 24,
+    "type": "sheltered",
+    "staff": false,
+    "latitude": 1.293945636745416,
+    "longitude": 103.7764586784134,
+    "latitudeDelta": 0.01,
+    "longitudeDelta": 0.01
+  },
+  {
+    "name": "CP12: Hon Sui Sen Memorial Library",
+    "id": 25,
+    "type": "open",
+    "staff": true,
+    "latitude": 1.29261440600016,
+    "longitude": 103.77461194122999,
+    "latitudeDelta": 0.01,
+    "longitudeDelta": 0.01
+  },
+  {
+    "name": "CP12A: Institute of Systems Science",
+    "id": 26,
+    "type": "sheltered",
+    "staff": false,
+    "latitude": 1.2922835166147901,
+    "longitude": 103.77677878238585,
+    "latitudeDelta": 0.01,
+    "longitudeDelta": 0.01
+  },
+  {
+    "name": "CP12B: ICube",
+    "id": 27,
+    "type": "open",
+    "staff": false,
+    "latitude": 1.2917963674411732,
+    "longitude": 103.77604504972837,
+    "latitudeDelta": 0.01,
+    "longitudeDelta": 0.01
+  },
+  {
+    "name": "CP13: Block COM1",
+    "id": 28,
+    "type": "open",
+    "staff": true,
+    "latitude": 1.2943275189122354,
+    "longitude": 103.77272987239988,
+    "latitudeDelta": 0.01,
+    "longitudeDelta": 0.01
+  },
+  {
+    "name": "CP14: Shaw Foundation Building/Block AS7",
+    "id": 29,
+    "type": "open",
+    "staff": true,
+    "latitude": 1.2947423230361466,
+    "longitude": 103.7707624842903,
+    "latitudeDelta": 0.01,
+    "longitudeDelta": 0.01
+  },
+  {
+    "name": "CP15: Temasek & Eusoff Hall",
+    "id": 30,
     "type": "open",
     "staff": false,
     "latitude": 1.2933116586433435,
@@ -30,8 +300,8 @@
     "longitudeDelta": 0.01
   },
   {
-    "name": "LT16 carpark",
-    "id": 16,
+    "name": "CP16: LT11/Block AS2",
+    "id": 31,
     "type": "open",
     "staff": false,
     "latitude": 1.295480242514761, 
@@ -40,17 +310,27 @@
     "longitudeDelta": 0.01
   },
   {
-    "name": "Information Technology Carpark",
+    "name": "CP17: Information Technology",
     "id": 32,
     "type": "sheltered",
-    "staff": false,
+    "staff": true,
     "latitude": 1.2979501852182853, 
     "longitude": 103.77217613452534,
     "latitudeDelta": 0.01,
     "longitudeDelta": 0.01
   },
   {
-    "name": "Stephen Riady Centre Carpark",
+    "name": "CP18: Block AS8",
+    "id": 33,
+    "type": "sheltered",
+    "staff": true,
+    "latitude": 1.295946128146834,
+    "longitude": 103.77197499065359,
+    "latitudeDelta": 0.01,
+    "longitudeDelta": 0.01
+  },
+  {
+    "name": "Stephen Riady Centre Car Park",
     "id": 34,
     "type": "sheltered",
     "staff": false,
