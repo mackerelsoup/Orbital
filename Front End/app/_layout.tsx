@@ -49,6 +49,27 @@ export default function RootLayout() {
             }
           }}></Drawer.Screen>
 
+          <Drawer.Screen name="calculator" options={{
+            title: "Fee Calculator",
+            drawerIcon: ({ color, size }) => (
+              <FontAwesome name="calculator" size={size} color={color} />
+            ),
+              
+            headerTitle: "Calculator",
+            headerRight: () => {
+              const { user } = useContext(UserContext)!
+              return (
+                <Link href={user.username ? '/profile' : '/login'} asChild style={styles.profileContainer}>
+                  <Pressable>
+                    <FontAwesome name="user-circle-o" size={28} />
+                  </Pressable>
+                </Link>
+              )
+            }
+            }}
+          />
+
+
           <Drawer.Screen
             name="login"
             options={{

@@ -1,19 +1,31 @@
+// File: app/calculator.tsx
+import { FontAwesome } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { Picker } from '@react-native-picker/picker';
 import React, { useState } from 'react';
-import { Button, Platform, StyleSheet, Switch, Text, View } from 'react-native';
+import { Alert, Button, Keyboard, Platform, StyleSheet, Switch, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import ModalSelector from 'react-native-modal-selector';
 import carparks from '../assets/carparks.json';
 
 export default function CalculatorScreen() {
   const [carparkId, setCarparkId] = useState<number>(carparks[0].id);
+  const [carparkLabel, setCarparkLabel] = useState<string>(carparks[0].name);
   const [startTime, setStartTime] = useState<Date>(new Date());
-  const [endTime, setEndTime] = useState<Date>(new Date());
+  const [duration, setDuration] = useState<number>(60);
   const [showStart, setShowStart] = useState(false);
-  const [showEnd, setShowEnd] = useState(false);
   const [fee, setFee] = useState<number | null>(null);
   const [isRegistered, setIsRegistered] = useState<boolean>(false);
 
+  const formatTime = (date: Date) => {
+    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    return `${monthNames[date.getMonth()]} ${date.getDate()} ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+  };
+
   const calculateFee = () => {
+    if (duration <= 0) {
+      Alert.alert("Invalid Duration", "Duration must be greater than 0.");
+      return;
+    }
+
     const selected = carparks.find(cp => cp.id === carparkId);
     if (!selected || !selected.pricing || !selected.pricing.rate_per_minute) {
       setFee(null);
@@ -21,28 +33,34 @@ export default function CalculatorScreen() {
     }
 
     const rate = selected.pricing.rate_per_minute;
-    const day = startTime.getDay(); // 1 = Monday, ..., 5 = Friday
+    const start = new Date(startTime);
+    const end = new Date(start.getTime() + duration * 60000);
+    const day = start.getDay();
     const isWeekday = day >= 1 && day <= 5;
 
     let charge = 0;
-    const intervals: { start: number; end: number }[] = [];
-    let cursor = new Date(startTime);
+    const intervals = [];
+    let cursor = new Date(start);
 
-    while (cursor < endTime) {
+    while (cursor < end) {
       const next = new Date(cursor);
       next.setMinutes(cursor.getMinutes() + 1);
-      if (next > endTime) break;
+      if (next > end) break;
 
       const hour = cursor.getHours();
       const minute = cursor.getMinutes();
       const timeInt = hour * 100 + minute;
 
+      if (isWeekday && timeInt > 1930) {
+        cursor = next;
+        continue;
+      }
+
       if (
         isRegistered &&
         isWeekday &&
-        (selected.name.includes("CP 3") || selected.name.includes("CP10B"))
+        (selected.name.includes("CP3: University") || selected.name.includes("CP10B"))
       ) {
-        // Cap zone: 0830 to 1800
         if (timeInt >= 830 && timeInt <= 1800) {
           intervals.push({ start: cursor.getTime(), end: next.getTime() });
         } else if (timeInt > 1800 && timeInt <= 1930) {
@@ -69,46 +87,58 @@ export default function CalculatorScreen() {
       <Text style={styles.heading}>Parking Fee Calculator</Text>
 
       <Text style={styles.label}>Select Carpark</Text>
-      <Picker
-        selectedValue={carparkId}
-        onValueChange={(itemValue) => setCarparkId(itemValue)}>
-        {carparks.map(cp => (
-          <Picker.Item key={cp.id} label={cp.name} value={cp.id} />
-        ))}
-      </Picker>
+      <ModalSelector
+        data={carparks.map(cp => ({ key: cp.id, label: cp.name }))}
+        initValue={carparkLabel}
+        onChange={(option) => {
+          setCarparkId(option.key);
+          setCarparkLabel(option.label);
+        }}
+        style={styles.modal}
+        optionTextStyle={styles.modalOption}
+        initValueTextStyle={styles.modalText}
+        selectTextStyle={styles.modalText}
+      />
 
       <View style={styles.switchContainer}>
         <Text style={styles.label}>Registered Vehicle?</Text>
-        <Switch value={isRegistered} onValueChange={setIsRegistered} />
+        <View style={{ marginLeft: 10 }}>
+          <Switch value={isRegistered} onValueChange={setIsRegistered} />
+        </View>
       </View>
 
       <Text style={styles.label}>Start Time</Text>
-      <Button title={startTime.toLocaleString()} onPress={() => setShowStart(true)} />
+      <View style={styles.rowBetween}>
+        <Button title={formatTime(startTime)} onPress={() => setShowStart(true)} />
+        {showStart && (
+          <TouchableOpacity onPress={() => setShowStart(false)}>
+            <FontAwesome name="times-circle" size={24} color="gray" />
+          </TouchableOpacity>
+        )}
+      </View>
       {showStart && (
         <DateTimePicker
           value={startTime}
           mode="datetime"
           display={Platform.OS === 'ios' ? 'inline' : 'default'}
           onChange={(e, date) => {
-            setShowStart(false);
             if (date) setStartTime(date);
           }}
         />
       )}
 
-      <Text style={styles.label}>End Time</Text>
-      <Button title={endTime.toLocaleString()} onPress={() => setShowEnd(true)} />
-      {showEnd && (
-        <DateTimePicker
-          value={endTime}
-          mode="datetime"
-          display={Platform.OS === 'ios' ? 'inline' : 'default'}
-          onChange={(e, date) => {
-            setShowEnd(false);
-            if (date) setEndTime(date);
-          }}
+      <Text style={styles.label}>Duration (minutes)</Text>
+      <View style={styles.rowBetween}>
+        <TextInput
+          style={styles.input}
+          keyboardType="numeric"
+          returnKeyType="done"
+          blurOnSubmit={true}
+          value={duration.toString()}
+          onChangeText={(text) => setDuration(Number(text))}
+          onSubmitEditing={() => Keyboard.dismiss()}
         />
-      )}
+      </View>
 
       <View style={{ marginVertical: 10 }}>
         <Button title="Calculate Fee" onPress={calculateFee} />
@@ -127,4 +157,9 @@ const styles = StyleSheet.create({
   label: { marginTop: 10, marginBottom: 4, fontWeight: '600' },
   result: { marginTop: 20, fontSize: 18, fontWeight: 'bold', color: 'green' },
   switchContainer: { flexDirection: 'row', alignItems: 'center', marginVertical: 10 },
+  input: { borderColor: '#ccc', borderWidth: 1, padding: 10, borderRadius: 5, flex: 1 },
+  modal: { marginBottom: 10 },
+  modalText: { fontSize: 18, fontWeight: '500', color: '#007AFF' },
+  modalOption: { fontSize: 20 },
+  rowBetween: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }
 });
