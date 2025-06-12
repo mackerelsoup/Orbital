@@ -1,14 +1,14 @@
 import CarparkList from '@/components/CarparkList';
 import { getLocation } from '@/components/LocationService';
 import MapComponent from '@/components/MapComponent';
-import React, { useContext, useEffect, useRef, useState } from 'react';
-import { StyleSheet, View, Text, Pressable, InteractionManager, } from 'react-native';
-import MapView, { MapMarker, Region } from 'react-native-maps';
-import carparks from '../assets/carparks.json';
-import { Link } from 'expo-router';
 import { UserContext } from '@/context/userContext';
 import { ActionSheetRef } from 'react-native-actions-sheet';
+import { Link } from 'expo-router';
+import React, { useContext, useEffect, useRef, useState } from 'react';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
+import MapView, { MapMarker, Region } from 'react-native-maps';
 import Modal from 'react-native-modal';
+import carparks from '../assets/carparks.json';
 
 export default function App() {
   const [region, setRegion] = useState<Region | undefined>(undefined);
