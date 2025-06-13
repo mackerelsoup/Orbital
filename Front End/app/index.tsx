@@ -7,6 +7,7 @@ import MapView, { MapMarker, Region } from 'react-native-maps';
 import carparks from '../assets/carparks.json';
 import { Link } from 'expo-router';
 import { UserContext } from '@/context/userContext';
+import { ActionSheetRef } from 'react-native-actions-sheet';
 
 
 export default function App() {
@@ -15,6 +16,7 @@ export default function App() {
   const markerRefs = useRef<(MapMarker | null)[]>([])
   const [coordinateSelected, setCoords] = useState<Region | null>(null)
   const {user} = useContext(UserContext)!
+  const sheetRef = useRef<ActionSheetRef>(null)
 
 
   //retreiving user location data
