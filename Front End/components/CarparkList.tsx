@@ -18,7 +18,7 @@ type CarparkListProps = {
 
 const CarparkList = ({ carparks, onItemPress, origin }: CarparkListProps) => {
   const [sortOption, setSortOption] = useState<string>('')
-  const [filterOption, setFilterOption] = useState<string>('')
+  const [filterOption, setFilterOption] = useState<string>('Filter Options')
   const { user } = useContext(UserContext)!
   const [carparkDistances, setCarparkDistances] = useState<Record<number, number>>({})
   const sheetRef = useRef<ActionSheetRef>(null)
@@ -33,7 +33,7 @@ const CarparkList = ({ carparks, onItemPress, origin }: CarparkListProps) => {
         const distances = await Promise.all(
           carparks.map(async (carpark) => {
             try {
-              const response = await fetch("http://10.130.2.118:3000/computeDistance", {
+              const response = await fetch("http://192.168.68.55:3000/computeDistance", {
                 method: 'POST',
                 headers: {
                   'Content-Type': 'application/json'
@@ -80,7 +80,7 @@ const CarparkList = ({ carparks, onItemPress, origin }: CarparkListProps) => {
     const carparkCopy = [...carparks]
     //console.log(carparkCopy)
     switch (filterOption) {
-      case '': {
+      case 'Filter Options': {
         return carparkCopy
       }
       case 'season_parking': {
@@ -121,7 +121,7 @@ const CarparkList = ({ carparks, onItemPress, origin }: CarparkListProps) => {
 
   const listHeaderComponent = () => {
     return (
-      <View style={{ justifyContent: 'flex-start' }}>
+      <View style={{ justifyContent: 'flex-start', backgroundColor: 'grey' }}>
         <Button label={filterOption} onPress={() => sheetRef.current?.show()} />
       </View>)
 

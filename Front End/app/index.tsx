@@ -8,14 +8,16 @@ import carparks from '../assets/carparks.json';
 import { Link } from 'expo-router';
 import { UserContext } from '@/context/userContext';
 import { ActionSheetRef } from 'react-native-actions-sheet';
-
+import Modal from 'react-native-modal';
 
 export default function App() {
   const [region, setRegion] = useState<Region | undefined>(undefined);
   const mapRef = useRef<MapView | null>(null)
   const markerRefs = useRef<(MapMarker | null)[]>([])
   const [coordinateSelected, setCoords] = useState<Region | null>(null)
-  const {user} = useContext(UserContext)!
+  const [selectedCarpark, setSelectedCarpark] = useState<Carpark | null>(null);
+  const [modalVisible, setModalVisible] = useState(false);
+  const { user } = useContext(UserContext)!
   const sheetRef = useRef<ActionSheetRef>(null)
 
 
@@ -56,7 +58,7 @@ export default function App() {
   }, []);
 
 
-  const handleCarparkSelect = (carpark: Carpark) => {
+   const handleCarparkSelect = (carpark: Carpark) => {
     const marker = markerRefs.current[carpark.id];
     //console.log(marker)
     setCoords({ latitude: carpark.latitude, longitude: carpark.longitude, longitudeDelta: 0.01, latitudeDelta: 0.01 });
@@ -67,7 +69,10 @@ export default function App() {
       latitudeDelta: 0.01,
       longitudeDelta: 0.01,
     });
+    setSelectedCarpark(carpark);
+    setModalVisible(true);
   };
+
 
 
 
@@ -94,6 +99,20 @@ export default function App() {
           </View>}
 
       </View>
+
+      {/* Modal Popup */}
+      <Modal isVisible={modalVisible} onBackdropPress={() => setModalVisible(false)}>
+        <View style={{ backgroundColor: 'white', padding: 20, borderRadius: 10 }}>
+          <Text style={{ fontSize: 16, fontWeight: 'bold' }}>{selectedCarpark?.name}</Text>
+          {selectedCarpark?.pricing?.rate_per_minute && (
+            <Text>Rate: ${selectedCarpark.pricing.rate_per_minute.toFixed(4)} / min</Text>
+          )}
+          {selectedCarpark?.pricing?.charged_hours && (
+            <Text style={{ fontStyle: 'italic', marginTop: 5 }}>{selectedCarpark.pricing?.charged_hours}</Text>
+          )}
+          <Text style={{ color: 'blue', marginTop: 12 }} onPress={() => setModalVisible(false)}>Close</Text>
+        </View>
+      </Modal>
 
       <CarparkList
         carparks={carparks}

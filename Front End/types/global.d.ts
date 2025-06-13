@@ -8,7 +8,11 @@ type Carpark = {
   longitude: number;
   latitudeDelta: number;
   longitudeDelta: number;
-  distance? : number;
+  distance?: number;
+  pricing?: {
+    rate_per_minute?: number;
+    charged_hours?: string;
+  }
 };
 
 type Coordinates = {
