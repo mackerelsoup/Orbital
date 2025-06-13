@@ -1,9 +1,11 @@
-import React, { useContext, useEffect, useMemo, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { FlatList, StyleSheet, View, Text } from 'react-native';
 import Button from '@/components/Button';
 import { Region } from 'react-native-maps';
 import CarparkItem from './CarparkItem';
 import { UserContext } from '@/context/userContext';
+import BottomSheet from './BottomSheet';
+import { ActionSheetRef } from 'react-native-actions-sheet';
 
 type CarparkListProps = {
   carparks: Carpark[];
@@ -15,10 +17,11 @@ type CarparkListProps = {
 
 
 const CarparkList = ({ carparks, onItemPress, origin }: CarparkListProps) => {
-  const [sortOption, setSortOption] = useState<String>('')
-  const [filterOption, setFilterOption] = useState<String>('')
+  const [sortOption, setSortOption] = useState<string>('')
+  const [filterOption, setFilterOption] = useState<string>('')
   const { user } = useContext(UserContext)!
-  const [carparkDistances, setCarparkDistances] =  useState<Record<number, number>>({})
+  const [carparkDistances, setCarparkDistances] = useState<Record<number, number>>({})
+  const sheetRef = useRef<ActionSheetRef>(null)
 
   useEffect(() => {
     // Only run if origin exists
@@ -83,18 +86,20 @@ const CarparkList = ({ carparks, onItemPress, origin }: CarparkListProps) => {
       case 'season_parking': {
         //implement season parking property, -> this button is availble only is user is a season pass holder
         return carparkCopy.filter((carpark) => {
-          carpark.season_parking_type == user.season_parking_type
+          return carpark.season_parking_type == user.season_parking_type
         })
       }
       case 'can_park': {
+        console.log("filtered can park")
         return carparkCopy.filter((carpark) => {
-          carpark.staff ? (carpark.staff == user.staff) : true
+          return carpark.staff ? (carpark.staff == user.staff) : true
         })
       }
     }
   }, [carparks, filterOption])
 
   const sortedCarparkList = useMemo(() => {
+    console.log("ran sorted")
     switch (sortOption) {
       //by default it will sort by distance
       case '': {
@@ -110,26 +115,44 @@ const CarparkList = ({ carparks, onItemPress, origin }: CarparkListProps) => {
     }
   }, [filteredCarparkList, filterOption, carparkDistances])
 
+  function handleFilterOption(filterOption: string) {
+    setFilterOption(filterOption)
+   }
 
-  return <FlatList
-    data={sortedCarparkList}
-    //renaming item into carpark
-    renderItem={({ item: carpark }) => (
-      <View>
-        <CarparkItem
-          carpark={carpark}
-          distances={carparkDistances}
-          onPress={onItemPress}
-          origin={origin}
-        >
-        </CarparkItem>
-      </View>
+  const listHeaderComponent = () => {
+    return (
+      <View style={{ justifyContent: 'flex-start' }}>
+        <Button label={filterOption} onPress={() => sheetRef.current?.show()} />
+      </View>)
 
-    )}
-    keyExtractor={(item) => item.id.toString()}
-    style={styles.list}
-    contentContainerStyle={styles.content}
-  />
+  }
+
+  return (
+    <View style = {{flex: 1}}>
+      <FlatList
+        data={sortedCarparkList}
+        //renaming item into carpark
+        renderItem={({ item: carpark }) => (
+          <View>
+            <CarparkItem
+              carpark={carpark}
+              distances={carparkDistances}
+              onPress={onItemPress}
+              origin={origin}
+            >
+            </CarparkItem>
+          </View>
+        )}
+        keyExtractor={(item) => item.id.toString()}
+        style={styles.list}
+        contentContainerStyle={styles.content}
+        ListHeaderComponent={listHeaderComponent}
+      />
+      <BottomSheet ref= {sheetRef} onSelect={handleFilterOption}></BottomSheet>
+    </View>
+      
+  )
+
 };
 
 const styles = StyleSheet.create({
