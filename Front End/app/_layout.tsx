@@ -19,7 +19,7 @@ export default function RootLayout() {
               return (
                 <Link href={user.username ? '/profile' : '/login'} asChild style={styles.profileContainer}>
                   <Pressable>
-                    <FontAwesome name="user-circle-o" size={28} />
+                    <FontAwesome name="user-circle-o" size={35} />
                   </Pressable>
                 </Link>
 
@@ -49,8 +49,7 @@ export default function RootLayout() {
 
 const styles = StyleSheet.create({
   profileContainer: {
-    paddingRight: 16.2,
-    paddingTop: 8,
+    padding: 12.5
   }
 
 
