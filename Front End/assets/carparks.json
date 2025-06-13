@@ -65,12 +65,12 @@
     "latitudeDelta": 0.01,
     "longitudeDelta": 0.01,
     "pricing": {
-      "penalty_rate_per_minute": 0.0856,
-      "remarks": "Penalty applies to non-staff season holders"
+      "rate_per_minute": 0.0856,
+      "charged_hours": "Penalty applies to non-staff season holders"
     }
   },
   {
-    "name": "CP3: University Cultural Centre",
+    "name": "CP3: University Cultural Centre/Yong Siew Toh Conservatory of Music",
     "id": 6,
     "type": "sheltered",
     "staff": false,
@@ -80,6 +80,7 @@
     "longitudeDelta": 0.01,
     "pricing": {
       "rate_per_minute": 0.0214,
+      "max_daily_cap": 2.568,
       "charged_hours": "Charges apply only from 0830H to 1800H capped at $2.568 per exit per day for registered NUS staff and students, and from 1801H to 1930H (Mon\u2013Fri) and 0830H to 1700H (Sat)"
     }
   },
@@ -135,8 +136,8 @@
     "latitudeDelta": 0.01,
     "longitudeDelta": 0.01,
     "pricing": {
-      "penalty_rate_per_minute": 0.0856,
-      "remarks": "Penalty applies to non-staff season holders"
+      "rate_per_minute": 0.0856,
+      "charged_hours": "Penalty applies to non-staff season holders"
     }
   },
   {
@@ -149,8 +150,8 @@
     "latitudeDelta": 0.01,
     "longitudeDelta": 0.01,
     "pricing": {
-      "penalty_rate_per_minute": 0.0856,
-      "remarks": "Penalty applies to non-staff season holders"
+      "rate_per_minute": 0.0856,
+      "charged_hours": "Penalty applies to non-staff season holders"
     }
   },
   {
@@ -177,8 +178,8 @@
     "latitudeDelta": 0.01,
     "longitudeDelta": 0.01,
     "pricing": {
-      "penalty_rate_per_minute": 0.0856,
-      "remarks": "Penalty applies to non-staff season holders"
+      "rate_per_minute": 0.0856,
+      "charged_hours": "Penalty applies to non-staff season holders"
     }
   },
   {
@@ -191,8 +192,8 @@
     "latitudeDelta": 0.01,
     "longitudeDelta": 0.01,
     "pricing": {
-      "penalty_rate_per_minute": 0.0856,
-      "remarks": "Penalty applies to non-staff season holders"
+      "rate_per_minute": 0.0856,
+      "charged_hours": "Penalty applies to non-staff season holders"
     }
   },
   {
@@ -205,8 +206,8 @@
     "latitudeDelta": 0.01,
     "longitudeDelta": 0.01,
     "pricing": {
-      "penalty_rate_per_minute": 0.0856,
-      "remarks": "Penalty applies to non-staff season holders"
+      "rate_per_minute": 0.0856,
+      "charged_hours": "Penalty applies to non-staff season holders"
     }
   },
   {
@@ -219,8 +220,8 @@
     "latitudeDelta": 0.01,
     "longitudeDelta": 0.01,
     "pricing": {
-      "penalty_rate_per_minute": 0.0856,
-      "remarks": "Penalty applies to non-staff season holders"
+      "rate_per_minute": 0.0856,
+      "charged_hours": "Penalty applies to non-staff season holders"
     }
   },
   {
@@ -262,6 +263,7 @@
     "longitudeDelta": 0.01,
     "pricing": {
       "rate_per_minute": 0.0214,
+      "max_daily_cap": 2.568,
       "charged_hours": "Charges apply only from 0830H to 1800H capped at $2.568 per exit per day for registered NUS staff and students, and from 1801H to 1930H (Mon\u2013Fri) and 0830H to 1700H (Sat)"
     }
   },
@@ -275,8 +277,8 @@
     "latitudeDelta": 0.01,
     "longitudeDelta": 0.01,
     "pricing": {
-      "penalty_rate_per_minute": 0.0856,
-      "remarks": "Penalty applies to non-staff season holders"
+      "rate_per_minute": 0.0856,
+      "charged_hours": "Penalty applies to non-staff season holders"
     }
   },
   {
@@ -303,8 +305,8 @@
     "latitudeDelta": 0.01,
     "longitudeDelta": 0.01,
     "pricing": {
-      "penalty_rate_per_minute": 0.0856,
-      "remarks": "Penalty applies to non-staff season holders"
+      "rate_per_minute": 0.0856,
+      "charged_hours": "Penalty applies to non-staff season holders"
     }
   },
   {
@@ -345,8 +347,8 @@
     "latitudeDelta": 0.01,
     "longitudeDelta": 0.01,
     "pricing": {
-      "penalty_rate_per_minute": 0.0856,
-      "remarks": "Penalty applies to non-staff season holders"
+      "rate_per_minute": 0.0856,
+      "charged_hours": "Penalty applies to non-staff season holders"
     }
   },
   {
@@ -387,8 +389,8 @@
     "latitudeDelta": 0.01,
     "longitudeDelta": 0.01,
     "pricing": {
-      "penalty_rate_per_minute": 0.0856,
-      "remarks": "Penalty applies to non-staff season holders"
+      "rate_per_minute": 0.0856,
+      "charged_hours": "Penalty applies to non-staff season holders"
     }
   },
   {
@@ -401,8 +403,8 @@
     "latitudeDelta": 0.01,
     "longitudeDelta": 0.01,
     "pricing": {
-      "penalty_rate_per_minute": 0.0856,
-      "remarks": "Penalty applies to non-staff season holders"
+      "rate_per_minute": 0.0856,
+      "charged_hours": "Penalty applies to non-staff season holders"
     }
   },
   {
@@ -443,8 +445,8 @@
     "latitudeDelta": 0.01,
     "longitudeDelta": 0.01,
     "pricing": {
-      "penalty_rate_per_minute": 0.0856,
-      "remarks": "Penalty applies to non-staff season holders"
+      "rate_per_minute": 0.0856,
+      "charged_hours": "Penalty applies to non-staff season holders"
     }
   },
   {
@@ -457,8 +459,8 @@
     "latitudeDelta": 0.01,
     "longitudeDelta": 0.01,
     "pricing": {
-      "penalty_rate_per_minute": 0.0856,
-      "remarks": "Penalty applies to non-staff season holders"
+      "rate_per_minute": 0.0856,
+      "charged_hours": "Penalty applies to non-staff season holders"
     }
   },
   {
