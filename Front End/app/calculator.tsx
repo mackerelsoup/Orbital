@@ -61,6 +61,7 @@ export default function CalculatorScreen() {
     let cappedMinutes = 0;
 
     let cursor = new Date(start);
+    // loop to calculate fees minute by minute based on existing conditions
     while (cursor < end) {
       const hour = cursor.getHours();
       const minute = cursor.getMinutes();
@@ -71,7 +72,7 @@ export default function CalculatorScreen() {
       const isCurrentSunday = currentDay === 0;
 
       if (isCurrentSunday) {
-        // free all day
+        // nothing since parking is free on sundays
       } else if (isCurrentSaturday) {
         if (timeInt >= 830 && timeInt < 1700) {
           charge += rate;
@@ -80,7 +81,7 @@ export default function CalculatorScreen() {
         const isFreeTime = timeInt < 830 || timeInt >= 1930;
 
         if (isFreeTime) {
-          // no charge
+          // nothing since it is outside parking charge hours
         } else if (isRegistered && isSpecialLot) {
           if (timeInt > 1800 && timeInt < 1930) {
             charge += rate;
@@ -153,7 +154,7 @@ export default function CalculatorScreen() {
               />
             </View>
 
-            {/* Registration Switch */}
+            {/* Registered or not Switch */}
             <View style={styles.inputGroup}>
               <View style={styles.switchRow}>
                 <Text style={styles.label}>
