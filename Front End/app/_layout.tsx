@@ -54,7 +54,6 @@ export default function RootLayout() {
             drawerIcon: ({ color, size }) => (
               <FontAwesome name="calculator" size={size} color={color} />
             ),
-              
             headerTitle: "Calculator",
             headerRight: () => {
               const { user } = useContext(UserContext)!
@@ -64,11 +63,30 @@ export default function RootLayout() {
                     <FontAwesome name="user-circle-o" size={28} />
                   </Pressable>
                 </Link>
+
               )
             }
-            }}
-          />
+          }}></Drawer.Screen>
 
+          <Drawer.Screen name="digitalpermits" options={{
+            title: "Digital Permits",
+            drawerIcon: ({ color, size }) => (
+              <FontAwesome name="id-card" size={size} color={color} />
+            ),
+            headerTitle: "Digital Permits",
+            headerRight: () => {
+              const { user } = useContext(UserContext)!
+              return (
+                <Link href={user.username ? '/profile' : '/login'} asChild style={styles.profileContainer}>
+                  <Pressable>
+                    <FontAwesome name="user-circle-o" size={28} />
+                  </Pressable>
+                </Link>
+
+              )
+            }
+          }}></Drawer.Screen>
+          
 
           <Drawer.Screen
             name="login"
