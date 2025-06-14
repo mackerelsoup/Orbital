@@ -56,8 +56,6 @@ app.post('/computeDistance', async (request, response) => {
 )
 
 
-
-
 //:id is a route param, acts as a placeholder for any value that is part of the URL
 app.get('/fetchbyUsername/:username', (request, response) => {
   const username = request.params.username
@@ -123,6 +121,26 @@ app.get('/fetchUserData/:username', (request, response) => {
   })
 })
 
+app.get('/fetchCarparkData/:id', (request, response) => {
+  const id = request.params.id
+  const fetch_id_query = "SELECT * FROM carpark_info WHERE id = $1"
+  connection.query(fetch_id_query, [id], (err, result) => {
+    if (err) {
+      response.send(err)
+      console.error(err)
+    }
+    else {
+      if (result.rowCount === 0) {
+        response.status(404).send("Carpark info not found")
+      }
+      else {
+        console.log("Carpark info extracted")
+        response.send(result.rows)
+      }
+
+    }
+  })
+})
 
 
 app.put('/update/:id', (request, response) => {

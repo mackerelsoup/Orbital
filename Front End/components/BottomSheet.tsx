@@ -12,12 +12,12 @@ export default function BottomSheet({ref, onSelect}: bottomSheetProps) {
   return (
     <ActionSheet ref = {ref}>
       <Button
-      label= "Season Parking"
-      onPress={() => onSelect("season_parking")}
+      label= "Distance"
+      onPress={() => onSelect("distance")}
       />
       <Button
-      label= "Can Park"
-      onPress={() => onSelect("can_park")}
+      label= "Availibility"
+      onPress={() => onSelect("availibility")}
       />
     </ActionSheet>
   )
