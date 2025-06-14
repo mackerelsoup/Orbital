@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, Button, Platform, Switch, Alert, TextInput, TouchableOpacity, Keyboard } from 'react-native';
-import DateTimePicker from '@react-native-community/datetimepicker';
-import ModalSelector from 'react-native-modal-selector';
 import { FontAwesome } from '@expo/vector-icons';
+import DateTimePicker from '@react-native-community/datetimepicker';
+import React, { useState } from 'react';
+import { Alert, Button, Keyboard, Platform, StyleSheet, Switch, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import ModalSelector from 'react-native-modal-selector';
 import carparks from '../assets/carparks.json';
 
 export default function CalculatorScreen() {
@@ -96,11 +96,7 @@ export default function CalculatorScreen() {
         style={styles.modal}
         optionTextStyle={styles.modalOption}
         initValueTextStyle={styles.modalText}
-<<<<<<< HEAD
         selectTextStyle={styles.modalText}
-=======
-        selectTextStyle={styles.modalSelected}
->>>>>>> a553b27 (improved calculator, still not working fully as intended)
       />
 
       <View style={styles.switchContainer}>
@@ -162,14 +158,7 @@ const styles = StyleSheet.create({
   switchContainer: { flexDirection: 'row', alignItems: 'center', marginVertical: 10 },
   input: { borderColor: '#ccc', borderWidth: 1, padding: 10, borderRadius: 5, flex: 1 },
   modal: { marginBottom: 10 },
-<<<<<<< HEAD
   modalText: { fontSize: 18, fontWeight: '500', color: '#007AFF' },
   modalOption: { fontSize: 20 },
   rowBetween: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }
-=======
-  modalText: { fontSize: 18, fontWeight: '500' },
-  modalOption: { fontSize: 20 },
-  rowBetween: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  modalSelected: { fontSize: 18, fontWeight: '500', color: '#007AFF' }
->>>>>>> a553b27 (improved calculator, still not working fully as intended)
 });
