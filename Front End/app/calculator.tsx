@@ -1,7 +1,7 @@
 import { FontAwesome } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import React, { useState } from 'react';
-import { Alert, Button, Keyboard, Platform, StyleSheet, Switch, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, Keyboard, Platform, ScrollView, StyleSheet, Switch, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import ModalSelector from 'react-native-modal-selector';
 import carparks from '../assets/carparks.json';
 
@@ -13,16 +13,26 @@ export default function CalculatorScreen() {
   const [showStart, setShowStart] = useState(false);
   const [fee, setFee] = useState<number | null>(null);
   const [isRegistered, setIsRegistered] = useState<boolean>(false);
+  const selectorRef = React.useRef<any>(null);
+
 
   const formatTime = (date: Date) => {
     const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
     return `${monthNames[date.getMonth()]} ${date.getDate()} ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
   };
 
+  const toggleDatePicker = () => {
+    setShowStart(!showStart);
+  };
+
   const calculateFee = () => {
     if (duration <= 0) {
-      Alert.alert("Invalid Duration", "Duration must be greater than 0.");
+      Alert.alert("Invalid Duration", "Duration must be greater than 10.");
       return;
+    }
+
+    if (duration <= 10){
+      Alert.alert("All carparks have a grace period of 10 minutes.")
     }
 
     const selected = carparks.find(cp => cp.id === carparkId);
@@ -36,129 +46,400 @@ export default function CalculatorScreen() {
     const end = new Date(start.getTime() + duration * 60000);
     const day = start.getDay();
     const isWeekday = day >= 1 && day <= 5;
+    const isSaturday = day === 6;
+    const isSunday = day === 0;
+    const isSpecialLot = selected.name.includes("CP3:") || selected.name.includes("CP10B");
 
     let charge = 0;
-    const intervals = [];
+    let cappedMinutes = 0;
+
     let cursor = new Date(start);
-
     while (cursor < end) {
-      const next = new Date(cursor);
-      next.setMinutes(cursor.getMinutes() + 1);
-      if (next > end) break;
-
       const hour = cursor.getHours();
       const minute = cursor.getMinutes();
       const timeInt = hour * 100 + minute;
+      const currentDay = cursor.getDay();
+      const isCurrentWeekday = currentDay >= 1 && currentDay <= 5;
+      const isCurrentSaturday = currentDay === 6;
+      const isCurrentSunday = currentDay === 0;
 
-      if (isWeekday && timeInt > 1930) {
-        cursor = next;
-        continue;
-      }
-
-      if (
-        isRegistered &&
-        isWeekday &&
-        (selected.name.includes("CP3: University") || selected.name.includes("CP10B"))
-      ) {
-        if (timeInt >= 830 && timeInt <= 1800) {
-          intervals.push({ start: cursor.getTime(), end: next.getTime() });
-        } else if (timeInt > 1800 && timeInt <= 1930) {
+      if (isCurrentSunday) {
+        // free all day
+      } else if (isCurrentSaturday) {
+        if (timeInt >= 830 && timeInt < 1700) {
           charge += rate;
         }
-      } else {
-        charge += rate;
+      } else if (isCurrentWeekday) {
+        const isFreeTime = timeInt < 830 || timeInt >= 1930;
+
+        if (isFreeTime) {
+          // no charge
+        } else if (isRegistered && isSpecialLot) {
+          if (timeInt > 1800 && timeInt < 1930) {
+            charge += rate;
+          } else if (timeInt >= 831 && timeInt < 1800) {
+            cappedMinutes += 1;
+          }
+        } else {
+          charge += rate;
+        }
       }
 
-      cursor = next;
+      cursor = new Date(cursor.getTime() + 60000);
     }
 
-    if (intervals.length > 0) {
-      const cappedMinutes = intervals.length;
-      const cappedCharge = Math.min(rate * cappedMinutes, 2.568);
-      charge += cappedCharge;
+    if (cappedMinutes > 0) {
+      charge += Math.min(rate * cappedMinutes, 2.568);
     }
 
     setFee(+charge.toFixed(4));
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.heading}>Parking Fee Calculator</Text>
+    <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
+      <View style={styles.container}>
+        {/* Header */}
+        <View style={styles.header}>
+          <FontAwesome name="calculator" size={28} color="#6366F1" style={styles.headerIcon} />
+          <Text style={styles.heading}>Parking Calculator</Text>
+        </View>
 
-      <Text style={styles.label}>Select Carpark</Text>
-      <ModalSelector
-        data={carparks.map(cp => ({ key: cp.id, label: cp.name }))}
-        initValue={carparkLabel}
-        onChange={(option) => {
-          setCarparkId(option.key);
-          setCarparkLabel(option.label);
-        }}
-        style={styles.modal}
-        optionTextStyle={styles.modalOption}
-        initValueTextStyle={styles.modalText}
-        selectTextStyle={styles.modalText}
-      />
+        {/* Main Content Card */}
+        <View style={styles.card}>
+          {/* Carpark Selection */}
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>
+              <FontAwesome name="map-marker" size={14} color="#6B7280" /> Carpark Location
+            </Text>
+            <ModalSelector
+              ref={selectorRef}
+              data={carparks.map(cp => ({ key: cp.id, label: cp.name }))}
+              onChange={(option) => {
+                setCarparkId(option.key);
+                setCarparkLabel(option.label);
+              }}
+              style={styles.selectorContainer}
+              selectStyle={styles.selector}
+              optionTextStyle={styles.modalOption}
+              cancelStyle={styles.cancelButton}
+              cancelTextStyle={styles.cancelText}
+              customSelector={
+                <TouchableOpacity
+                  style={styles.selector}
+                  onPress={() => selectorRef.current.open()}
+                >
+                  <Text
+                    style={[
+                      styles.selectorText,
+                      { color: carparkLabel ? '#2563EB' : '#9CA3AF' }
+                    ]}
+                  >
+                    {carparkLabel || 'Select a carpark'}
+                  </Text>
+                </TouchableOpacity>
+              }
+            />
+          </View>
 
-      <View style={styles.switchContainer}>
-        <Text style={styles.label}>Registered Vehicle?</Text>
-        <View style={{ marginLeft: 10 }}>
-          <Switch value={isRegistered} onValueChange={setIsRegistered} />
+          {/* Registration Switch */}
+          <View style={styles.inputGroup}>
+            <View style={styles.switchRow}>
+              <Text style={styles.label}>
+                <FontAwesome name="id-card" size={14} color="#6B7280" /> Registered Vehicle
+              </Text>
+              <Switch 
+                value={isRegistered} 
+                onValueChange={setIsRegistered}
+                trackColor={{ false: '#E5E7EB', true: '#A78BFA' }}
+                thumbColor={isRegistered ? '#6366F1' : '#F3F4F6'}
+              />
+            </View>
+          </View>
+
+          {/* Start Time */}
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>
+              <FontAwesome name="clock-o" size={14} color="#6B7280" /> Start Time
+            </Text>
+            <TouchableOpacity 
+              style={styles.timeButton} 
+              onPress={toggleDatePicker}
+            >
+              <Text style={styles.timeButtonText}>{formatTime(startTime)}</Text>
+              <FontAwesome name="calendar" size={16} color="#6366F1" />
+            </TouchableOpacity>
+            
+            {showStart && (
+              <View style={styles.datePickerContainer}>
+                <View style={styles.datePickerHeader}>
+                  <Text style={styles.datePickerTitle}>Select Date & Time</Text>
+                  <TouchableOpacity 
+                    style={styles.closeButton}
+                    onPress={toggleDatePicker}
+                  >
+                    <FontAwesome name="times" size={18} color="#6B7280" />
+                  </TouchableOpacity>
+                </View>
+                <View style={styles.datePickerWrapper}>
+                  <DateTimePicker
+                    value={startTime}
+                    mode="datetime"
+                    display={Platform.OS === 'ios' ? 'compact' : 'default'}
+                    onChange={(e, date) => {
+                      if (date) {
+                        setStartTime(date);
+                        if (Platform.OS === 'android') {
+                          setShowStart(false);
+                        }
+                      }
+                    }}
+                    style={styles.datePicker}
+                  />
+                </View>
+                {Platform.OS === 'ios' && (
+                  <TouchableOpacity 
+                    style={styles.doneButton}
+                    onPress={toggleDatePicker}
+                  >
+                    <Text style={styles.doneButtonText}>Done</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+            )}
+          </View>
+
+          {/* Duration */}
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>
+              <FontAwesome name="hourglass-half" size={14} color="#6B7280" /> Duration (minutes)
+            </Text>
+            <TextInput
+              style={styles.input}
+              keyboardType="numeric"
+              returnKeyType="done"
+              blurOnSubmit={true}
+              value={duration.toString()}
+              onChangeText={(text) => setDuration(Number(text))}
+              onSubmitEditing={() => Keyboard.dismiss()}
+              placeholder="Enter duration"
+              placeholderTextColor="#9CA3AF"
+            />
+          </View>
+
+          {/* Calculate Button */}
+          <TouchableOpacity style={styles.calculateButton} onPress={calculateFee}>
+            <FontAwesome name="calculator" size={18} color="#FFFFFF" style={styles.buttonIcon} />
+            <Text style={styles.calculateButtonText}>Calculate Fee</Text>
+          </TouchableOpacity>
+
+          {/* Result */}
+          {fee !== null && (
+            <View style={styles.resultCard}>
+              <FontAwesome name="dollar" size={20} color="#10B981" style={styles.resultIcon} />
+              <Text style={styles.resultText}>Estimated Fee: ${fee.toFixed(2)}</Text>
+            </View>
+          )}
         </View>
       </View>
-
-      <Text style={styles.label}>Start Time</Text>
-      <View style={styles.rowBetween}>
-        <Button title={formatTime(startTime)} onPress={() => setShowStart(true)} />
-        {showStart && (
-          <TouchableOpacity onPress={() => setShowStart(false)}>
-            <FontAwesome name="times-circle" size={24} color="gray" />
-          </TouchableOpacity>
-        )}
-      </View>
-      {showStart && (
-        <DateTimePicker
-          value={startTime}
-          mode="datetime"
-          display={Platform.OS === 'ios' ? 'inline' : 'default'}
-          onChange={(e, date) => {
-            if (date) setStartTime(date);
-          }}
-        />
-      )}
-
-      <Text style={styles.label}>Duration (minutes)</Text>
-      <View style={styles.rowBetween}>
-        <TextInput
-          style={styles.input}
-          keyboardType="numeric"
-          returnKeyType="done"
-          blurOnSubmit={true}
-          value={duration.toString()}
-          onChangeText={(text) => setDuration(Number(text))}
-          onSubmitEditing={() => Keyboard.dismiss()}
-        />
-      </View>
-
-      <View style={{ marginVertical: 10 }}>
-        <Button title="Calculate Fee" onPress={calculateFee} />
-      </View>
-
-      {fee !== null && (
-        <Text style={styles.result}>Estimated Fee: ${fee.toFixed(4)}</Text>
-      )}
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20 },
-  heading: { fontSize: 20, fontWeight: 'bold', marginBottom: 16 },
-  label: { marginTop: 10, marginBottom: 4, fontWeight: '600' },
-  result: { marginTop: 20, fontSize: 18, fontWeight: 'bold', color: 'green' },
-  switchContainer: { flexDirection: 'row', alignItems: 'center', marginVertical: 10 },
-  input: { borderColor: '#ccc', borderWidth: 1, padding: 10, borderRadius: 5, flex: 1 },
-  modal: { marginBottom: 10 },
-  modalText: { fontSize: 18, fontWeight: '500', color: '#007AFF' },
-  modalOption: { fontSize: 20 },
-  rowBetween: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }
+  scrollContainer: {
+    flexGrow: 1,
+    paddingBottom: 40,
+    backgroundColor: '#F9FAFB',
+  },
+  container: {
+    flex: 1,
+    padding: 20,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 24,
+    paddingTop: 10,
+  },
+  headerIcon: {
+    marginRight: 12,
+  },
+  heading: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#1F2937',
+  },
+  card: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 24,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  inputGroup: {
+    marginBottom: 24,
+  },
+  label: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#374151',
+    marginBottom: 8,
+  },
+  selectorContainer: {
+    marginBottom: 0,
+  },
+  selector: {
+    backgroundColor: '#F9FAFB',
+    borderColor: '#D1D5DB',
+    borderWidth: 1,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    minHeight: 52,
+  },
+  selectorText: {
+    fontSize: 16,
+    color: '#111827',
+    fontWeight: '500',
+    lineHeight: 20,
+    flexShrink: 1,
+    textAlign: 'left',
+  },
+  modalOption: {
+    fontSize: 16,
+    paddingVertical: 12,
+    color: '#374151',
+  },
+  cancelButton: {
+    backgroundColor: '#F3F4F6',
+    borderRadius: 12,
+  },
+  cancelText: {
+    color: '#6B7280',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  switchRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  timeButton: {
+    backgroundColor: '#F9FAFB',
+    borderColor: '#D1D5DB',
+    borderWidth: 1,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  timeButtonText: {
+    fontSize: 16,
+    color: '#374151',
+    fontWeight: '500',
+  },
+  datePickerContainer: {
+    marginTop: 12,
+    backgroundColor: '#F9FAFB',
+    borderRadius: 12,
+    padding: 16,
+    borderColor: '#E5E7EB',
+    borderWidth: 1,
+    width: '100%',
+    alignSelf: 'center',
+  },
+  datePickerHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  datePickerTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#374151',
+  },
+  closeButton: {
+    padding: 4,
+  },
+  datePickerWrapper: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
+    overflow: 'hidden',
+  },
+  datePicker: {
+    width: '100%',
+    height: Platform.OS === 'ios' ? 200 : 'auto',
+  },
+  doneButton: {
+    backgroundColor: '#6366F1',
+    borderRadius: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    alignSelf: 'center',
+    marginTop: 12,
+  },
+  doneButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  input: {
+    backgroundColor: '#F9FAFB',
+    borderColor: '#D1D5DB',
+    borderWidth: 1,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    fontSize: 16,
+    color: '#374151',
+  },
+  calculateButton: {
+    backgroundColor: '#6366F1',
+    borderRadius: 12,
+    paddingVertical: 16,
+    paddingHorizontal: 24,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#6366F1',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
+    marginTop: 8,
+  },
+  buttonIcon: {
+    marginRight: 8,
+  },
+  calculateButtonText: {
+    color: '#FFFFFF',
+    fontSize: 18,
+    fontWeight: '700',
+  },
+  resultCard: {
+    backgroundColor: '#ECFDF5',
+    borderColor: '#10B981',
+    borderWidth: 2,
+    borderRadius: 12,
+    padding: 20,
+    marginTop: 24,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  resultIcon: {
+    marginRight: 8,
+  },
+  resultText: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#10B981',
+  },
 });
