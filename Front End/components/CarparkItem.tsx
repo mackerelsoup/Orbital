@@ -26,7 +26,7 @@ export default function CarparkItem({ carpark, distances, onPress, origin }: Pro
             {"Distance: " + (distances[carpark.id]? `${distances[carpark.id].toFixed(2)} km` : "Computing distance.. ")}
           </Text>
           <Text style={{ fontSize: 15, color: "white" }}>
-            {"Can park? " + (carpark.staff? (user?.staff == carpark.staff? "Yes" : "No") : "Yes")}
+            {"Allowed to park? " + (carpark.staff? (user?.staff == carpark.staff? "Yes" : "No") : "Yes")}
           </Text>
         </>
       } />

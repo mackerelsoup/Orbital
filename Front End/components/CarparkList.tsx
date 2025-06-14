@@ -1,11 +1,12 @@
 import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { FlatList, StyleSheet, View, Text } from 'react-native';
+import { FlatList, StyleSheet, View, Text, Pressable } from 'react-native';
 import Button from '@/components/Button';
 import { Region } from 'react-native-maps';
 import CarparkItem from './CarparkItem';
 import { UserContext } from '@/context/userContext';
 import BottomSheet from './BottomSheet';
 import { ActionSheetRef } from 'react-native-actions-sheet';
+import FontAwesome from '@expo/vector-icons/FontAwesome';
 
 type CarparkListProps = {
   carparks: Carpark[];
@@ -14,13 +15,13 @@ type CarparkListProps = {
 }
 
 
-
-
 const CarparkList = ({ carparks, onItemPress, origin }: CarparkListProps) => {
-  const [sortOption, setSortOption] = useState<string>('')
-  const [filterOption, setFilterOption] = useState<string>('Filter Options')
+  const [sortOption, setSortOption] = useState<string>('Sort')
+  const [filterOption, setFilterOption] = useState<string>('')
   const { user } = useContext(UserContext)!
   const [carparkDistances, setCarparkDistances] = useState<Record<number, number>>({})
+  const [carparkAvailibility, setCarparkAvailibility] = useState<Record<number, [number, number]>>({})
+
   const sheetRef = useRef<ActionSheetRef>(null)
 
   useEffect(() => {
@@ -33,7 +34,7 @@ const CarparkList = ({ carparks, onItemPress, origin }: CarparkListProps) => {
         const distances = await Promise.all(
           carparks.map(async (carpark) => {
             try {
-              const response = await fetch("http://192.168.68.55:3000/computeDistance", {
+              const response = await fetch("http://192.168.10.227:3000/computeDistance", {
                 method: 'POST',
                 headers: {
                   'Content-Type': 'application/json'
@@ -74,13 +75,46 @@ const CarparkList = ({ carparks, onItemPress, origin }: CarparkListProps) => {
     };
 
     getDistances(carparks, origin);
+
   }, [carparks, origin]); // Add origin to dependencies
+
+  useEffect(() => {
+    const getAvailibility = async (carparks: Carpark[]) => {
+      try {
+        const availibilities = await Promise.all(
+          carparks.map(async (carpark) => {
+            try {
+              const response = await fetch(`http://192.168.10.227:3000/fetchCarparkData/${carpark.id}`)
+
+              if (!response.ok) throw new Error("Failed to fetch");
+              const data = await response.json()
+              //console.log(data)
+              return data
+            } catch (error) {
+              console.log(error)
+              return `Carpark : ${carpark.id}`
+            }
+          })
+        )
+        const tempCarparkAvailibility: Record<number, [number, number]> = {};
+        availibilities.forEach((availibility) => {
+          tempCarparkAvailibility[availibility[0].id] = [availibility[0].capacity, availibility[0].measure]
+        })
+        setCarparkAvailibility(tempCarparkAvailibility)
+        //console.log(carparkAvailibility)
+      } catch (error) {
+        console.error("Error fetching availibility", error)
+      }
+
+    }
+    getAvailibility(carparks)
+  }, [carparks])
 
   const filteredCarparkList = useMemo(() => {
     const carparkCopy = [...carparks]
     //console.log(carparkCopy)
     switch (filterOption) {
-      case 'Filter Options': {
+      case '': {
         return carparkCopy
       }
       case 'season_parking': {
@@ -90,7 +124,7 @@ const CarparkList = ({ carparks, onItemPress, origin }: CarparkListProps) => {
         })
       }
       case 'can_park': {
-        console.log("filtered can park")
+        //console.log("filtered can park")
         return carparkCopy.filter((carpark) => {
           return carpark.staff ? (carpark.staff == user.staff) : true
         })
@@ -99,36 +133,61 @@ const CarparkList = ({ carparks, onItemPress, origin }: CarparkListProps) => {
   }, [carparks, filterOption])
 
   const sortedCarparkList = useMemo(() => {
+    //console.log(filteredCarparkList)
     console.log("ran sorted")
     switch (sortOption) {
       //by default it will sort by distance
-      case '': {
+      case 'Sort': {
         return filteredCarparkList?.sort((a, b) => (carparkDistances[a.id] - (carparkDistances[b.id])))
       }
       case 'distance': {
-        return filteredCarparkList?.sort((a, b) => (a.distance ?? Infinity) - (b.distance ?? Infinity))
+        return filteredCarparkList?.sort((a, b) => (carparkDistances[a.id] - (carparkDistances[b.id])))
       }
       case 'availibility': {
-        //kiv for now
+        return filteredCarparkList?.sort((a, b) => (carparkAvailibility[a.id][0] - carparkAvailibility[a.id][1] ) - (carparkAvailibility[b.id][0] - carparkAvailibility[b.id][1]))
       }
 
     }
-  }, [filteredCarparkList, filterOption, carparkDistances])
+  }, [filteredCarparkList, filterOption, sortOption, carparkDistances, carparkAvailibility])
 
-  function handleFilterOption(filterOption: string) {
-    setFilterOption(filterOption)
-   }
-
-  const listHeaderComponent = () => {
-    return (
-      <View style={{ justifyContent: 'flex-start', backgroundColor: 'grey' }}>
-        <Button label={filterOption} onPress={() => sheetRef.current?.show()} />
-      </View>)
-
+  function handleSortOption(sortOption: string) {
+    setSortOption(sortOption)
+    setTimeout(() => {
+      sheetRef.current?.hide();
+    }, 50); // Small delay before closing
   }
 
+  const listHeaderComponent = useMemo(() => {
+    return (
+      <View style= {{flexDirection: 'column', alignItems: 'flex-start'}}>
+        <Pressable
+        onPress={() => sheetRef.current?.show()}
+        style= {{flexDirection: 'row', alignItems: 'baseline'}}
+        >
+          <FontAwesome name="sort" size={16} color="black" style = {{left: 10}} />
+          <Text style = {{color: 'black', fontSize: 15, left: 16}}>{sortOption}</Text>
+        </Pressable>
+      </View>)
+  }, [sortOption])
+
+
   return (
-    <View style = {{flex: 1}}>
+    <View style={{ flex: 1 }}>
+      <View style= {{flexDirection: 'row'}}>
+        <Pressable
+        onPress={() => setFilterOption('season_parking')}>
+          <Text 
+          style= {{backgroundColor: filterOption === 'season_parking'? '#90ee90' : 'white', padding: 10, borderRadius: 20, marginHorizontal: 5, marginTop: 5}}>
+            Season Parking</Text>
+        </Pressable>
+        <Pressable
+        onPress={() => setFilterOption('can_park')}
+        >
+          <Text
+          style= {{backgroundColor: filterOption === 'can_park' ? '#90ee90' : 'white', padding: 10, borderRadius: 20, marginHorizontal: 5, marginTop: 5}}>
+            Allowed Parking</Text>
+        </Pressable>
+      </View>
       <FlatList
         data={sortedCarparkList}
         //renaming item into carpark
@@ -147,18 +206,15 @@ const CarparkList = ({ carparks, onItemPress, origin }: CarparkListProps) => {
         style={styles.list}
         contentContainerStyle={styles.content}
         ListHeaderComponent={listHeaderComponent}
+        ListHeaderComponentStyle= {{}}
       />
-      <BottomSheet ref= {sheetRef} onSelect={handleFilterOption}></BottomSheet>
-    </View>
-      
-  )
-
+      <BottomSheet ref={sheetRef} onSelect={handleSortOption}></BottomSheet>
+    </View>)
 };
 
 const styles = StyleSheet.create({
   list: {
     flex: 1,
-    //backgroundColor: 'white',
   },
   content: {
     paddingTop: 10,
