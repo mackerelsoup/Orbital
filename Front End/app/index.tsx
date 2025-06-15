@@ -81,7 +81,7 @@ export default function App() {
 
 
   return (
-    <GestureHandlerRootView style={styles.container}>
+    <View style={styles.container}>
 
       <View style={styles.mapContainer}>
         <MapComponent
@@ -124,7 +124,7 @@ export default function App() {
         onFilteredCarparkChange={handleFilteredCarpark}
         origin={region!}
       />
-    </GestureHandlerRootView>
+    </View>
   );
 }
 
