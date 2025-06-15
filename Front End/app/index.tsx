@@ -5,7 +5,7 @@ import { UserContext } from '@/context/userContext';
 import { ActionSheetRef } from 'react-native-actions-sheet';
 import { Link } from 'expo-router';
 import React, { useContext, useEffect, useRef, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View, Linking } from 'react-native';
 import MapView, { MapMarker, Region } from 'react-native-maps';
 import Modal from 'react-native-modal';
 import carparks from '../assets/carparks.json';
@@ -21,7 +21,6 @@ export default function App() {
   const [modalVisible, setModalVisible] = useState(false);
 
   const { user } = useContext(UserContext)!
-
 
   //retreiving user location data
   useEffect(() => {
@@ -59,37 +58,77 @@ export default function App() {
     initializeLocation();
   }, []);
 
-
-   const handleCarparkSelect = (carpark: Carpark) => {
+  const handleCarparkSelect = (carpark: Carpark) => {
     const marker = markerRefs.current[carpark.id];
     //console.log(marker)
-    setCoords({ latitude: carpark.latitude, longitude: carpark.longitude, longitudeDelta: 0.01, latitudeDelta: 0.01 });
+    setCoords({ 
+      latitude: carpark.latitude, 
+      longitude: carpark.longitude, 
+      longitudeDelta: 0.01, 
+      latitudeDelta: 0.01 });
     marker?.showCallout();
     mapRef.current?.animateToRegion({
       latitude: carpark.latitude,
       longitude: carpark.longitude,
-      latitudeDelta: 0.01,
-      longitudeDelta: 0.01,
+      latitudeDelta: 0.005,
+      longitudeDelta: 0.005,
     });
     setSelectedCarpark(carpark);
     setModalVisible(true);
+  };
+
+  // Add this function to handle marker press from MapComponent
+  const handleMarkerPress = (carpark: Carpark) => {
+    setSelectedCarpark(carpark);
+    setModalVisible(true);
+    setCoords({ 
+      latitude: carpark.latitude, 
+      longitude: carpark.longitude, 
+      longitudeDelta: 0.01, 
+      latitudeDelta: 0.01 
+    });
   };
 
   const handleFilteredCarpark = (filteredCarparks: Carpark[]) => {
     setCarparkCopy(filteredCarparks)
   }
 
-
+  // Function to handle navigation
+  const handleNavigate = () => {
+    if (selectedCarpark) {
+      const url = `https://www.google.com/maps/dir/?api=1&destination=${selectedCarpark.latitude},${selectedCarpark.longitude}`;
+      Linking.openURL(url);
+      setModalVisible(false);
+    }
+  };
+  
   return (
     <View style={styles.container}>
-
       <View style={styles.mapContainer}>
         <MapComponent
           region={region}
           mapRef={mapRef}
           markerRefs={markerRefs}
-          carparks={carparkCopy}>
+          carparks={carparkCopy}
+          onMarkerPress={handleMarkerPress}>
         </MapComponent>
+
+        {/* Legend */}
+        <View style={styles.legendContainer}>
+          <View style={styles.legendItem}>
+            <View style={[styles.legendIcon, { backgroundColor: '#007AFF' }]}>
+              <Text style={styles.legendIconText}>P</Text>
+            </View>
+            <Text style={styles.legendText}>Public</Text>
+          </View>
+          <View style={styles.legendItem}>
+            <View style={[styles.legendIcon, { backgroundColor: '#FF0000' }]}>
+              <Text style={styles.legendIconText}>S</Text>
+            </View>
+            <Text style={styles.legendText}>Staff</Text>
+          </View>
+        </View>
+
         {coordinateSelected &&
           <View style={styles.navigationPopupContainer}>
             <Link
@@ -101,20 +140,37 @@ export default function App() {
               </Pressable>
             </Link>
           </View>}
-
       </View>
 
       {/* Modal Popup */}
-      <Modal isVisible={modalVisible} onBackdropPress={() => setModalVisible(false)}>
-        <View style={{ backgroundColor: 'white', padding: 20, borderRadius: 10 }}>
-          <Text style={{ fontSize: 16, fontWeight: 'bold' }}>{selectedCarpark?.name}</Text>
+      <Modal isVisible={modalVisible} onBackdropPress={() => setModalVisible(false)} style={styles.modal}>
+        <View style={styles.modalContent}>
+          <Text style={styles.modalTitle}>{selectedCarpark?.name}</Text>
+
+          {selectedCarpark?.distance && (
+            <Text style={styles.modalDistance}>{selectedCarpark.distance.toFixed(1)} km away</Text>
+          )}
+
           {selectedCarpark?.pricing?.rate_per_minute && (
-            <Text>Rate: ${selectedCarpark.pricing.rate_per_minute.toFixed(4)} / min</Text>
+            <Text style={styles.modalPrice}>Rate: ${selectedCarpark.pricing.rate_per_minute.toFixed(4)} / min</Text>
           )}
+
           {selectedCarpark?.pricing?.charged_hours && (
-            <Text style={{ fontStyle: 'italic', marginTop: 5 }}>{selectedCarpark.pricing?.charged_hours}</Text>
+            <Text style={styles.modalHours}>{selectedCarpark.pricing?.charged_hours}</Text>
           )}
-          <Text style={{ color: 'blue', marginTop: 12 }} onPress={() => setModalVisible(false)}>Close</Text>
+
+          <View style={styles.modalButtons}>
+            <Pressable
+              style={styles.navigateButton}
+              onPress={handleNavigate}
+            >
+              <Text style={styles.navigateButtonText}>Navigate</Text>
+            </Pressable>
+
+            <Pressable style={styles.closeButton} onPress={() => setModalVisible(false)}>
+              <Text style={styles.closeButtonText}>Close</Text>
+            </Pressable>
+          </View>
         </View>
       </Modal>
 
@@ -131,12 +187,12 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-
   },
   mapContainer: {
     height: "60%",
     alignItems: "center",
-    justifyContent: "flex-end"
+    justifyContent: "flex-end",
+    position: 'relative',
   },
   navigationPopupContainer: {
     width: 150,
@@ -146,7 +202,109 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 10,
     borderRadius: 20
+  },
+  legendContainer: {
+    position: 'absolute',
+    top: 20,
+    right: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    borderRadius: 8,
+    padding: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+    zIndex: 1000,
+  },
+  legendItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  legendIcon: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 8,
+  },
+  legendIconText: {
+    color: 'white',
+    fontSize: 12,
+    fontWeight: 'bold',
+  },
+  legendText: {
+    fontSize: 12,
+    color: '#333',
+    fontWeight: '500',
+  },
+  modal: {
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalContent: {
+    backgroundColor: "white",
+    padding: 24,
+    borderRadius: 16,
+    width: "90%",
+    maxWidth: 400,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#333",
+    marginBottom: 8,
+  },
+  modalDistance: {
+    fontSize: 16,
+    color: "#666",
+    marginBottom: 8,
+  },
+  modalPrice: {
+    fontSize: 16,
+    color: "#007AFF",
+    fontWeight: "600",
+    marginBottom: 4,
+  },
+  modalHours: {
+    fontSize: 14,
+    fontStyle: "italic",
+    color: "#666",
+    marginBottom: 20,
+  },
+  modalButtons: {
+    flexDirection: "row",
+    gap: 12,
+  },
+  navigateButton: {
+    flex: 1,
+    backgroundColor: "#007AFF",
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  navigateButtonText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  closeButton: {
+    flex: 1,
+    backgroundColor: "#f0f0f0",
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  closeButtonText: {
+    color: "#333",
+    fontSize: 16,
+    fontWeight: "500",
   }
-
 })
-

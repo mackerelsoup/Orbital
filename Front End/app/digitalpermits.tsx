@@ -58,6 +58,7 @@ export default function DigitalPermits() {
     );
   };
 
+  
   // state of page if user is not logged in
   if (!loggedIn) {
     return (
@@ -118,6 +119,8 @@ export default function DigitalPermits() {
     );
   }
 
+
+  // if user is logged in
   const FeatureButton = ({ 
     title, 
     description, 

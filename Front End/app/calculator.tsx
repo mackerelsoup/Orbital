@@ -199,6 +199,10 @@ export default function CalculatorScreen() {
                       mode="datetime"
                       display={Platform.OS === 'ios' ? 'compact' : 'default'}
                       onChange={(e, date) => {
+                        if (e.type === 'dismissed' ) {
+                          setShowStart(false);
+                          return;
+                        }
                         if (date) {
                           setStartTime(date);
                           if (Platform.OS === 'android') {

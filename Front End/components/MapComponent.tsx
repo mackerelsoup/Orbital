@@ -3,9 +3,8 @@ import { StyleSheet } from 'react-native';
 import MapView, { MapMarker, Region , PROVIDER_GOOGLE} from 'react-native-maps';
 import CarparkMarker from './CarparkMarker';
 
-
 type MapComponentProps = {
-  region?: Region;
+  region: Region | undefined;
   mapRef: React.RefObject<MapView|null>;
   markerRefs: React.RefObject<(MapMarker|null)[]>;
   carparks: Carpark[];
