@@ -11,7 +11,8 @@
     "pricing": {
       "rate_per_minute": 0.0214,
       "charged_hours": "Charges apply only from 0830H to 1930H (Mon\u2013Fri) and 0830H to 1700H (Sat)"
-    }
+    },
+    "season_parking_type": ["staff_open", "staff_covered"]
   },
   {
     "name": "CP2: Block E6/T-Lab",
@@ -25,7 +26,8 @@
     "pricing": {
       "rate_per_minute": 0.0214,
       "charged_hours": "Charges apply only from 0830H to 1930H (Mon\u2013Fri) and 0830H to 1700H (Sat)"
-    }
+    },
+    "season_parking_type": ["staff_open", "staff_covered"]
   },
   {
     "name": "CP2A: Block E3A",
@@ -39,7 +41,8 @@
     "pricing": {
       "rate_per_minute": 0.0214,
       "charged_hours": "Charges apply only from 0830H to 1930H (Mon\u2013Fri) and 0830H to 1700H (Sat)"
-    }
+    },
+    "season_parking_type": ["staff_open", "staff_covered", "student_open_2A"]
   },
   {
     "name": "CP2B: Block EA",
@@ -53,7 +56,8 @@
     "pricing": {
       "rate_per_minute": 0.0214,
       "charged_hours": "Charges apply only from 0830H to 1930H (Mon\u2013Fri) and 0830H to 1700H (Sat)"
-    }
+    },
+    "season_parking_type": ["staff_open", "staff_covered"]
   },
   {
     "name": "CP2C: Block E6",
@@ -67,7 +71,8 @@
     "pricing": {
       "rate_per_minute": 0.0856,
       "charged_hours": "Penalty applies to non-staff season holders"
-    }
+    },
+    "season_parking_type": ["staff_open", "staff_covered"]
   },
   {
     "name": "CP3: University Cultural Centre/Yong Siew Toh Conservatory of Music",
@@ -82,7 +87,8 @@
       "rate_per_minute": 0.0214,
       "max_daily_cap": 2.568,
       "charged_hours": "Charges apply only from 0830H to 1800H capped at $2.568 per exit per day for registered NUS staff and students, and from 1801H to 1930H (Mon\u2013Fri) and 0830H to 1700H (Sat)"
-    }
+    },
+    "season_parking_type": ["staff_covered", "student_covered"]
   },
   {
     "name": "CP3A: Lee Kong Chian Natural History Museum",
@@ -96,7 +102,8 @@
     "pricing": {
       "rate_per_minute": 0.0214,
       "charged_hours": "Charges apply only from 0830H to 1930H (Mon\u2013Fri) and 0830H to 1700H (Sat)"
-    }
+    },
+    "season_parking_type": ["staff_covered", "staff_open", "student_open", "student_open_2A", "student_open_10", "student_open_11", "student_covered"]
   },
   {
     "name": "CP4/4A: Raffles Hall/Runme Shaw CFA Studios",
@@ -110,10 +117,11 @@
     "pricing": {
       "rate_per_minute": 0.0214,
       "charged_hours": "Charges apply only from 0830H to 1930H (Mon\u2013Fri) and 0830H to 1700H (Sat)"
-    }
+    },
+    "season_parking_type": ["staff_covered", "staff_open", "student_open", "student_open_2A", "student_open_10", "student_open_11", "student_covered"]
   },
   {
-    "name": "CP5: Sports and Recreation Centre",
+    "name": "CP5: University Sports Centre",
     "id": 9,
     "type": "open",
     "staff": false,
@@ -124,7 +132,8 @@
     "pricing": {
       "rate_per_minute": 0.0214,
       "charged_hours": "Charges apply only from 0830H to 1930H (Mon\u2013Fri) and 0830H to 1700H (Sat)"
-    }
+    },
+    "season_parking_type": ["staff_covered", "staff_open",  "student_open", "student_open_2A", "student_open_10", "student_open_11", "student_covered"]
   },
   {
     "name": "CP6: Block S7 and S13",
@@ -138,7 +147,8 @@
     "pricing": {
       "rate_per_minute": 0.0856,
       "charged_hours": "Penalty applies to non-staff season holders"
-    }
+    },
+    "season_parking_type": ["staff_covered", "staff_open"]
   },
   {
     "name": "CP6A: Block S1A/LT32",
@@ -152,7 +162,8 @@
     "pricing": {
       "rate_per_minute": 0.0856,
       "charged_hours": "Penalty applies to non-staff season holders"
-    }
+    },
+    "season_parking_type": ["staff_covered", "staff_open"]
   },
   {
     "name": "CP6B: University Hall",
@@ -166,7 +177,8 @@
     "pricing": {
       "rate_per_minute": 0.0214,
       "charged_hours": "Charges apply only from 0830H to 1930H (Mon\u2013Fri) and 0830H to 1700H (Sat)"
-    }
+    },
+    "season_parking_type": ["staff_covered"]
   },
   {
     "name": "CP7: Block S10 and S14",
@@ -180,7 +192,8 @@
     "pricing": {
       "rate_per_minute": 0.0856,
       "charged_hours": "Penalty applies to non-staff season holders"
-    }
+    },
+    "season_parking_type": ["staff_open", "staff_covered"]
   },
   {
     "name": "CP8: Block S16",
@@ -194,7 +207,8 @@
     "pricing": {
       "rate_per_minute": 0.0856,
       "charged_hours": "Penalty applies to non-staff season holders"
-    }
+    },
+    "season_parking_type": ["staff_open", "staff_covered"]
   },
   {
     "name": "CP9A: Block MD11",
@@ -207,8 +221,10 @@
     "longitudeDelta": 0.01,
     "pricing": {
       "rate_per_minute": 0.0856,
-      "charged_hours": "Penalty applies to non-staff season holders"
-    }
+      "charged_hours": "Authorised personel only"
+    },
+    "season_parking_type": []
+
   },
   {
     "name": "CP10: Block S17/LT33/LT34 (Staff)",
@@ -222,7 +238,8 @@
     "pricing": {
       "rate_per_minute": 0.0856,
       "charged_hours": "Penalty applies to non-staff season holders"
-    }
+    },
+    "season_parking_type": ["staff_open", "staff_covered"]
   },
   {
     "name": "CP10: Block S17/LT33/LT34 (Visitors)",
@@ -236,7 +253,8 @@
     "pricing": {
       "rate_per_minute": 0.0214,
       "charged_hours": "Charges apply only from 0830H to 1930H (Mon\u2013Fri) and 0830H to 1700H (Sat)"
-    }
+    },
+    "season_parking_type": ["staff_open", "staff_covered", "student_open_10"]
   },
   {
     "name": "CP10A: CRISP King Edward VII Hall/Squash Court",
@@ -250,7 +268,8 @@
     "pricing": {
       "rate_per_minute": 0.0214,
       "charged_hours": "Charges apply only from 0830H to 1930H (Mon\u2013Fri) and 0830H to 1700H (Sat)"
-    }
+    },
+    "season_parking_type": ["staff_open", "staff_covered", "student_open", "student_open_2A", "student_open_10", "student_open_11", "student_covered"]
   },
   {
     "name": "CP10B: Prince George's Park Residences",
@@ -265,7 +284,8 @@
       "rate_per_minute": 0.0214,
       "max_daily_cap": 2.568,
       "charged_hours": "Charges apply only from 0830H to 1800H capped at $2.568 per exit per day for registered NUS staff and students, and from 1801H to 1930H (Mon\u2013Fri) and 0830H to 1700H (Sat)"
-    }
+    },
+    "season_parking_type": [ "staff_covered", "student_covered"]
   },
   {
     "name": "CP10C: Centre for Life Sciences",
@@ -279,7 +299,8 @@
     "pricing": {
       "rate_per_minute": 0.0856,
       "charged_hours": "Penalty applies to non-staff season holders"
-    }
+    },
+    "season_parking_type": []
   },
   {
     "name": "CP11: COM3/Singapore Synchrotron Light Source",
@@ -293,7 +314,8 @@
     "pricing": {
       "rate_per_minute": 0.0214,
       "charged_hours": "Charges apply only from 0830H to 1930H (Mon\u2013Fri) and 0830H to 1700H (Sat)"
-    }
+    },
+    "season_parking_type": [ "staff_covered", "student_covered", "student_open_11"]
   },
   {
     "name": "CP11A: Block BIZ2",
@@ -307,7 +329,8 @@
     "pricing": {
       "rate_per_minute": 0.0856,
       "charged_hours": "Penalty applies to non-staff season holders"
-    }
+    },
+    "season_parking_type": ["staff_open", "staff_covered"]
   },
   {
     "name": "CP11B: Innovation 4.0",
@@ -321,7 +344,8 @@
     "pricing": {
       "rate_per_minute": 0.0214,
       "charged_hours": "Charges apply only from 0830H to 1930H (Mon\u2013Fri) and 0830H to 1700H (Sat)"
-    }
+    },
+    "season_parking_type": ["staff_open", "staff_covered"]
   },
   {
     "name": "CP11C: TCOMS",
@@ -335,7 +359,8 @@
     "pricing": {
       "rate_per_minute": 0.0214,
       "charged_hours": "Charges apply only from 0830H to 1930H (Mon\u2013Fri) and 0830H to 1700H (Sat)"
-    }
+    },
+    "season_parking_type": ["staff_open", "staff_covered"]
   },
   {
     "name": "CP12: Hon Sui Sen Memorial Library",
@@ -349,7 +374,8 @@
     "pricing": {
       "rate_per_minute": 0.0856,
       "charged_hours": "Penalty applies to non-staff season holders"
-    }
+    },
+    "season_parking_type": ["staff_open", "staff_covered"]
   },
   {
     "name": "CP12A: Institute of Systems Science",
@@ -363,7 +389,8 @@
     "pricing": {
       "rate_per_minute": 0.0214,
       "charged_hours": "Charges apply only from 0830H to 1930H (Mon\u2013Fri) and 0830H to 1700H (Sat)"
-    }
+    },
+    "season_parking_type": ["student_covered", "staff_covered"]
   },
   {
     "name": "CP12B: ICube",
@@ -376,8 +403,9 @@
     "longitudeDelta": 0.01,
     "pricing": {
       "rate_per_minute": 0.0214,
-      "charged_hours": "Charges apply only from 0830H to 1930H (Mon\u2013Fri) and 0830H to 1700H (Sat)"
-    }
+      "charged_hours": "Charges apply only from 0830H to 1930H (Mon\u2013Fri) and 0830H to 1700H (Sat) NOTE: THIS CARPARK IS CURRENTLY CLOSED"
+    },
+    "season_parking_type": ["staff_open", "staff_covered", "student_open", "student_open_2A", "student_open_10", "student_open_11", "student_covered"]
   },
   {
     "name": "CP13: Block COM1",
@@ -391,7 +419,8 @@
     "pricing": {
       "rate_per_minute": 0.0856,
       "charged_hours": "Penalty applies to non-staff season holders"
-    }
+    },
+    "season_parking_type": ["staff_open", "staff_covered"]
   },
   {
     "name": "CP14: Shaw Foundation Building/Block AS7",
@@ -405,7 +434,8 @@
     "pricing": {
       "rate_per_minute": 0.0856,
       "charged_hours": "Penalty applies to non-staff season holders"
-    }
+    },
+    "season_parking_type": ["staff_open", "staff_covered"]
   },
   {
     "name": "CP15: Temasek & Eusoff Hall",
@@ -419,7 +449,8 @@
     "pricing": {
       "rate_per_minute": 0.0214,
       "charged_hours": "Charges apply only from 0830H to 1930H (Mon\u2013Fri) and 0830H to 1700H (Sat)"
-    }
+    },
+    "season_parking_type": ["staff_open", "staff_covered","student_open", "student_open_2A", "student_open_10", "student_open_11", "student_covered"]
   },
   {
     "name": "CP16: LT11/Block AS2",
@@ -433,7 +464,8 @@
     "pricing": {
       "rate_per_minute": 0.0214,
       "charged_hours": "Charges apply only from 0830H to 1930H (Mon\u2013Fri) and 0830H to 1700H (Sat)"
-    }
+    },
+    "season_parking_type": ["staff_open", "staff_covered"]
   },
   {
     "name": "CP17: Information Technology",
@@ -447,7 +479,8 @@
     "pricing": {
       "rate_per_minute": 0.0856,
       "charged_hours": "Penalty applies to non-staff season holders"
-    }
+    },
+    "season_parking_type": ["staff_open", "staff_covered"]
   },
   {
     "name": "CP18: Block AS8",
@@ -461,7 +494,8 @@
     "pricing": {
       "rate_per_minute": 0.0856,
       "charged_hours": "Penalty applies to non-staff season holders"
-    }
+    },
+    "season_parking_type": ["staff_covered"]
   },
   {
     "name": "Stephen Riady Centre Car Park",
@@ -475,6 +509,7 @@
     "pricing": {
       "rate_per_minute": 0.0214,
       "charged_hours": "Charges apply only from 0830H to 1930H (Mon\u2013Fri) and 0830H to 1700H (Sat)"
-    }
+    },
+    "season_parking_type": ["student_covered", "staff_covered"]
   }
 ]

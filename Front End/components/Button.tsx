@@ -17,7 +17,8 @@ export default function Button({ label, onPress, children }: Props) {
                     styles.button,
                     { opacity: pressed ? 0.5 : 1 },
                 ]}
-                onPress={onPress}>
+                onPress={onPress}
+                onPressIn={() => console.log("Pressed in")}>
                 <View style = {{flexDirection: 'column', justifyContent: 'center', alignItems: 'center'}}>
                     <Text style={styles.buttonLabel}>{label}</Text>
                     {children}
