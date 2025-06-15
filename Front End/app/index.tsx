@@ -9,16 +9,18 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import MapView, { MapMarker, Region } from 'react-native-maps';
 import Modal from 'react-native-modal';
 import carparks from '../assets/carparks.json';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 export default function App() {
   const [region, setRegion] = useState<Region | undefined>(undefined);
-  const mapRef = useRef<MapView | null>(null)
-  const markerRefs = useRef<(MapMarker | null)[]>([])
-  const [coordinateSelected, setCoords] = useState<Region | null>(null)
+  const mapRef = useRef<MapView | null>(null);
+  const markerRefs = useRef<(MapMarker | null)[]>([]);
+  const [carparkCopy, setCarparkCopy] = useState<Carpark[]>(carparks)
+  const [coordinateSelected, setCoords] = useState<Region | null>(null);
   const [selectedCarpark, setSelectedCarpark] = useState<Carpark | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
+
   const { user } = useContext(UserContext)!
-  const sheetRef = useRef<ActionSheetRef>(null)
 
 
   //retreiving user location data
@@ -73,18 +75,20 @@ export default function App() {
     setModalVisible(true);
   };
 
-
+  const handleFilteredCarpark = (filteredCarparks: Carpark[]) => {
+    setCarparkCopy(filteredCarparks)
+  }
 
 
   return (
-    <View style={styles.container}>
+    <GestureHandlerRootView style={styles.container}>
 
       <View style={styles.mapContainer}>
         <MapComponent
           region={region}
           mapRef={mapRef}
           markerRefs={markerRefs}
-          carparks={carparks}>
+          carparks={carparkCopy}>
         </MapComponent>
         {coordinateSelected &&
           <View style={styles.navigationPopupContainer}>
@@ -117,9 +121,10 @@ export default function App() {
       <CarparkList
         carparks={carparks}
         onItemPress={handleCarparkSelect}
+        onFilteredCarparkChange={handleFilteredCarpark}
         origin={region!}
       />
-    </View>
+    </GestureHandlerRootView>
   );
 }
 
