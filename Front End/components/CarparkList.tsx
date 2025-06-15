@@ -3,9 +3,9 @@ import { FlatList, StyleSheet, View, Text, Pressable } from 'react-native';
 import { Region } from 'react-native-maps';
 import CarparkItem from './CarparkItem';
 import { UserContext } from '@/context/userContext';
-import BottomSheet from './BottomSheet';
-import { ActionSheetRef } from 'react-native-actions-sheet';
+import CustomBottomSheet from './BottomSheet';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
+import BottomSheet, { BottomSheetModal } from '@gorhom/bottom-sheet';
 
 type CarparkListProps = {
   carparks: Carpark[];
@@ -21,7 +21,7 @@ const CarparkList = ({ carparks, onItemPress, onFilteredCarparkChange, origin }:
   const [carparkDistances, setCarparkDistances] = useState<Record<number, number>>({})
   const [carparkAvailibility, setCarparkAvailibility] = useState<Record<number, [number, number]>>({})
 
-  const sheetRef = useRef<ActionSheetRef>(null)
+  const sheetRef = useRef<BottomSheetModal>(null)
 
   useEffect(() => {
     // Only run if origin exists
@@ -151,8 +151,8 @@ const CarparkList = ({ carparks, onItemPress, onFilteredCarparkChange, origin }:
   function handleSortOption(sortOption: string) {
     setSortOption(sortOption)
     setTimeout(() => {
-      sheetRef.current?.hide();
-    }, 50); // Small delay before closing
+      sheetRef.current?.dismiss();
+    }, 25); // Small delay before closing
   }
 
   const listHeaderComponent = useMemo(() => {
@@ -160,7 +160,9 @@ const CarparkList = ({ carparks, onItemPress, onFilteredCarparkChange, origin }:
       <View style={{ flexDirection: 'column', alignItems: 'flex-start' }}>
 
         <Pressable
-          onPress={() => sheetRef.current?.show()}
+          onPress={() => {
+            sheetRef.current?.present()
+          }}
           style={{ flexDirection: 'row', alignItems: 'baseline' }}
         >
           <FontAwesome name="sort" size={16} color="black" style={{ left: 10 }} />
@@ -169,9 +171,11 @@ const CarparkList = ({ carparks, onItemPress, onFilteredCarparkChange, origin }:
       </View>)
   }, [sortOption])
 
-
   return (
     <View style={{ flex: 1 }}>
+      <CustomBottomSheet ref={sheetRef} onSelect={(option) => {
+        setTimeout(() => handleSortOption(option), 150);
+      }} />
       <View style={{ flexDirection: 'row' }}>
         {user.username &&
           <Pressable
@@ -209,9 +213,7 @@ const CarparkList = ({ carparks, onItemPress, onFilteredCarparkChange, origin }:
         ListHeaderComponent={listHeaderComponent}
         ListHeaderComponentStyle={{}}
       />
-      <BottomSheet ref={sheetRef} onSelect={(option) => {
-        setTimeout(() => handleSortOption(option), 150); 
-      }} />
+      
     </View>)
 };
 

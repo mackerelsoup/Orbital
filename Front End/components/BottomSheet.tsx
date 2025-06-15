@@ -1,29 +1,41 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native'
-import React from 'react'
-import ActionSheet, { ActionSheetRef } from "react-native-actions-sheet"
-import Button from './Button'
-import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet';
+import React, { useMemo, forwardRef } from 'react';
+import { View, StyleSheet, Text } from 'react-native';
+import { BottomSheetModal, BottomSheetView } from '@gorhom/bottom-sheet';
+import Button from './Button';
 
-type bottomSheetProps = {
-  ref: React.RefObject<ActionSheetRef|null>
-  onSelect: (option : string) => void;
-}
+type CustomBottomSheetProps = {
+  onSelect: (option: string) => void;
+};
 
-export default function sheet({ref, onSelect}: bottomSheetProps) {
-  return (
-    <ActionSheet ref = {ref}>
-      <Button
-      label= "Distance"
-      onPress={() => onSelect("distance")}
-      />
-      <Button
-      label= "Availibility"
-      onPress={() => onSelect("availibility")}
-      />
-      
-      
-    </ActionSheet>
-  )
-}
+const CustomBottomSheet = forwardRef<BottomSheetModal, CustomBottomSheetProps>(
+  ({ onSelect }, ref) => {
+    const snapPoints = useMemo(() => ['50%'], []);
 
-const styles = StyleSheet.create({})
+    return (
+      <BottomSheetModal
+        ref={ref}
+        snapPoints={snapPoints}
+      >
+        <BottomSheetView style={styles.contentContainer}>
+          <Button
+            label="Distance"
+            onPress={() => onSelect("distance")}
+          />
+          <Button
+            label="Availibility"
+            onPress={() => onSelect("availibility")}
+          />
+        </BottomSheetView>
+      </BottomSheetModal>
+    );
+  }
+);
+
+export default CustomBottomSheet;
+
+const styles = StyleSheet.create({
+  contentContainer: {
+    padding: 20,
+    gap: 12,
+  },
+});
