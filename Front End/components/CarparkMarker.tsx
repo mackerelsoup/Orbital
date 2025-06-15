@@ -67,6 +67,9 @@ const styles = StyleSheet.create({
   markerText: {
     color: "white",
     fontWeight: "bold",
+    textAlign: 'center',
+    textAlignVertical: 'center',
+    includeFontPadding: false,
   },
 })
 
