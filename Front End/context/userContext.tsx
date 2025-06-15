@@ -16,6 +16,7 @@ export const UserProvider = ({ children }: UserProviderProps) => {
   const [user, setUser] = useState<UserData>({
     staff: false,
     season_parking: false,
+    season_parking_type: 'nil'
   });
 
   const value = {
