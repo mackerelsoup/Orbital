@@ -19,7 +19,7 @@ const CarparkList = ({ carparks, onItemPress, onFilteredCarparkChange, origin }:
   const [filterOption, setFilterOption] = useState<string>('')
   const { user } = useContext(UserContext)!
   const [carparkDistances, setCarparkDistances] = useState<Record<number, number>>({})
-  const [carparkAvailibility, setCarparkAvailibility] = useState<Record<number, [number, number]>>({})
+  const [carparkAvailability, setCarparkAvailability] = useState<Record<number, [number, number]>>({})
 
   const sheetRef = useRef<BottomSheetModal>(null)
 
@@ -75,11 +75,11 @@ const CarparkList = ({ carparks, onItemPress, onFilteredCarparkChange, origin }:
 
     getDistances(carparks, origin);
 
-  }, [carparks, origin]); // Add origin to dependencies
+  }, [origin]); // Add origin to dependencies
 
   useEffect(() => {
     console.log("getting avail")
-    const getAvailibility = async (carparks: Carpark[]) => {
+    const getAvailability = async (carparks: Carpark[]) => {
       try {
         const availibilities = await Promise.all(
           carparks.map(async (carpark) => {
@@ -100,14 +100,14 @@ const CarparkList = ({ carparks, onItemPress, onFilteredCarparkChange, origin }:
         availibilities.forEach((availibility) => {
           tempCarparkAvailibility[availibility[0].id] = [availibility[0].capacity, availibility[0].measure]
         })
-        setCarparkAvailibility(tempCarparkAvailibility)
-        //console.log(carparkAvailibility)
+        setCarparkAvailability(tempCarparkAvailibility)
+        //console.log(carparkAvailability)
       } catch (error) {
         console.error("Error fetching availibility", error)
       }
 
     }
-    getAvailibility(carparks)
+    getAvailability(carparks)
   }, [carparks])
 
   const filteredCarparkList = useMemo(() => {
@@ -127,7 +127,7 @@ const CarparkList = ({ carparks, onItemPress, onFilteredCarparkChange, origin }:
 
   useEffect(() => {
     onFilteredCarparkChange(filteredCarparkList);
-  }, [filteredCarparkList, onFilteredCarparkChange]);
+  }, [filterOption, user.season_parking_type, user.staff]);
 
 
   const sortedCarparkList = useMemo(() => {
@@ -142,11 +142,11 @@ const CarparkList = ({ carparks, onItemPress, onFilteredCarparkChange, origin }:
         return filteredCarparkList?.sort((a, b) => (carparkDistances[a.id] - (carparkDistances[b.id])))
       }
       case 'availibility': {
-        return filteredCarparkList?.sort((a, b) => (carparkAvailibility[a.id][0] - carparkAvailibility[a.id][1]) - (carparkAvailibility[b.id][0] - carparkAvailibility[b.id][1]))
+        return filteredCarparkList?.sort((a, b) => (carparkAvailability[a.id][0] - carparkAvailability[a.id][1]) - (carparkAvailability[b.id][0] - carparkAvailability[b.id][1]))
       }
 
     }
-  }, [filteredCarparkList, filterOption, sortOption, carparkDistances, carparkAvailibility])
+  }, [filteredCarparkList, filterOption, sortOption, carparkDistances, carparkAvailability])
 
   function handleSortOption(sortOption: string) {
     setSortOption(sortOption)
@@ -201,8 +201,8 @@ const CarparkList = ({ carparks, onItemPress, onFilteredCarparkChange, origin }:
             <CarparkItem
               carpark={carpark}
               distances={carparkDistances}
+              availability={carparkAvailability? carparkAvailability : null}
               onPress={onItemPress}
-              origin={origin}
             >
             </CarparkItem>
           </View>
