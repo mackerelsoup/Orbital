@@ -142,6 +142,28 @@ app.get('/fetchCarparkData/:id', (request, response) => {
   })
 })
 
+app.get('/fetchCarparkHistory/:id', (request, response) => {
+  const id = request.params.id
+  const fetch_id_query = "SELECT * FROM carpark_availability_history WHERE carpark_id = $1 ORDER BY recorded_at ASC"
+  connection.query(fetch_id_query, [id], (err, result) => {
+    if (err) {
+      response.send(err)
+      console.error(err)
+    }
+    else {
+      if (result.rowCount === 0) {
+        response.status(404).send("Carpark availability history not found")
+      }
+      else {
+        console.log("Carpark info extracted")
+        response.send(result.rows)
+      }
+
+    }
+  })
+})
+
+
 
 app.put('/update/:id', (request, response) => {
   const id = request.params.id

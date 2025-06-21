@@ -39,7 +39,8 @@
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
         }
-      ]
+      ],
+      "expo-font"
     ],
     "experiments": {
       "typedRoutes": true
@@ -49,7 +50,6 @@
       "eas": {
         "projectId": "984ed6b9-2f16-4b80-b7b8-53d546a4e489"
       }
-      
     },
     "owner": "mackerelsoup"
   }

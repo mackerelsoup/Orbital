@@ -9,14 +9,16 @@ type CustomBottomSheetProps = {
 
 const CustomBottomSheet = forwardRef<BottomSheetModal, CustomBottomSheetProps>(
   ({ onSelect }, ref) => {
-    const snapPoints = useMemo(() => ['50%'], []);
 
     return (
       <BottomSheetModal
         ref={ref}
-        snapPoints={snapPoints}
+        index={1}
+        snapPoints={[250, 500]}
       >
-        <BottomSheetView style={styles.contentContainer}>
+        <BottomSheetView 
+        style={styles.contentContainer}
+        >
           <Button
             label="Distance"
             onPress={() => onSelect("distance")}

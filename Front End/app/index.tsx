@@ -20,7 +20,6 @@ export default function App() {
   const [selectedCarpark, setSelectedCarpark] = useState<Carpark | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
 
-  const { user } = useContext(UserContext)!
 
   //retreiving user location data
   useEffect(() => {
