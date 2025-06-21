@@ -2,7 +2,10 @@ import { StyleSheet, Text, View } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { CartesianChart, Line, useChartPressState } from "victory-native"
 import { useFont, Circle, Text as SKText } from '@shopify/react-native-skia'
-import { SharedValue, useDerivedValue } from 'react-native-reanimated'
+import { SharedValue, useDerivedValue, Easing } from 'react-native-reanimated'
+import TimeRangeSelector from '@/components/TimeRangeSelector'
+import { subMonths, subYears } from 'date-fns';
+
 
 type CarparkTrendProps = {
   carpark: Carpark
@@ -41,7 +44,10 @@ function ToolTip({ x, y, value }: { x: SharedValue<number>; y: SharedValue<numbe
 
 export default function CarparkTrend({ carpark }: CarparkTrendProps) {
   const [graphData, setGraphData] = useState<{ time: number, availability: number }[]>([]);
-  const [currentTime, setCurrentTime] = useState<number>(0)
+  const [currentTime, setCurrentTime] = useState<number>(0);
+  const [selectedRange, setSelectedRange] = useState<'Hour' | '6hr' | 'Day' | 'Month' | 'Year'>('Hour');
+  const [startTime, setStartTime] = useState(0);
+  const [endTime, setEndTime] = useState(0);
   const fonts = useFont(SpaceMono, 8)
   const { state, isActive } = useChartPressState({
     x: 0,
@@ -75,18 +81,46 @@ export default function CarparkTrend({ carpark }: CarparkTrendProps) {
 
 
   useEffect(() => {
-    console.log(isActive)
-  }, [isActive])
+    switch (selectedRange) {
+      case 'Hour': {
+        setStartTime(3600000);
+        setEndTime(0);
+        break;
+      }
+      case '6hr': {
+        setStartTime(21600000);
+        setEndTime(0);
+        break;
+      }
+      case 'Day': {
+        setStartTime(86400000);
+        setEndTime(0);
+        break;
+      }
+      case 'Month': {
+        const timeDifference = currentTime - subMonths(currentTime, 1).getTime();
+        setStartTime(timeDifference + 86400000);
+        setEndTime(timeDifference);
+        break;
+      }
+      case 'Year': {
+        const timeDifference = currentTime - subYears(currentTime, 1).getTime();
+        setStartTime(timeDifference + 86400000);
+        setEndTime(timeDifference);
+        break;
+      }
+    }
+  }, [selectedRange, currentTime])
 
   return (
-    <View style={{ height: 600, justifyContent:'center' }}>
+    <View style={{ height: 600, justifyContent: 'center' }}>
       <CartesianChart
         data={graphData}
         xKey={"time"}
         yKeys={["availability"]}
-        domainPadding={{ top: 10, bottom: 20, left:20, right: 10 }}
+        domainPadding={{ top: 10, bottom: 20, left: 20, right: 10 }}
         chartPressState={state}
-        viewport={{x:[currentTime- 3600000, currentTime]}}
+        viewport={{ x: [currentTime - startTime, currentTime - endTime] }}
         xAxis={{
           font: fonts,
           formatXLabel(label) {
@@ -98,7 +132,7 @@ export default function CarparkTrend({ carpark }: CarparkTrendProps) {
             });
           },
           labelOffset: -30,
-          
+
         }}
         yAxis={[{
           font: fonts,
@@ -113,7 +147,11 @@ export default function CarparkTrend({ carpark }: CarparkTrendProps) {
                 points={points.availability}
                 color={"green"}
                 strokeWidth={3}
-                animate={{ type: 'timing', duration: 500 }}
+                animate={{
+                  type: 'timing',
+                  duration: 500,
+                  easing: Easing.out(Easing.quad),
+                }}
                 curveType='linear'
 
               ></Line>
@@ -128,7 +166,9 @@ export default function CarparkTrend({ carpark }: CarparkTrendProps) {
         }}
 
       </CartesianChart>
+      <TimeRangeSelector selected={selectedRange} onSelect={setSelectedRange}></TimeRangeSelector>
     </View>
+
   )
 }
 
