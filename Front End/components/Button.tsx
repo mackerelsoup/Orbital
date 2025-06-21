@@ -18,7 +18,7 @@ export default function Button({ label, onPress, children }: Props) {
                     { opacity: pressed ? 0.5 : 1 },
                 ]}
                 onPress={onPress}
-                onPressIn={() => console.log("Pressed in")}>
+                >
                 <View style = {{flexDirection: 'column', justifyContent: 'center', alignItems: 'center'}}>
                     <Text style={styles.buttonLabel}>{label}</Text>
                     {children}
@@ -31,12 +31,9 @@ export default function Button({ label, onPress, children }: Props) {
 
 const styles = StyleSheet.create({
     buttonContainer: {
-        height: 70,
-        marginHorizontal: 10,
         alignItems: 'center',
         justifyContent: 'center',
         margin: 8,
-
 
     },
     button: {
@@ -44,7 +41,6 @@ const styles = StyleSheet.create({
         height: '100%',
         alignItems: 'center',
         justifyContent: 'center',
-        flexDirection: 'row',
         //borderRadius: 50,
         backgroundColor: "black"
 
@@ -52,5 +48,6 @@ const styles = StyleSheet.create({
     buttonLabel: {
         color: '#fff',
         fontSize: 16,
+        textAlign: 'center'
     },
 });
