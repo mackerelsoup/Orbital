@@ -5,7 +5,8 @@ import CarparkItem from './CarparkItem';
 import { UserContext } from '@/context/userContext';
 import CustomBottomSheet from './BottomSheet';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
-import BottomSheet, { BottomSheetModal } from '@gorhom/bottom-sheet';
+import { BottomSheetModal } from '@gorhom/bottom-sheet';
+import Animated, { useSharedValue, withTiming, runOnJS, useAnimatedStyle, Easing } from 'react-native-reanimated';
 
 type CarparkListProps = {
   carparks: Carpark[];
@@ -20,6 +21,8 @@ const CarparkList = ({ carparks, onItemPress, onFilteredCarparkChange, origin }:
   const { user } = useContext(UserContext)!
   const [carparkDistances, setCarparkDistances] = useState<Record<number, number>>({})
   const [carparkAvailability, setCarparkAvailability] = useState<Record<number, [number, number]>>({})
+  const [isDone, setIsDone] = useState(false)
+  const onDoneCallback = useRef<() => void | null>(null); // callback to resolve promise
 
   const sheetRef = useRef<BottomSheetModal>(null)
 
@@ -110,6 +113,8 @@ const CarparkList = ({ carparks, onItemPress, onFilteredCarparkChange, origin }:
     getAvailability(carparks)
   }, [carparks])
 
+
+  //filter and sorting------------------
   const filteredCarparkList = useMemo(() => {
     const carparkCopy = [...carparks];
     console.log("filtering")
@@ -125,9 +130,10 @@ const CarparkList = ({ carparks, onItemPress, onFilteredCarparkChange, origin }:
     }
   }, [carparks, filterOption]);
 
+
   useEffect(() => {
     onFilteredCarparkChange(filteredCarparkList);
-  }, [filterOption, user.season_parking_type, user.staff]);
+  }, [filteredCarparkList, filterOption, user.season_parking_type, user.staff]);
 
 
   const sortedCarparkList = useMemo(() => {
@@ -148,6 +154,11 @@ const CarparkList = ({ carparks, onItemPress, onFilteredCarparkChange, origin }:
     }
   }, [filteredCarparkList, filterOption, sortOption, carparkDistances, carparkAvailability])
 
+  useEffect(() => {
+    setIsDone(true)
+    console.log("isDone sorted", isDone)
+  }, [sortedCarparkList])
+
   function handleSortOption(sortOption: string) {
     setSortOption(sortOption)
     setTimeout(() => {
@@ -155,10 +166,84 @@ const CarparkList = ({ carparks, onItemPress, onFilteredCarparkChange, origin }:
     }, 25); // Small delay before closing
   }
 
-  const listHeaderComponent = useMemo(() => {
-    return (
-      <View style={{ flexDirection: 'column', alignItems: 'flex-start' }}>
 
+  //---------------------------
+
+  //handling list fade in and fade out
+  const listOpacity = useSharedValue(1); // Starts invisible
+
+
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      opacity: listOpacity.value,
+    };
+  });
+
+  useEffect(() => {
+    //ensures that the data is loaded
+    console.log("isdone?", isDone)
+    if (isDone && onDoneCallback.current) {
+      onDoneCallback.current(); // resolves the promise
+      onDoneCallback.current = null; // clean up
+    }
+  }, [isDone]);
+
+  const waitForIsDone = () => {
+    console.log("called")
+    return new Promise<void>((resolve) => {
+      onDoneCallback.current = resolve;
+    });
+  };
+
+  const handleFilterOption = async (filterOption: string) => {
+    setIsDone(false);
+    setFilterOption(filterOption);
+
+    // Smooth fade out (quick but eased)
+    listOpacity.value = withTiming(0, {
+      duration: 400,
+      easing: Easing.out(Easing.quad), // ease-out
+    });
+
+    // Wait for isDone to be set elsewhere
+    await waitForIsDone();
+
+    // Smooth fade in (slightly slower and eased)
+    setTimeout(() => {
+      listOpacity.value = withTiming(1, {
+        duration: 500,
+        easing: Easing.inOut(Easing.quad),
+      });
+    }, 450); // Small delay to give UI time to settle
+  };
+
+
+  return (
+    <View style={{ flex: 1 }}>
+
+      <CustomBottomSheet ref={sheetRef} onSelect={(option) => {
+        setTimeout(() => handleSortOption(option), 150);
+      }} />
+
+      <View style={{ flexDirection: 'row' }}>
+        {user.username &&
+          <Pressable
+            onPress={() => filterOption == 'season_parking' ? handleFilterOption('') : handleFilterOption('season_parking')}>
+            <Text
+              style={{ backgroundColor: filterOption === 'season_parking' ? '#90ee90' : 'white', padding: 6, borderRadius: 20, margin: 7 }}>
+              Season Parking</Text>
+          </Pressable>}
+
+        <Pressable
+          onPress={() => filterOption == 'can_park' ? handleFilterOption('') : handleFilterOption('can_park')}
+        >
+          <Text
+            style={{ backgroundColor: filterOption === 'can_park' ? '#90ee90' : 'white', padding: 6, borderRadius: 20, margin: 7 }}>
+            Allowed Parking</Text>
+        </Pressable>
+      </View>
+
+      <View style={{ flexDirection: 'column', alignItems: 'flex-start' }}>
         <Pressable
           onPress={() => {
             sheetRef.current?.present()
@@ -168,52 +253,30 @@ const CarparkList = ({ carparks, onItemPress, onFilteredCarparkChange, origin }:
           <FontAwesome name="sort" size={16} color="black" style={{ left: 10 }} />
           <Text style={{ color: 'black', fontSize: 15, left: 16 }}>{sortOption}</Text>
         </Pressable>
-      </View>)
-  }, [sortOption])
-
-  return (
-    <View style={{ flex: 1 }}>
-      <CustomBottomSheet ref={sheetRef} onSelect={(option) => {
-        setTimeout(() => handleSortOption(option), 150);
-      }} />
-      <View style={{ flexDirection: 'row' }}>
-        {user.username &&
-          <Pressable
-            onPress={() => filterOption == 'season_parking' ? setFilterOption('') : setFilterOption('season_parking')}>
-            <Text
-              style={{ backgroundColor: filterOption === 'season_parking' ? '#90ee90' : 'white', padding: 6, borderRadius: 20, margin: 7 }}>
-              Season Parking</Text>
-          </Pressable>}
-
-        <Pressable
-          onPress={() => filterOption == 'can_park' ? setFilterOption('') : setFilterOption('can_park')}
-        >
-          <Text
-            style={{ backgroundColor: filterOption === 'can_park' ? '#90ee90' : 'white', padding: 6, borderRadius: 20, margin: 7 }}>
-            Allowed Parking</Text>
-        </Pressable>
       </View>
-      <FlatList
-        data={sortedCarparkList}
-        //renaming item into carpark
-        renderItem={({ item: carpark }) => (
-          <View>
-            <CarparkItem
-              carpark={carpark}
-              distances={carparkDistances}
-              availability={carparkAvailability? carparkAvailability : null}
-              onPress={onItemPress}
-            >
-            </CarparkItem>
-          </View>
-        )}
-        keyExtractor={(item) => item.id.toString()}
-        style={styles.list}
-        contentContainerStyle={styles.content}
-        ListHeaderComponent={listHeaderComponent}
-        ListHeaderComponentStyle={{}}
-      />
-      
+
+      <Animated.View style={[{ flex: 1 }, animatedStyle]}>
+        <FlatList
+          data={sortedCarparkList}
+          //renaming item into carpark
+          renderItem={({ item: carpark }) => (
+            <View>
+              <CarparkItem
+                carpark={carpark}
+                distances={carparkDistances}
+                availability={carparkAvailability ? carparkAvailability : null}
+                onPress={onItemPress}
+              >
+              </CarparkItem>
+            </View>
+          )}
+          keyExtractor={(item) => item.id.toString()}
+          style={[styles.list]}
+          contentContainerStyle={styles.content}
+        />
+      </Animated.View>
+
+
     </View>)
 };
 
