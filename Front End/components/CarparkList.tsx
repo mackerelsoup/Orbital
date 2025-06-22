@@ -10,7 +10,8 @@ import Animated, {
   useSharedValue,
   withTiming,
   useAnimatedStyle,
-  Easing
+  Easing,
+  runOnJS
 } from 'react-native-reanimated';
 
 // Types
@@ -86,6 +87,7 @@ const CarparkList = ({
   // State
   const [sortOption, setSortOption] = useState<string>(SORT_OPTIONS.DEFAULT);
   const [filterOption, setFilterOption] = useState<string>('');
+  const [visualFilterOption, setVisualFilterOption] = useState<string>('')
   const [carparkDistances, setCarparkDistances] = useState<DistanceData>({});
   const [carparkAvailability, setCarparkAvailability] = useState<AvailabilityData>({});
   const [isDataReady, setIsDataReady] = useState(false);
@@ -234,21 +236,25 @@ const CarparkList = ({
 
   const handleFilterOption = async (option: string) => {
     setIsDataReady(false);
-    setFilterOption(prev => prev === option ? '' : option);
-
-    listOpacity.value = withTiming(0, {
-      duration: 400,
-      easing: Easing.out(Easing.quad),
+    setVisualFilterOption(prev => prev === option ? '' : option)
+    await new Promise<void>((resolve) => {
+      listOpacity.value = withTiming(0, {
+        duration: 200,
+        easing: Easing.out(Easing.quad),
+      }, (finished) => {
+        if (finished) {
+          runOnJS(resolve)();
+        }
+      });
     });
-
+    setFilterOption(prev => prev === option ? '' : option);
     await waitForDataReady();
-
     setTimeout(() => {
       listOpacity.value = withTiming(1, {
         duration: 500,
         easing: Easing.inOut(Easing.quad),
       });
-    }, 450);
+    }, 300);
   }; //handles filter and filter animation
 
   return (
@@ -262,13 +268,13 @@ const CarparkList = ({
         {user.username && (
           <FilterButton
             label="Season Parking"
-            isActive={filterOption === FILTER_OPTIONS.SEASON_PARKING}
+            isActive={visualFilterOption === FILTER_OPTIONS.SEASON_PARKING}
             onPress={() => handleFilterOption(FILTER_OPTIONS.SEASON_PARKING)}
           />
         )}
         <FilterButton
           label="Allowed Parking"
-          isActive={filterOption === FILTER_OPTIONS.CAN_PARK}
+          isActive={visualFilterOption === FILTER_OPTIONS.CAN_PARK}
           onPress={() => handleFilterOption(FILTER_OPTIONS.CAN_PARK)}
         />
       </View>
