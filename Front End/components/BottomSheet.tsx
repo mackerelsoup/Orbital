@@ -25,7 +25,7 @@ const CustomBottomSheet = forwardRef<BottomSheetModal, CustomBottomSheetProps>(
           />
           <Button
             label="Availibility"
-            onPress={() => onSelect("availibility")}
+            onPress={() => onSelect("availability")}
           />
         </BottomSheetView>
       </BottomSheetModal>

@@ -1,292 +1,345 @@
 import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { FlatList, StyleSheet, View, Text, Pressable } from 'react-native';
+import { FlatList, StyleSheet, View, Pressable, Text } from 'react-native';
 import { Region } from 'react-native-maps';
 import CarparkItem from './CarparkItem';
 import { UserContext } from '@/context/userContext';
 import CustomBottomSheet from './BottomSheet';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { BottomSheetModal } from '@gorhom/bottom-sheet';
-import Animated, { useSharedValue, withTiming, runOnJS, useAnimatedStyle, Easing } from 'react-native-reanimated';
+import Animated, {
+  useSharedValue,
+  withTiming,
+  useAnimatedStyle,
+  Easing
+} from 'react-native-reanimated';
 
+// Types
 type CarparkListProps = {
   carparks: Carpark[];
   onItemPress: (carpark: Carpark) => void;
-  onFilteredCarparkChange: (filteredCarprks: Carpark[]) => void
-  origin: Region
-}
+  onFilteredCarparkChange: (filteredCarprks: Carpark[]) => void;
+  origin: Region;
+};
 
-const CarparkList = ({ carparks, onItemPress, onFilteredCarparkChange, origin }: CarparkListProps) => {
-  const [sortOption, setSortOption] = useState<string>('Sort')
-  const [filterOption, setFilterOption] = useState<string>('')
-  const { user } = useContext(UserContext)!
-  const [carparkDistances, setCarparkDistances] = useState<Record<number, number>>({})
-  const [carparkAvailability, setCarparkAvailability] = useState<Record<number, [number, number]>>({})
-  const [isDone, setIsDone] = useState(false)
-  const onDoneCallback = useRef<() => void | null>(null); // callback to resolve promise
+type DistanceData = Record<number, number>;
+type AvailabilityData = Record<number, [number, number]>;
 
-  const sheetRef = useRef<BottomSheetModal>(null)
+// Constants
+const SORT_OPTIONS = {
+  DEFAULT: 'Sort',
+  DISTANCE: 'distance',
+  AVAILABILITY: 'availability'
+};
 
+const FILTER_OPTIONS = {
+  SEASON_PARKING: 'season_parking',
+  CAN_PARK: 'can_park'
+};
+
+// API URLs
+const API_BASE_URL = 'http://192.168.68.60:3000';
+const API_ENDPOINTS = {
+  DISTANCE: `${API_BASE_URL}/computeDistance`,
+  AVAILABILITY: (id: number) => `${API_BASE_URL}/fetchCarparkData/${id}`
+};
+
+// Helper Components
+const FilterButton = ({
+  label,
+  isActive,
+  onPress
+}: {
+  label: string;
+  isActive: boolean;
+  onPress: () => void
+}) => (
+  <Pressable onPress={onPress}>
+    <View style={[
+      styles.filterButton,
+      isActive && styles.activeFilterButton
+    ]}>
+      <Text style={styles.filterButtonText}>{label}</Text>
+    </View>
+  </Pressable>
+);
+
+const SortButton = ({
+  onPress,
+  currentOption
+}: {
+  onPress: () => void;
+  currentOption: string
+}) => (
+  <Pressable onPress={onPress} style={styles.sortButton}>
+    <FontAwesome name="sort" size={16} color="black" />
+    <Text style={styles.sortButtonText}>{currentOption}</Text>
+  </Pressable>
+);
+
+// Main Component
+const CarparkList = ({
+  carparks,
+  onItemPress,
+  onFilteredCarparkChange,
+  origin
+}: CarparkListProps) => {
+  // State
+  const [sortOption, setSortOption] = useState<string>(SORT_OPTIONS.DEFAULT);
+  const [filterOption, setFilterOption] = useState<string>('');
+  const [carparkDistances, setCarparkDistances] = useState<DistanceData>({});
+  const [carparkAvailability, setCarparkAvailability] = useState<AvailabilityData>({});
+  const [isDataReady, setIsDataReady] = useState(false);
+
+  // Refs and Context
+  const { user } = useContext(UserContext)!;
+  const sheetRef = useRef<BottomSheetModal>(null);
+  const onDoneCallback = useRef<() => void | undefined>(undefined);
+  const listOpacity = useSharedValue(1);
+
+  // Animation
+  const animatedStyle = useAnimatedStyle(() => ({
+    opacity: listOpacity.value,
+  }));
+
+  // Data Fetching
   useEffect(() => {
-    // Only run if origin exists
     if (!origin) return;
-    console.log("getting distances")
-    const getDistances = async (carparks: Carpark[], origin: Region) => {
+
+    const fetchDistances = async () => {
       try {
-        // Use Promise.all to wait for all requests
-        const distances = await Promise.all(
-          carparks.map(async (carpark) => {
-            try {
-              const response = await fetch("http://192.168.68.60:3000/computeDistance", {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                  origin: {
-                    latitude: origin.latitude,
-                    longitude: origin.longitude
-                  },
-                  destination: {
-                    latitude: carpark.latitude,
-                    longitude: carpark.longitude
-                  }
-                })
-              });
+        const distancePromises = carparks.map(async (carpark) => {
+          const response = await fetch(API_ENDPOINTS.DISTANCE, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              origin: {
+                latitude: origin.latitude,
+                longitude: origin.longitude
+              },
+              destination: {
+                latitude: carpark.latitude,
+                longitude: carpark.longitude
+              }
+            })
+          });
 
-              if (!response.ok) throw new Error("Failed to fetch");
-              const data = await response.json();
-              return { id: carpark.id, distance: data.distance };
-              //inner catch
-            } catch (error) {
-              console.error(error);
-              return { id: carpark.id, distance: null };
-            }
-          })
-        );
+          if (!response.ok) throw new Error("Failed to fetch distance");
+          const data = await response.json();
+          return { id: carpark.id, distance: data.distance / 1000 };
+        });
 
-        const tempCarparkDistances: Record<number, number> = {};
-        distances.forEach((distance) => {
-          tempCarparkDistances[distance.id] = distance.distance / 1000
-        })
+        const distances = await Promise.all(distancePromises);
+        const distanceMap = distances.reduce((acc, { id, distance }) => {
+          acc[id] = distance;
+          return acc;
+        }, {} as DistanceData);
 
-        setCarparkDistances(tempCarparkDistances);
-        //outer catch
+        setCarparkDistances(distanceMap);
       } catch (error) {
         console.error("Error fetching distances:", error);
       }
     };
 
-    getDistances(carparks, origin);
-
-  }, [origin]); // Add origin to dependencies
+    fetchDistances();
+  }, [origin]);
 
   useEffect(() => {
-    console.log("getting avail")
-    const getAvailability = async (carparks: Carpark[]) => {
+    const fetchAvailability = async () => {
       try {
-        const availibilities = await Promise.all(
-          carparks.map(async (carpark) => {
-            try {
-              const response = await fetch(`http://192.168.68.60:3000/fetchCarparkData/${carpark.id}`)
+        const availabilityPromises = carparks.map(async (carpark) => {
+          const response = await fetch(API_ENDPOINTS.AVAILABILITY(carpark.id));
+          if (!response.ok) throw new Error("Failed to fetch availability");
+          return await response.json();
+        });
 
-              if (!response.ok) throw new Error("Failed to fetch");
-              const data = await response.json()
-              //console.log(data)
-              return data
-            } catch (error) {
-              console.log(error)
-              return `Carpark : ${carpark.id}`
-            }
-          })
-        )
-        const tempCarparkAvailibility: Record<number, [number, number]> = {};
-        availibilities.forEach((availibility) => {
-          tempCarparkAvailibility[availibility[0].id] = [availibility[0].capacity, availibility[0].measure]
-        })
-        setCarparkAvailability(tempCarparkAvailibility)
-        //console.log(carparkAvailability)
+        const availabilities = await Promise.all(availabilityPromises);
+        const availabilityMap = availabilities.reduce((acc, item) => {
+          acc[item[0].id] = [item[0].capacity, item[0].measure];
+          return acc;
+        }, {} as AvailabilityData);
+
+        setCarparkAvailability(availabilityMap);
       } catch (error) {
-        console.error("Error fetching availibility", error)
+        console.error("Error fetching availability", error);
       }
+    };
 
-    }
-    getAvailability(carparks)
-  }, [carparks])
+    fetchAvailability();
+  }, [carparks]);
 
-
-  //filter and sorting------------------
+  // Filtering and Sorting
   const filteredCarparkList = useMemo(() => {
-    const carparkCopy = [...carparks];
-    console.log("filtering")
+    if (!carparks.length) return [];
+
     switch (filterOption) {
-      case 'season_parking':
-        return carparkCopy.filter((carpark) =>
-          carpark.season_parking_type?.some((season_parking) => season_parking === user.season_parking_type)
+      case FILTER_OPTIONS.SEASON_PARKING:
+        return carparks.filter(carpark =>
+          carpark.season_parking_type?.includes(user.season_parking_type!)
         );
-      case 'can_park':
-        return carparkCopy.filter((carpark) => carpark.staff ? (carpark.staff == user.staff) : true);
+      case FILTER_OPTIONS.CAN_PARK:
+        return carparks.filter(carpark =>
+          carpark.staff ? carpark.staff === user.staff : true
+        );
       default:
-        return carparkCopy;
+        return [...carparks];
     }
-  }, [carparks, filterOption]);
-
-
-  useEffect(() => {
-    onFilteredCarparkChange(filteredCarparkList);
-  }, [filteredCarparkList, filterOption, user.season_parking_type, user.staff]);
-
+  }, [carparks, filterOption, user]);
 
   const sortedCarparkList = useMemo(() => {
-    //console.log(filteredCarparkList)
-    console.log("ran sorted")
-    switch (sortOption) {
-      //by default it will sort by distance
-      case 'Sort': {
-        return filteredCarparkList?.sort((a, b) => (carparkDistances[a.id] - (carparkDistances[b.id])))
+    if (!filteredCarparkList.length) return [];
+
+    const sortFunctions = {
+      [SORT_OPTIONS.DEFAULT]: (a: Carpark, b: Carpark) =>
+        (carparkDistances[a.id] || Infinity) - (carparkDistances[b.id] || Infinity),
+      [SORT_OPTIONS.DISTANCE]: (a: Carpark, b: Carpark) =>
+        (carparkDistances[a.id] || Infinity) - (carparkDistances[b.id] || Infinity),
+      [SORT_OPTIONS.AVAILABILITY]: (a: Carpark, b: Carpark) => {
+        const availA = carparkAvailability[a.id] || [0, 0];
+        const availB = carparkAvailability[b.id] || [0, 0];
+        return (availA[0] - availA[1]) - (availB[0] - availB[1]);
       }
-      case 'distance': {
-        return filteredCarparkList?.sort((a, b) => (carparkDistances[a.id] - (carparkDistances[b.id])))
-      }
-      case 'availibility': {
-        return filteredCarparkList?.sort((a, b) => (carparkAvailability[a.id][0] - carparkAvailability[a.id][1]) - (carparkAvailability[b.id][0] - carparkAvailability[b.id][1]))
-      }
-
-    }
-  }, [filteredCarparkList, filterOption, sortOption, carparkDistances, carparkAvailability])
-
-  useEffect(() => {
-    setIsDone(true)
-    console.log("isDone sorted", isDone)
-  }, [sortedCarparkList])
-
-  function handleSortOption(sortOption: string) {
-    setSortOption(sortOption)
-    setTimeout(() => {
-      sheetRef.current?.dismiss();
-    }, 25); // Small delay before closing
-  }
-
-
-  //---------------------------
-
-  //handling list fade in and fade out
-  const listOpacity = useSharedValue(1); // Starts invisible
-
-
-  const animatedStyle = useAnimatedStyle(() => {
-    return {
-      opacity: listOpacity.value,
     };
-  });
+
+    return [...filteredCarparkList].sort(sortFunctions[sortOption] || sortFunctions[SORT_OPTIONS.DEFAULT]);
+  }, [filteredCarparkList, sortOption, carparkDistances, carparkAvailability]);
+
+  // Effects
+  useEffect(() => {
+    onFilteredCarparkChange(filteredCarparkList);
+  }, [filteredCarparkList]);
 
   useEffect(() => {
-    //ensures that the data is loaded
-    console.log("isdone?", isDone)
-    if (isDone && onDoneCallback.current) {
-      onDoneCallback.current(); // resolves the promise
-      onDoneCallback.current = null; // clean up
+    setIsDataReady(true);
+    if (isDataReady && onDoneCallback.current) {
+      onDoneCallback.current();
+      onDoneCallback.current = undefined;
     }
-  }, [isDone]);
+  }, [sortedCarparkList]);
 
-  const waitForIsDone = () => {
-    console.log("called")
-    return new Promise<void>((resolve) => {
-      onDoneCallback.current = resolve;
+  const waitForDataReady = () => {
+    return new Promise<void>(resolve => {
+      if (isDataReady) {
+        resolve();
+      } else {
+        onDoneCallback.current = resolve;
+      }
     });
   };
 
-  const handleFilterOption = async (filterOption: string) => {
-    setIsDone(false);
-    setFilterOption(filterOption);
+  // Handlers
+  const handleSortOption = (option: string) => {
+    setSortOption(option);
+    setTimeout(() => sheetRef.current?.dismiss(), 25);
+  };
 
-    // Smooth fade out (quick but eased)
+  const handleFilterOption = async (option: string) => {
+    setIsDataReady(false);
+    setFilterOption(prev => prev === option ? '' : option);
+
     listOpacity.value = withTiming(0, {
       duration: 400,
-      easing: Easing.out(Easing.quad), // ease-out
+      easing: Easing.out(Easing.quad),
     });
 
-    // Wait for isDone to be set elsewhere
-    await waitForIsDone();
+    await waitForDataReady();
 
-    // Smooth fade in (slightly slower and eased)
     setTimeout(() => {
       listOpacity.value = withTiming(1, {
         duration: 500,
         easing: Easing.inOut(Easing.quad),
       });
-    }, 450); // Small delay to give UI time to settle
-  };
-
+    }, 450);
+  }; //handles filter and filter animation
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={styles.container}>
+      <CustomBottomSheet
+        ref={sheetRef}
+        onSelect={handleSortOption}
+      />
 
-      <CustomBottomSheet ref={sheetRef} onSelect={(option) => {
-        setTimeout(() => handleSortOption(option), 150);
-      }} />
-
-      <View style={{ flexDirection: 'row' }}>
-        {user.username &&
-          <Pressable
-            onPress={() => filterOption == 'season_parking' ? handleFilterOption('') : handleFilterOption('season_parking')}>
-            <Text
-              style={{ backgroundColor: filterOption === 'season_parking' ? '#90ee90' : 'white', padding: 6, borderRadius: 20, margin: 7 }}>
-              Season Parking</Text>
-          </Pressable>}
-
-        <Pressable
-          onPress={() => filterOption == 'can_park' ? handleFilterOption('') : handleFilterOption('can_park')}
-        >
-          <Text
-            style={{ backgroundColor: filterOption === 'can_park' ? '#90ee90' : 'white', padding: 6, borderRadius: 20, margin: 7 }}>
-            Allowed Parking</Text>
-        </Pressable>
+      <View style={styles.filterRow}>
+        {user.username && (
+          <FilterButton
+            label="Season Parking"
+            isActive={filterOption === FILTER_OPTIONS.SEASON_PARKING}
+            onPress={() => handleFilterOption(FILTER_OPTIONS.SEASON_PARKING)}
+          />
+        )}
+        <FilterButton
+          label="Allowed Parking"
+          isActive={filterOption === FILTER_OPTIONS.CAN_PARK}
+          onPress={() => handleFilterOption(FILTER_OPTIONS.CAN_PARK)}
+        />
       </View>
 
-      <View style={{ flexDirection: 'column', alignItems: 'flex-start' }}>
-        <Pressable
-          onPress={() => {
-            sheetRef.current?.present()
-          }}
-          style={{ flexDirection: 'row', alignItems: 'baseline' }}
-        >
-          <FontAwesome name="sort" size={16} color="black" style={{ left: 10 }} />
-          <Text style={{ color: 'black', fontSize: 15, left: 16 }}>{sortOption}</Text>
-        </Pressable>
+      <View style={styles.sortContainer}>
+        <SortButton
+          onPress={() => sheetRef.current?.present()}
+          currentOption={sortOption}
+        />
       </View>
 
-      <Animated.View style={[{ flex: 1 }, animatedStyle]}>
+      <Animated.View style={[styles.listContainer, animatedStyle]}>
         <FlatList
           data={sortedCarparkList}
-          //renaming item into carpark
           renderItem={({ item: carpark }) => (
-            <View>
-              <CarparkItem
-                carpark={carpark}
-                distances={carparkDistances}
-                availability={carparkAvailability ? carparkAvailability : null}
-                onPress={onItemPress}
-              >
-              </CarparkItem>
-            </View>
+            <CarparkItem
+              carpark={carpark}
+              distances={carparkDistances}
+              availability={carparkAvailability}
+              onPress={onItemPress}
+            />
           )}
-          keyExtractor={(item) => item.id.toString()}
-          style={[styles.list]}
-          contentContainerStyle={styles.content}
+          keyExtractor={item => item.id.toString()}
+          contentContainerStyle={styles.listContent}
         />
       </Animated.View>
-
-
-    </View>)
+    </View>
+  );
 };
 
+// Styles
 const styles = StyleSheet.create({
-  list: {
+  container: {
     flex: 1,
   },
-  content: {
+  filterRow: {
+    flexDirection: 'row',
+    paddingHorizontal: 8,
+  },
+  filterButton: {
+    padding: 6,
+    borderRadius: 20,
+    margin: 7,
+    backgroundColor: 'white',
+  },
+  activeFilterButton: {
+    backgroundColor: '#90ee90',
+  },
+  filterButtonText: {
+    fontSize: 14,
+  },
+  sortContainer: {
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    paddingLeft: 10,
+  },
+  sortButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  sortButtonText: {
+    color: 'black',
+    fontSize: 15,
+    marginLeft: 6,
+  },
+  listContainer: {
+    flex: 1,
+  },
+  listContent: {
     paddingTop: 10,
-  }
+  },
 });
 
 export default CarparkList;
