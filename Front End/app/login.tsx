@@ -84,8 +84,8 @@
 
       try {
         let response
-        if (isEmail()) response = await fetch(`http://10.125.1.227:3000/fetchbyEmail/${username}`);
-        else response = await fetch(`http://10.125.1.227:3000/fetchbyUsername/${username}`);
+        if (isEmail()) response = await fetch(`http://192.168.1.91:3000/fetchbyEmail/${username}`);
+        else response = await fetch(`http://192.168.1.91:3000/fetchbyUsername/${username}`);
 
         if (response.status === 404) throw new UserNotFoundError("User not found")
         if (!response.ok) throw new ConnectionError("Network response was not ok")
@@ -120,7 +120,7 @@
     const setUserData = async (data: userDataIncomplete) => {
       console.log(data)
       try {
-        let response = await fetch(`http://10.125.1.227:3000/fetchUserData/${username}`)
+        let response = await fetch(`http://192.168.1.91:3000/fetchUserData/${username}`)
         if (response.status === 404) throw new userDataNotFoundError("User not found")
         if (!response.ok) throw new ConnectionError("Network response was not ok")
 

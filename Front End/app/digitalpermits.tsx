@@ -1,5 +1,6 @@
 import { FontAwesome } from '@expo/vector-icons';
 import * as WebBrowser from 'expo-web-browser';
+import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
@@ -14,6 +15,7 @@ update.tsx
 export default function DigitalPermits() {
   const [loggedIn, setLoggedIn] = useState(false);
   const [userType, setUserType] = useState<'Student' | 'Staff' | null>(null);
+  const router = useRouter();
 
   const handleLogin = (selectedUserType: 'Student' | 'Staff') => {
     setLoggedIn(true);
@@ -138,13 +140,7 @@ export default function DigitalPermits() {
   }) => (
     <TouchableOpacity 
       style={[styles.featureButton, { backgroundColor: color }]}
-      onPress={() => {
-        Alert.alert(
-          title,
-          'Feature is coming soon',
-          [{ text: 'OK', style: 'default' }]
-        );
-      }}
+      onPress={() => router.push("/season")}
     >
       <View style={styles.featureContent}>
         <View style={styles.featureIconContainer}>
