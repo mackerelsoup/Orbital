@@ -3,7 +3,7 @@ import { getLocation } from '@/components/LocationService';
 import MapComponent from '@/components/MapComponent';
 import { Portal } from 'react-native-portalize'
 import { Link } from 'expo-router';
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Pressable, StyleSheet, Text, View, Linking, Dimensions, Platform } from 'react-native';
 import MapView, { MapMarker, Region } from 'react-native-maps';
 import Modal from 'react-native-modal';
