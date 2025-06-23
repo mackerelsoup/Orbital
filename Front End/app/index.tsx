@@ -1,15 +1,15 @@
 import CarparkList from '@/components/CarparkList';
 import { getLocation } from '@/components/LocationService';
 import MapComponent from '@/components/MapComponent';
-import { UserContext } from '@/context/userContext';
-import { ActionSheetRef } from 'react-native-actions-sheet';
+import { Portal } from 'react-native-portalize'
 import { Link } from 'expo-router';
 import React, { useContext, useEffect, useRef, useState } from 'react';
-import { Pressable, StyleSheet, Text, View, Linking } from 'react-native';
+import { Pressable, StyleSheet, Text, View, Linking, Dimensions, Platform } from 'react-native';
 import MapView, { MapMarker, Region } from 'react-native-maps';
 import Modal from 'react-native-modal';
 import carparks from '../assets/carparks.json';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+
 
 export default function App() {
   const [region, setRegion] = useState<Region | undefined>(undefined);
@@ -19,7 +19,6 @@ export default function App() {
   const [coordinateSelected, setCoords] = useState<Region | null>(null);
   const [selectedCarpark, setSelectedCarpark] = useState<Carpark | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
-
 
   //retreiving user location data
   useEffect(() => {
@@ -60,11 +59,12 @@ export default function App() {
   const handleCarparkSelect = (carpark: Carpark) => {
     const marker = markerRefs.current[carpark.id];
     //console.log(marker)
-    setCoords({ 
-      latitude: carpark.latitude, 
-      longitude: carpark.longitude, 
-      longitudeDelta: 0.01, 
-      latitudeDelta: 0.01 });
+    setCoords({
+      latitude: carpark.latitude,
+      longitude: carpark.longitude,
+      longitudeDelta: 0.01,
+      latitudeDelta: 0.01
+    });
     marker?.showCallout();
     mapRef.current?.animateToRegion({
       latitude: carpark.latitude,
@@ -76,15 +76,15 @@ export default function App() {
     setModalVisible(true);
   };
 
-  // Add this function to handle marker press from MapComponent
+  // Add this function to handle marker press from MapComponent 
   const handleMarkerPress = (carpark: Carpark) => {
     setSelectedCarpark(carpark);
     setModalVisible(true);
-    setCoords({ 
-      latitude: carpark.latitude, 
-      longitude: carpark.longitude, 
-      longitudeDelta: 0.01, 
-      latitudeDelta: 0.01 
+    setCoords({
+      latitude: carpark.latitude,
+      longitude: carpark.longitude,
+      longitudeDelta: 0.01,
+      latitudeDelta: 0.01
     });
   };
 
@@ -100,7 +100,7 @@ export default function App() {
       setModalVisible(false);
     }
   };
-  
+
   return (
     <View style={styles.container}>
       <View style={styles.mapContainer}>
@@ -142,36 +142,49 @@ export default function App() {
       </View>
 
       {/* Modal Popup */}
-      <Modal isVisible={modalVisible} onBackdropPress={() => setModalVisible(false)} style={styles.modal}>
-        <View style={styles.modalContent}>
-          <Text style={styles.modalTitle}>{selectedCarpark?.name}</Text>
+      {selectedCarpark && modalVisible &&
+        <Portal>
+          <Modal
+            isVisible={modalVisible}
+            onBackdropPress={() => setModalVisible(false)} onBackButtonPress={() => { setModalVisible(false) }}
+            useNativeDriver={true}
+            hideModalContentWhileAnimating={true}
+            style={styles.modalContainer}
+          >
+            <View style={styles.modalContent}>
+              <Text style={styles.modalTitle}>{selectedCarpark?.name}</Text>
 
-          {selectedCarpark?.distance && (
-            <Text style={styles.modalDistance}>{selectedCarpark.distance.toFixed(1)} km away</Text>
-          )}
+              {selectedCarpark?.distance && (
+                <Text style={styles.modalDistance}>{selectedCarpark.distance.toFixed(1)} km away</Text>
+              )}
 
-          {selectedCarpark?.pricing?.rate_per_minute && (
-            <Text style={styles.modalPrice}>Rate: ${selectedCarpark.pricing.rate_per_minute.toFixed(4)} / min</Text>
-          )}
+              {selectedCarpark?.pricing?.rate_per_minute && (
+                <Text style={styles.modalPrice}>Rate: ${selectedCarpark.pricing.rate_per_minute.toFixed(4)} / min</Text>
+              )}
 
-          {selectedCarpark?.pricing?.charged_hours && (
-            <Text style={styles.modalHours}>{selectedCarpark.pricing?.charged_hours}</Text>
-          )}
+              {selectedCarpark?.pricing?.charged_hours && (
+                <Text style={styles.modalHours}>{selectedCarpark.pricing?.charged_hours}</Text>
+              )}
 
-          <View style={styles.modalButtons}>
-            <Pressable
-              style={styles.navigateButton}
-              onPress={handleNavigate}
-            >
-              <Text style={styles.navigateButtonText}>Navigate</Text>
-            </Pressable>
+              <View style={styles.modalButtons}>
+                <Pressable
+                  style={styles.navigateButton}
+                  onPress={handleNavigate}
+                >
+                  <Text style={styles.navigateButtonText}>Navigate</Text>
+                </Pressable>
 
-            <Pressable style={styles.closeButton} onPress={() => setModalVisible(false)}>
-              <Text style={styles.closeButtonText}>Close</Text>
-            </Pressable>
-          </View>
-        </View>
-      </Modal>
+                <Pressable style={styles.closeButton} onPress={() => setModalVisible(false)}>
+                  <Text style={styles.closeButtonText}>Close</Text>
+                </Pressable>
+              </View>
+            </View>
+          </Modal>
+
+        </Portal>
+
+      }
+
 
       <CarparkList
         carparks={carparks}
@@ -253,16 +266,15 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     flex: 1,
   },
-  modal: {
-    justifyContent: "center",
-    alignItems: "center",
+  modalContainer: {
+    justifyContent: 'center',
+    alignItems: 'center'
   },
   modalContent: {
     backgroundColor: "white",
     padding: 24,
     borderRadius: 16,
     width: "90%",
-    maxWidth: 400,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
