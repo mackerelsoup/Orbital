@@ -15,7 +15,7 @@ connection.connect().then(() => console.log("connected"))
 
 app.post('/computeDistance', async (request, response) => {
   const { origin, destination } = request.body;
-  console.log('here')
+  console.log('distance here')
   try {
     const res = await axios.post(
       'https://routes.googleapis.com/directions/v2:computeRoutes',
@@ -40,7 +40,7 @@ app.post('/computeDistance', async (request, response) => {
           'Content-Type': 'application/json',
           'X-Goog-Api-Key': process.env.GOOGLE_MAPS_API_KEY,
           'X-Goog-FieldMask': 'routes.duration,routes.distanceMeters'
-        }
+        },
       }
     );
     console.log("here2")
@@ -142,10 +142,13 @@ app.get('/fetchCarparkData/:id', (request, response) => {
   })
 })
 
-app.get('/fetchCarparkHistory/:id', (request, response) => {
+app.get('/fetchCarparkHistory/:id/:startTime/:endTime', (request, response) => {
+  console.log("fethcding history")
   const id = request.params.id
-  const fetch_id_query = "SELECT * FROM carpark_availability_history WHERE carpark_id = $1 ORDER BY recorded_at ASC"
-  connection.query(fetch_id_query, [id], (err, result) => {
+  const startTime = request.params.startTime
+  const endTime = request.params.endTime
+  const fetch_id_query = "SELECT * FROM carpark_availability_history WHERE carpark_id = $1 AND recorded_at >= to_timestamp($2) AND recorded_at <= to_timestamp($3) ORDER BY recorded_at ASC"
+  connection.query(fetch_id_query, [id, startTime, endTime], (err, result) => {
     if (err) {
       response.send(err)
       console.error(err)
@@ -155,7 +158,7 @@ app.get('/fetchCarparkHistory/:id', (request, response) => {
         response.status(404).send("Carpark availability history not found")
       }
       else {
-        console.log("Carpark info extracted")
+        console.log("Carpark availability extracted")
         response.send(result.rows)
       }
 
@@ -163,6 +166,26 @@ app.get('/fetchCarparkHistory/:id', (request, response) => {
   })
 })
 
+app.get('/getCurrentTime', (request, response) => {
+  console.log("fetching time")
+  const fetch_id_query = "SELECT MAX(recorded_at) AS latest_time FROM carpark_availability_history"
+  connection.query(fetch_id_query, (err, result) => {
+    if (err) {
+      response.send(err)
+      console.error(err)
+    }
+    else {
+      if (result.rowCount === 0) {
+        response.status(404).send("Cannot get latest time")
+      }
+      else {
+        console.log("Latest time extracted")
+        response.send(result.rows)
+      }
+
+    }
+  })
+})
 
 
 app.put('/update/:id', (request, response) => {
