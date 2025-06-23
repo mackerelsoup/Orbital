@@ -55,62 +55,77 @@ export default function CarparkTrend({ carpark }: CarparkTrendProps) {
   });
 
   useEffect(() => {
+    const getCurrentTime = async () => {
+      try {
+        const response = await fetch("http://192.168.68.60:3000/getCurrentTime");
+        if (!response.ok) throw new Error("Current Time not Available");
+        const data = await response.json();
+        const latestTime = new Date(data[0].latest_time).getTime();
+        //console.log("latest", latestTime)
+        setCurrentTime(latestTime);
+      } catch (error) {
+        console.log("Failed to fetch current time", error);
+      }
+    };
+
+    getCurrentTime();
+  }, []);
+
+  useEffect(() => {
+    if (currentTime === 0) return;
+
+    let rangeStart = currentTime;
+
+    switch (selectedRange) {
+      case 'Hour':
+        rangeStart = currentTime - 3600000;
+        setEndTime(currentTime);
+        break;
+      case '6hr':
+        rangeStart = currentTime - 21600000;
+        setEndTime(currentTime);
+        break;
+      case 'Day':
+        rangeStart = currentTime - 86400000;
+        setEndTime(currentTime);
+        break;
+      case 'Month':
+        rangeStart = subMonths(currentTime, 1).getTime();
+        setEndTime(rangeStart + 86400000);
+        break;
+      case 'Year':
+        rangeStart = subYears(currentTime, 1).getTime();
+        setEndTime(rangeStart + 86400000);
+        break;
+    }
+
+    //console.log(rangeStart)
+    setStartTime(rangeStart);
+  }, [selectedRange, currentTime]);
+
+  useEffect(() => {
+    if (startTime === 0 || endTime === 0) return;
+
     const getAvailabilityHistory = async (carpark: Carpark) => {
       try {
-        const response = await fetch(`http://192.168.68.60:3000/fetchCarparkHistory/1`)
-
-        if (response.status === 404 || !response.ok) throw new Error("Carpark History not Available")
+        const response = await fetch(`http://192.168.68.60:3000/fetchCarparkHistory/1/${startTime / 1000}/${endTime / 1000}`);
+        if (!response.ok) throw new Error("Carpark History not Available");
         const data: CarparkAvailability[] = await response.json();
 
         const processedData = data.map(entry => ({
           time: new Date(entry.recorded_at).getTime(),
           availability: entry.available
-        }))
+        }));
 
-        setCurrentTime(processedData.slice(-1)[0].time)
-        console.log(processedData.slice(-3))
-        setGraphData(processedData)
-
+        setGraphData(processedData);
       } catch (error) {
-        console.log(error)
+        console.log("Error fetching history:", error);
       }
-    }
+    };
 
-    getAvailabilityHistory(carpark)
-  }, [])
+    getAvailabilityHistory(carpark);
+  }, [startTime, endTime]);
 
-
-  useEffect(() => {
-    switch (selectedRange) {
-      case 'Hour': {
-        setStartTime(3600000);
-        setEndTime(0);
-        break;
-      }
-      case '6hr': {
-        setStartTime(21600000);
-        setEndTime(0);
-        break;
-      }
-      case 'Day': {
-        setStartTime(86400000);
-        setEndTime(0);
-        break;
-      }
-      case 'Month': {
-        const timeDifference = currentTime - subMonths(currentTime, 1).getTime();
-        setStartTime(timeDifference + 86400000);
-        setEndTime(timeDifference);
-        break;
-      }
-      case 'Year': {
-        const timeDifference = currentTime - subYears(currentTime, 1).getTime();
-        setStartTime(timeDifference + 86400000);
-        setEndTime(timeDifference);
-        break;
-      }
-    }
-  }, [selectedRange, currentTime])
 
   return (
     <View style={{ height: 600, justifyContent: 'center' }}>
@@ -120,7 +135,7 @@ export default function CarparkTrend({ carpark }: CarparkTrendProps) {
         yKeys={["availability"]}
         domainPadding={{ top: 10, bottom: 20, left: 20, right: 10 }}
         chartPressState={state}
-        viewport={{ x: [currentTime - startTime, currentTime - endTime] }}
+        viewport={{ x: [startTime, endTime] }}
         xAxis={{
           font: fonts,
           formatXLabel(label) {
