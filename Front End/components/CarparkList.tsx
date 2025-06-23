@@ -104,70 +104,70 @@ const CarparkList = ({
   }));
 
   // Data Fetching
-  useEffect(() => {
-    if (!origin) return;
+  // useEffect(() => {
+  //   if (!origin) return;
 
-    const fetchDistances = async () => {
-      try {
-        const distancePromises = carparks.map(async (carpark) => {
-          const response = await fetch(API_ENDPOINTS.DISTANCE, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              origin: {
-                latitude: origin.latitude,
-                longitude: origin.longitude
-              },
-              destination: {
-                latitude: carpark.latitude,
-                longitude: carpark.longitude
-              }
-            })
-          });
+  //   const fetchDistances = async () => {
+  //     try {
+  //       const distancePromises = carparks.map(async (carpark) => {
+  //         const response = await fetch(API_ENDPOINTS.DISTANCE, {
+  //           method: 'POST',
+  //           headers: { 'Content-Type': 'application/json' },
+  //           body: JSON.stringify({
+  //             origin: {
+  //               latitude: origin.latitude,
+  //               longitude: origin.longitude
+  //             },
+  //             destination: {
+  //               latitude: carpark.latitude,
+  //               longitude: carpark.longitude
+  //             }
+  //           })
+  //         });
 
-          if (!response.ok) throw new Error("Failed to fetch distance");
-          const data = await response.json();
-          return { id: carpark.id, distance: data.distance / 1000 };
-        });
+  //         if (!response.ok) throw new Error("Failed to fetch distance");
+  //         const data = await response.json();
+  //         return { id: carpark.id, distance: data.distance / 1000 };
+  //       });
 
-        const distances = await Promise.all(distancePromises);
-        const distanceMap = distances.reduce((acc, { id, distance }) => {
-          acc[id] = distance;
-          return acc;
-        }, {} as DistanceData);
+  //       const distances = await Promise.all(distancePromises);
+  //       const distanceMap = distances.reduce((acc, { id, distance }) => {
+  //         acc[id] = distance;
+  //         return acc;
+  //       }, {} as DistanceData);
 
-        setCarparkDistances(distanceMap);
-      } catch (error) {
-        console.error("Error fetching distances:", error);
-      }
-    };
+  //       setCarparkDistances(distanceMap);
+  //     } catch (error) {
+  //       console.error("Error fetching distances:", error);
+  //     }
+  //   };
 
-    fetchDistances();
-  }, [origin]);
+  //   fetchDistances();
+  // }, [origin]);
 
-  useEffect(() => {
-    const fetchAvailability = async () => {
-      try {
-        const availabilityPromises = carparks.map(async (carpark) => {
-          const response = await fetch(API_ENDPOINTS.AVAILABILITY(carpark.id));
-          if (!response.ok) throw new Error("Failed to fetch availability");
-          return await response.json();
-        });
+  // useEffect(() => {
+  //   const fetchAvailability = async () => {
+  //     try {
+  //       const availabilityPromises = carparks.map(async (carpark) => {
+  //         const response = await fetch(API_ENDPOINTS.AVAILABILITY(carpark.id));
+  //         if (!response.ok) throw new Error("Failed to fetch availability");
+  //         return await response.json();
+  //       });
 
-        const availabilities = await Promise.all(availabilityPromises);
-        const availabilityMap = availabilities.reduce((acc, item) => {
-          acc[item[0].id] = [item[0].capacity, item[0].measure];
-          return acc;
-        }, {} as AvailabilityData);
+  //       const availabilities = await Promise.all(availabilityPromises);
+  //       const availabilityMap = availabilities.reduce((acc, item) => {
+  //         acc[item[0].id] = [item[0].capacity, item[0].measure];
+  //         return acc;
+  //       }, {} as AvailabilityData);
 
-        setCarparkAvailability(availabilityMap);
-      } catch (error) {
-        console.error("Error fetching availability", error);
-      }
-    };
+  //       setCarparkAvailability(availabilityMap);
+  //     } catch (error) {
+  //       console.error("Error fetching availability", error);
+  //     }
+  //   };
 
-    fetchAvailability();
-  }, [carparks]);
+  //   fetchAvailability();
+  // }, [carparks]);
 
   // Filtering and Sorting
   const filteredCarparkList = useMemo(() => {
@@ -206,17 +206,17 @@ const CarparkList = ({
   }, [filteredCarparkList, sortOption, carparkDistances, carparkAvailability]);
 
   // Effects
-  useEffect(() => {
-    onFilteredCarparkChange(filteredCarparkList);
-  }, [filteredCarparkList]);
+  // useEffect(() => {
+  //   onFilteredCarparkChange(filteredCarparkList);
+  // }, [filteredCarparkList]);
 
-  useEffect(() => {
-    setIsDataReady(true);
-    if (isDataReady && onDoneCallback.current) {
-      onDoneCallback.current();
-      onDoneCallback.current = undefined;
-    }
-  }, [sortedCarparkList]);
+  // useEffect(() => {
+  //   setIsDataReady(true);
+  //   if (isDataReady && onDoneCallback.current) {
+  //     onDoneCallback.current();
+  //     onDoneCallback.current = undefined;
+  //   }
+  // }, [sortedCarparkList]);
 
   const waitForDataReady = () => {
     return new Promise<void>(resolve => {
