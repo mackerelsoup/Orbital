@@ -1,10 +1,12 @@
 import { StyleSheet, Text, View } from 'react-native'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useMemo } from 'react'
 import { CartesianChart, Line, useChartPressState } from "victory-native"
 import { useFont, Circle, Text as SKText } from '@shopify/react-native-skia'
 import { SharedValue, useDerivedValue, Easing } from 'react-native-reanimated'
 import TimeRangeSelector from '@/components/TimeRangeSelector'
 import { subMonths, subYears } from 'date-fns';
+import { scaleTime } from 'd3-scale';
+import { timeMinute } from 'd3-time';
 
 
 type CarparkTrendProps = {
@@ -14,7 +16,7 @@ type CarparkTrendProps = {
 type CarparkAvailability = {
   id: number;
   carpark_id: number;
-  available: number;
+  occupied: number;
   total: number;
   recorded_at: string;
 };
@@ -57,7 +59,7 @@ export default function CarparkTrend({ carpark }: CarparkTrendProps) {
   useEffect(() => {
     const getCurrentTime = async () => {
       try {
-        const response = await fetch("http://192.168.68.60:3000/getCurrentTime");
+        const response = await fetch("http://192.168.68.60:3000/getCurrentTimeDemo");
         if (!response.ok) throw new Error("Current Time not Available");
         const data = await response.json();
         const latestTime = new Date(data[0].latest_time).getTime();
@@ -108,15 +110,17 @@ export default function CarparkTrend({ carpark }: CarparkTrendProps) {
 
     const getAvailabilityHistory = async (carpark: Carpark) => {
       try {
-        const response = await fetch(`http://192.168.68.60:3000/fetchCarparkHistory/1/${startTime / 1000}/${endTime / 1000}`);
+        const response = await fetch(`http://192.168.68.60:3000/fetchCarparkHistoryDemo/1/${startTime / 1000}/${endTime / 1000}`);
         if (!response.ok) throw new Error("Carpark History not Available");
         const data: CarparkAvailability[] = await response.json();
 
+        console.log(data)
+
         const processedData = data.map(entry => ({
           time: new Date(entry.recorded_at).getTime(),
-          availability: entry.available
+          availability: Number(entry.occupied)
         }));
-
+        console.log(processedData)
         setGraphData(processedData);
       } catch (error) {
         console.log("Error fetching history:", error);
@@ -126,6 +130,24 @@ export default function CarparkTrend({ carpark }: CarparkTrendProps) {
     getAvailabilityHistory(carpark);
   }, [startTime, endTime]);
 
+  const tickValues = useMemo(() => {
+    if (!startTime || !endTime) return [];
+
+    const startDate = new Date(startTime);
+    const endDate = new Date(endTime);
+
+    console.log(startDate, " ", endDate)
+
+    const scale = scaleTime()
+      .domain([startDate, endDate]);
+
+    // Generate ticks every 15 minutes
+    const interval = timeMinute.every(15);
+    console.log(interval ? scale.ticks(interval).map(d => d.getTime()) : [])
+    return interval ? scale.ticks(interval).map(d => d.getTime()) : [];
+  }, [startTime, endTime]);
+
+
 
   return (
     <View style={{ height: 600, justifyContent: 'center' }}>
@@ -133,9 +155,9 @@ export default function CarparkTrend({ carpark }: CarparkTrendProps) {
         data={graphData}
         xKey={"time"}
         yKeys={["availability"]}
-        domainPadding={{ top: 10, bottom: 20, left: 20, right: 10 }}
+        domainPadding={{ top: 10, bottom: 20, left: 10, right: 10 }}
         chartPressState={state}
-        viewport={{ x: [startTime, endTime] }}
+        viewport={{ x: [startTime, endTime + 300000] }}
         xAxis={{
           font: fonts,
           formatXLabel(label) {
@@ -147,13 +169,13 @@ export default function CarparkTrend({ carpark }: CarparkTrendProps) {
             });
           },
           labelOffset: -30,
+          tickValues: tickValues
 
         }}
         yAxis={[{
           font: fonts,
-          labelPosition: 'inset'
+          labelPosition: 'outset'
         }]}
-
       >
         {({ points, chartBounds }) => {
           return (
@@ -167,7 +189,8 @@ export default function CarparkTrend({ carpark }: CarparkTrendProps) {
                   duration: 500,
                   easing: Easing.out(Easing.quad),
                 }}
-                curveType='linear'
+                curveType='monotoneX'
+
 
               ></Line>
               {
