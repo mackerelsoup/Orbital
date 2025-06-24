@@ -166,9 +166,55 @@ app.get('/fetchCarparkHistory/:id/:startTime/:endTime', (request, response) => {
   })
 })
 
+app.get('/fetchCarparkHistoryDemo/:id/:startTime/:endTime', (request, response) => {
+  console.log("fethcding history")
+  const id = request.params.id
+  const startTime = request.params.startTime
+  const endTime = request.params.endTime
+  const fetch_id_query = "SELECT * FROM temp_carpark_avail WHERE carpark_id = $1 AND recorded_at >= to_timestamp($2) AND recorded_at <= to_timestamp($3) ORDER BY recorded_at ASC"
+  connection.query(fetch_id_query, [id, startTime, endTime], (err, result) => {
+    if (err) {
+      response.send(err)
+      console.error(err)
+    }
+    else {
+      if (result.rowCount === 0) {
+        response.status(404).send("Carpark availability history not found")
+      }
+      else {
+        console.log("Carpark availability extracted")
+        response.send(result.rows)
+      }
+
+    }
+  })
+})
+
+
 app.get('/getCurrentTime', (request, response) => {
   console.log("fetching time")
   const fetch_id_query = "SELECT MAX(recorded_at) AS latest_time FROM carpark_availability_history"
+  connection.query(fetch_id_query, (err, result) => {
+    if (err) {
+      response.send(err)
+      console.error(err)
+    }
+    else {
+      if (result.rowCount === 0) {
+        response.status(404).send("Cannot get latest time")
+      }
+      else {
+        console.log("Latest time extracted")
+        response.send(result.rows)
+      }
+
+    }
+  })
+})
+
+app.get('/getCurrentTimeDemo', (request, response) => {
+  console.log("fetching time")
+  const fetch_id_query = "SELECT MAX(recorded_at) AS latest_time FROM temp_carpark_avail"
   connection.query(fetch_id_query, (err, result) => {
     if (err) {
       response.send(err)
