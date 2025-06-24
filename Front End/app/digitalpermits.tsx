@@ -123,7 +123,7 @@ export default function DigitalPermits() {
 
   // if user is logged in
   // rmb to define valid routes later so no need to cast
-  type validRoutes = "/season" | "/capped" | "/reservation" | "/update";
+  type validRoutes = "/season" | "/capped" | "/reservation";
   const FeatureButton = ({ 
     title, 
     description, 

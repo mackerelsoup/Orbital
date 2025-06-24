@@ -92,20 +92,44 @@ export default function RootLayout() {
                 }
               }}></Drawer.Screen>
 
-
+              {/* hidden drawers */}
               <Drawer.Screen
                 name="login"
                 options={{
                   headerShown: false,
                   drawerItemStyle: { display: 'none' }
                 }} />
-
               <Drawer.Screen
                 name="profile"
                 options={{
                   drawerItemStyle: { display: 'none' }
-                }}>
-              </Drawer.Screen>
+                }}/>
+              <Drawer.Screen
+                name="capped"
+                options={{
+                  drawerItemStyle: { display: 'none' }
+                }}/>
+              <Drawer.Screen
+                name="season"
+                options={{
+                  drawerItemStyle: { display: 'none' }
+                }}/>
+              <Drawer.Screen
+                name="cappedForm"
+                options={{
+                  drawerItemStyle: { display: 'none' }
+                }}/>
+              <Drawer.Screen
+                name="seasonForm"
+                options={{
+                  drawerItemStyle: { display: 'none' }
+                }}/>
+              <Drawer.Screen
+                name="reservation"
+                options={{
+                  drawerItemStyle: { display: 'none' }
+                }}/>
+
             </Drawer>
           </BottomSheetModalProvider>
 
