@@ -5,37 +5,38 @@ import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "rea
 
 /*
 Parent file of:
-seasonForm.tsx
+cappedForm.tsx
 
 Parent file:
 digitalpermits.tsx
 */
 
-const SeasonParkingStatus = () => {
+
+const CappedParkingStatus = () => {
   const router = useRouter()
   const { signedUp } = useLocalSearchParams()
-  const [hasSeasonParking, setHasSeasonParking] = useState(false)
+  const [hasCappedParking, setHasCappedParking] = useState(false)
 
   useEffect(() => {
     if (signedUp === "true") {
-      setHasSeasonParking(true)
+      setHasCappedParking(true)
     }
   }, [signedUp])
 
   // if user wishes to end current season parking period
-  const handleEndSeasonParking = () => {
+  const handleEndCappedParking = () => {
     Alert.alert(
-      "End Season Parking",
-      "Are you sure you want to end your current season parking subscription? This action cannot be undone and you will lose access to season parking benefits immediately.",
+      "Remove Vehicle Registraion",
+      "Are you sure you want to remove your vehicle's registration? You will lose access to capped parking rates immediately and your vehicle will no longer be registered.",
       [
         {
           text: "Cancel", style: "cancel",
         },
         {
-          text: "End Subscription", style: "destructive",
+          text: "Remove", style: "destructive",
           onPress: () => {
-            setHasSeasonParking(false)
-            Alert.alert("Subscription Ended", "Your season parking subscription has been successfully ended.")
+            setHasCappedParking(false)
+            Alert.alert("Vehicle Registration Removed", "Your vehicle registration has been successfully removed.")
           }
         }
       ]
@@ -43,24 +44,24 @@ const SeasonParkingStatus = () => {
   } 
 
   // if user has successfully applied for season parking
-  if (hasSeasonParking) {
+  if (hasCappedParking) {
     return (
       <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
         <View style={styles.container}>
           {/* header */}
           <View style={styles.header}>
-            <FontAwesome name="calendar" size={44} color="#10B981" style={styles.headerIcon} />
-            <Text style={styles.heading}>Season Parking</Text>
+            <FontAwesome name="car" size={44} color="#10B981" style={styles.headerIcon} />
+            <Text style={styles.heading}>Capped Parking</Text>
           </View>
 
           {/* status card */}
           <View style={styles.card}>
             <View style={styles.statusHeader}>
               <FontAwesome name="check-circle" size={24} color="#10B981" />
-              <Text style={styles.statusTitle}>Active Season Parking</Text>
+              <Text style={styles.statusTitle}>Vehicle Registered</Text>
             </View>
 
-            <Text style={styles.statusDescription}>You currently have an active season parking subscription.</Text>
+            <Text style={styles.statusDescription}>Your vehicle is registered and currently enjoys capped parking rates.</Text>
 
             {/* validity details */}
             <View style={styles.inputGroup}>
@@ -72,20 +73,22 @@ const SeasonParkingStatus = () => {
               </View>
             </View>
 
-            <View style={styles.inputGroup}>
-              <Text style={styles.label}>
-                <FontAwesome name="map-marker" size={14} color="#6B7280" />  Parking Type
-              </Text> 
-              <View style={styles.detailValue}>
-                <Text style={styles.detailText}>Unsheltered Lot - $35/month</Text>
-              </View>
+            <View style={styles.cappedCard}>
+              <Text style={styles.title}>Capped Parking Rates</Text>
+              <Text style={styles.carparks}>CP 3, CP 10B</Text>
+              
+              <Text style={styles.cappedHeading}>Mon–Fri</Text>
+              <Text style={styles.text}>
+                0830 to 1800: $0.0214/min (capped at $2.568 per exit)
+              </Text>
+              <Text style={styles.text}>1801 to 1930: $0.0214/min</Text>
             </View>
 
             {/* view details */}
             <TouchableOpacity
               style={styles.primaryButton}
               onPress={() => {
-                alert("Season Parking valid from 01/06/2025 to 31/08/2025")
+                alert("Capped Parking Rates valid from 01/06/2025 to 31/08/2025")
               }}
             >
               <FontAwesome name="info-circle" size={18} color="#FFFFFF" style={styles.buttonIcon} />
@@ -95,12 +98,12 @@ const SeasonParkingStatus = () => {
             {/* additional (non-working yet) actions */}
             <View style={styles.actionRow}>
               <TouchableOpacity style={styles.secondaryButton}>
-                <FontAwesome name="refresh" size={16} color="#6366F1" />
+                <FontAwesome name="refresh" size={16} color="#10B981" />
                 <Text style={styles.secondaryButtonText}>Renew</Text>
               </TouchableOpacity>
 
               <TouchableOpacity style={styles.secondaryButton}>
-                <FontAwesome name="edit" size={16} color="#6366F1" />
+                <FontAwesome name="edit" size={16} color="#10B981" />
                 <Text style={styles.secondaryButtonText}>Modify</Text>
               </TouchableOpacity>
             </View>
@@ -108,10 +111,10 @@ const SeasonParkingStatus = () => {
             {/* end season parking button */}
             <TouchableOpacity
               style={styles.dangerButton}
-              onPress={handleEndSeasonParking}
+              onPress={handleEndCappedParking}
             >
               <FontAwesome name="times-circle" size={18} color="#FFFFFF" style={styles.buttonIcon} />
-              <Text style={styles.dangerButtonText}>End Season Parking</Text>
+              <Text style={styles.dangerButtonText}>Remove Vehicle Registration</Text>
             </TouchableOpacity>
 
           </View>
@@ -120,68 +123,56 @@ const SeasonParkingStatus = () => {
     )
   }
 
+  
   // default view for no season parking
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
       <View style={styles.container}>
         {/* header icon + text */}
         <View style={styles.header}>
-          <FontAwesome name="calendar" size={44} color="#6366F1" style={styles.headerIcon} />
-          <Text style={styles.heading}>Season Parking</Text>
+          <FontAwesome name="car" size={44} color="#10B981" style={styles.headerIcon} />
+          <Text style={styles.heading}>Register Vehicle</Text>
         </View>
 
         {/* no season parking card */}
         <View style={styles.card}>
           <View style={styles.statusHeader}>
             <FontAwesome name="exclamation-circle" size={24} color="#F59E0B" />
-            <Text style={styles.statusTitle}>No Active Season Parking</Text>
+            <Text style={styles.statusTitle}>Vehicle NOT Registered</Text>
           </View>
 
           <Text style={styles.statusDescription}>
-            You currently do not have an active season parking subscription. Apply now to enjoy free campus parking!
+            You currently do not have a vehicle registered. Register now to enjoy capped parking rates at selected car parks!
           </Text>
 
-          {/* season benefits */}
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>
-              <FontAwesome name="star" size={16} color="#6B7280" /> Season Parking Benefits
-            </Text>
-            <View style={styles.benefitsContainer}>
-              <View style={styles.benefitItem}>
-                <FontAwesome name="check" size={14} color="#10B981" />
-                <Text style={styles.benefitText}>Free parking at selected car parks</Text>
+            {/* capped rates display */}
+            <View>
+              <Text style={styles.cappedRatesTitle}>Capped Parking Rates</Text>
+              <View style={styles.cappedRatesCard}>
+                <View style={styles.cappedRatesRow}>
+                  <Text style={styles.cappedRatesTime}>Mon-Fri, 08:30-18:00</Text>
+                  <Text style={styles.cappedRatesAmount}>$0.0214/min</Text>
+                </View>
+                <View style={styles.capHighlight}>
+                  <FontAwesome name="star" size={12} color="#10B981" />
+                  <Text style={styles.capHighlightText}>Capped at $2.568 per exit</Text>
+                </View>
               </View>
-
-              <View style={styles.benefitItem}>
-                <FontAwesome name="check" size={14} color="#10B981" />
-                <Text style={styles.benefitText}>Choose between sheltered and non-sheltered car park plans</Text>
+            </View>
+            <View>
+              <Text style={styles.cappedRatesTitle2}>Selected Car Parks</Text>
+              <View style={styles.cappedRatesCard}>
+                  <Text style={styles.cappedRatesCP}>CP3 – University Cultural Centre /Yong Siew Toh Conservatory of Music</Text>
+                  <Text style={styles.cappedRatesCP2}>CP10 – Prince George’s Park Residences</Text>
               </View>
             </View>
           </View>
 
-          {/* pricing options */}
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>
-              <FontAwesome name="dollar" size={16} color="#6B7280" /> Pricing Options
-            </Text>
-            <View style={styles.pricingContainer}>
-              <View style={styles.pricingOption}>
-                <Text style={styles.pricingLabel}>Unsheltered Lot</Text>
-                <Text style={styles.pricingValue}>$35/month</Text>
-              </View>
-              <View style={styles.pricingOption}>
-                <Text style={styles.pricingLabel}>Sheltered Lot</Text>
-                <Text style={styles.pricingValue}>$65/month</Text>
-              </View>
-            </View>
-          </View>
-
-          <TouchableOpacity style={styles.primaryButton} onPress={() => router.push("/seasonForm")}>
+          <TouchableOpacity style={styles.primaryButton} onPress={() => router.push("/cappedForm")}>
             <FontAwesome name="plus" size={17} color="#FFFFFF" style={styles.buttonIcon} />
             <Text style={styles.primaryButtonText}>Sign Up for Season Parking</Text>
           </TouchableOpacity>
         </View>
-      </View>
     </ScrollView>
   )
 }
@@ -260,14 +251,14 @@ const styles = StyleSheet.create({
     color: "#1F2937",
   },
   primaryButton: {
-    backgroundColor: "#6366F1",
+    backgroundColor: "#10B981",
     borderRadius: 12,
     paddingVertical: 16,
     paddingHorizontal: 24,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: "#6366F1",
+    shadowColor: "#10B981",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
@@ -311,7 +302,7 @@ const styles = StyleSheet.create({
   secondaryButton: {
     flex: 1,
     backgroundColor: "#F9FAFB",
-    borderColor: "#6366F1",
+    borderColor: "#10B981",
     borderWidth: 1,
     borderRadius: 12,
     paddingVertical: 12,
@@ -321,7 +312,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   secondaryButtonText: {
-    color: "#6366F1",
+    color: "#10B981",
     fontSize: 14,
     fontWeight: "600",
     marginLeft: 6,
@@ -364,6 +355,90 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     marginTop: 4,
   },
+  title: {
+  fontWeight: '500',
+  fontSize: 22,
+  marginBottom: 24,
+},
+  carparks: {
+    fontWeight: '800',
+    fontSize: 20,
+    marginBottom: 2,
+  },
+  cappedHeading: {
+    fontWeight: '600',
+    marginTop: 6,
+  },
+  text: {
+    marginBottom: 4,
+  },
+  cappedCard: {
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  cappedRatesTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#374151",
+    marginBottom: 12,
+    marginTop: 12,
+  },
+  cappedRatesCard: {
+    backgroundColor: "#F0FDF4",
+    borderRadius: 12,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: "#BBF7D0",
+  },
+  cappedRatesRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  cappedRatesTime: {
+    fontSize: 14,
+    color: "#374151",
+  },
+  cappedRatesAmount: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#059669",
+  },
+  capHighlight: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  capHighlightText: {
+    fontSize: 12,
+    color: "#059669",
+    fontWeight: "500",
+    marginLeft: 6,
+  },
+  cappedRatesTitle2: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#374151",
+    marginBottom: 12,
+    marginTop: 32,
+  },
+  cappedRatesCP: {
+    fontSize: 18,
+    color: "#374151",
+  },
+  cappedRatesCP2: {
+    fontSize: 18,
+    color: "#374151",
+    marginTop: 30,
+  },
+
 })
 
-export default SeasonParkingStatus
+export default CappedParkingStatus

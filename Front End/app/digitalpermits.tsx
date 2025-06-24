@@ -6,10 +6,9 @@ import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'rea
 
 /*
 Parent file of:
-register.tsx
+capped.tsx
 reservation.tsx
 season.tsx
-update.tsx
 */
 
 export default function DigitalPermits() {
@@ -123,6 +122,8 @@ export default function DigitalPermits() {
 
 
   // if user is logged in
+  // rmb to define valid routes later so no need to cast
+  type validRoutes = "/season" | "/capped" | "/reservation" | "/update";
   const FeatureButton = ({ 
     title, 
     description, 
@@ -134,13 +135,13 @@ export default function DigitalPermits() {
     title: string; 
     description: string;
     icon: any; 
-    href: string;
+    href: validRoutes;
     color?: string;
     iconColor?: string;
-  }) => (
+  }) => ( 
     <TouchableOpacity 
       style={[styles.featureButton, { backgroundColor: color }]}
-      onPress={() => router.push("/season")}
+      onPress={() => router.push(href)}
     >
       <View style={styles.featureContent}>
         <View style={styles.featureIconContainer}>
@@ -188,14 +189,14 @@ export default function DigitalPermits() {
             description="View and manage your seasonal parking permits"
             icon="calendar" 
             href="/season"
-            color="#8B5CF6"
+            color="#6366F1"
           />
           
           <FeatureButton 
             title="Register Vehicle" 
             description="Register for capped parking at selected locations"
             icon="car" 
-            href="/register"
+            href="/capped"
             color="#10B981"
           />
           
@@ -206,14 +207,7 @@ export default function DigitalPermits() {
             href="/reservation"
             color="#F59E0B"
           />
-          
-          <FeatureButton 
-            title="Update Personal Info" 
-            description="Manage your personal and vehicle details"
-            icon="edit" 
-            href="/update"
-            color="#6366F1"
-          />
+    
         </View>
 
         {/* Help Card */}
