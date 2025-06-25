@@ -6,7 +6,7 @@ import { RadioButton } from 'react-native-paper';
 
 /*
 Parent file:
-digitalpermits.tsx
+capped.tsx
 */
 
 interface FormData {
