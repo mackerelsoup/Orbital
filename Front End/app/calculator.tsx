@@ -121,7 +121,7 @@ export default function CalculatorScreen() {
             {/* Carpark Selection */}
             <View style={styles.inputGroup}>
               <Text style={styles.label}>
-                <FontAwesome name="map-marker" size={14} color="#6B7280" /> Carpark Location
+                <FontAwesome name="map-marker" size={14} color="#6B7280" />  Carpark Location
               </Text>
               <ModalSelector
                 ref={selectorRef}
@@ -157,7 +157,7 @@ export default function CalculatorScreen() {
             <View style={styles.inputGroup}>
               <View style={styles.switchRow}>
                 <Text style={styles.label}>
-                  <FontAwesome name="id-card" size={14} color="#6B7280" /> Registered Vehicle
+                  <FontAwesome name="id-card" size={14} color="#6B7280" />  Registered Vehicle
                 </Text>
                 <Switch 
                   value={isRegistered} 
@@ -171,7 +171,7 @@ export default function CalculatorScreen() {
             {/* Start Time */}
             <View style={styles.inputGroup}>
               <Text style={styles.label}>
-                <FontAwesome name="clock-o" size={14} color="#6B7280" /> Start Time
+                <FontAwesome name="clock-o" size={14} color="#6B7280" />  Start Time
               </Text>
               <TouchableOpacity 
                 style={styles.timeButton} 
@@ -227,7 +227,7 @@ export default function CalculatorScreen() {
             {/* Duration */}
             <View style={styles.inputGroup}>
               <Text style={styles.label}>
-                <FontAwesome name="hourglass-half" size={14} color="#6B7280" /> Duration (minutes)
+                <FontAwesome name="hourglass-half" size={14} color="#6B7280" />  Duration (minutes)
               </Text>
               <TextInput
                 style={styles.input}

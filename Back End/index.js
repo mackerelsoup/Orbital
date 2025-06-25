@@ -348,6 +348,59 @@ app.delete('/delete/:id', (request, response) => {
   })
 })
 
+// for storing season parking form data
+app.post('/applySeasonParking', (request, response) => {
+  const {
+    salutation, name, address, studentNo, faculty, email, tel, vehicleRegNo, iuNo, vehicleOwner, relationship, engineCapacity, parkingType
+  } = request.body;
+
+  const query = `
+    INSERT INTO season_parking_applications (
+      salutation, name, address, student_no, faculty, email, tel, vehicle_reg_no, iu_no, vehicle_owner, relationship, engine_capacity, parking_type
+    ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
+    RETURNING *
+  `;
+
+  const values = [
+    salutation, name, address, studentNo, faculty, email, tel, vehicleRegNo, iuNo, vehicleOwner, relationship, engineCapacity, parkingType
+  ];
+
+  connection.query(query, values, (err, result) => {
+    if (err) {
+      console.log("error in season parking");
+      console.error(err);
+      return response.status(500).json({ success: false, error: 'Database error' });
+    }
+    response.status(201).json({ success: true, data: result.rows[0] });
+  });
+});
+
+// for storing capped parking
+app.post('/applyCappedParking', (request, response) => {
+  const {
+    salutation, name, address, email, tel, vehicleRegNo, iuNo, vehicleOwner, relationship, engineCapacity
+  } = request.body;
+
+  const query = `
+    INSERT INTO capped_parking_applications (
+      salutation, name, address, email, tel, vehicle_reg_no, iu_no, vehicle_owner, relationship, engine_capacity
+    ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
+    RETURNING *
+  `;
+
+  const values = [
+    salutation, name, address, email, tel, vehicleRegNo, iuNo, vehicleOwner, relationship, engineCapacity
+  ];
+
+  connection.query(query, values, (err, result) => {
+    if (err) {
+      console.log("error in capped parking");
+      console.error(err);
+      return response.status(500).json({ success: false, error: 'Database error' });
+    }
+    response.status(201).json({ success: true, data: result.rows[0] });
+  });
+});
 
 app.listen(3000, () => {
   console.log("server is running")

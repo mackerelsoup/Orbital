@@ -69,7 +69,7 @@ export default function PricingScreen() {
             <Text style={styles.pricingLabel}>Daily Cap</Text>
             <Text style={styles.pricingValue}>
               {item.pricing?.max_daily_cap !== undefined
-                ? `$${item.pricing.max_daily_cap.toFixed(2)}`
+                ? `$${Math.floor(item.pricing?.max_daily_cap * 100) / 100}`
                 : 'No Cap'}
             </Text>
           </View>
@@ -85,6 +85,7 @@ export default function PricingScreen() {
     </TouchableOpacity>
   );
 
+  
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#F8FAFC" />
