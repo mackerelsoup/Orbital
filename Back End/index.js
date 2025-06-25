@@ -2,6 +2,7 @@ require('dotenv').config()
 const { Client } = require('pg')
 const express = require('express')
 const axios = require('axios')
+const { spawn } = require('child_process')
 
 const app = express()
 //parses incoming request 
@@ -171,7 +172,7 @@ app.get('/fetchCarparkHistoryDemo/:id/:startTime/:endTime', (request, response) 
   const id = request.params.id
   const startTime = request.params.startTime
   const endTime = request.params.endTime
-  const fetch_id_query = "SELECT * FROM temp_carpark_avail WHERE carpark_id = $1 AND recorded_at >= to_timestamp($2) AND recorded_at <= to_timestamp($3) ORDER BY recorded_at ASC"
+  const fetch_id_query = "SELECT available, recorded_at FROM temp_carpark_avail WHERE carpark_id = $1 AND recorded_at >= to_timestamp($2) AND recorded_at <= to_timestamp($3) ORDER BY recorded_at ASC"
   connection.query(fetch_id_query, [id, startTime, endTime], (err, result) => {
     if (err) {
       response.send(err)
@@ -232,6 +233,88 @@ app.get('/getCurrentTimeDemo', (request, response) => {
     }
   })
 })
+
+app.get('/getAllHistoricalDataDemo/:id', (request, response) => {
+  console.log("fecthing time")
+  const id = request.params.id
+  const fetch_id_query = "SELECT to_char(recorded_at, 'YYYY-MM-DD HH24:MI:SS') AS recorded_at, available FROM temp_carpark_avail WHERE carpark_id = $1 ORDER BY recorded_at ASC"
+  connection.query(fetch_id_query, [id], (err, result) => {
+    if (err) {
+      response.send(err)
+      console.error(err)
+    }
+    else {
+      if (result.rowCount === 0) {
+        response.status(404).send("No carpark avail info ")
+      }
+      else {
+        console.log("all historical data obtained")
+        response.send(result.rows)
+      }
+
+    }
+  })
+})
+
+app.post('/getAvailabilityForecastDemo/:id', async (request, response) => {
+  console.log("predicting avail");
+  const id = request.params.id;
+
+  try {
+    // Fetch historical carpark data
+    const res = await fetch(`http://192.168.68.60:3000/getAllHistoricalDataDemo/${id}`);
+    if (!res.ok) {
+      return response.status(res.status).json({ error: `Failed to fetch carpark data: ${res.statusText}` });
+    }
+
+    const carparkAvailData = await res.json();;
+
+    // Spawn python process
+    const py = spawn('C:/Users/Admin/miniconda3/envs/arima-env/python.exe', ['./scripts/Carpark Availability Prediction Script.py']);
+
+    console.log("spawned")
+
+    let forecast = '';
+    let errorOutput = '';
+
+    // Collect data from python stdout
+    py.stdout.on('data', (data) => {
+      forecast += data.toString();
+    });
+
+    // Collect data from python stderr
+    py.stderr.on('data', (err) => {
+      errorOutput += err.toString();
+    });
+
+    // When python finishes
+    py.on('close', (code) => {
+      if (code !== 0) {
+        console.error(`Python process exited with code ${code}, stderr: ${errorOutput}`);
+        return response.status(500).json({ error: 'Python script error', details: errorOutput });
+      }
+      try {
+        // Parse the JSON output from python
+        console.log(forecast)
+        const forecastJson = JSON.parse(forecast);
+        return response.json(forecastJson);
+      } catch (parseErr) {
+        console.error('Error parsing JSON from python:', parseErr);
+        return response.status(500).json({ error: 'Invalid JSON output from python' });
+      }
+    });
+
+    // Send JSON input to python stdin
+    py.stdin.write(JSON.stringify(carparkAvailData));
+    py.stdin.end();
+
+  } catch (error) {
+    console.error('Server error:', error);
+    response.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+
 
 
 app.put('/update/:id', (request, response) => {

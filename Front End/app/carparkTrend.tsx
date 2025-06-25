@@ -7,6 +7,7 @@ import TimeRangeSelector from '@/components/TimeRangeSelector'
 import { subMonths, subYears } from 'date-fns';
 import { scaleTime } from 'd3-scale';
 import { timeMinute } from 'd3-time';
+import Button from '@/components/Button'
 
 
 type CarparkTrendProps = {
@@ -14,10 +15,7 @@ type CarparkTrendProps = {
 }
 
 type CarparkAvailability = {
-  id: number;
-  carpark_id: number;
-  occupied: number;
-  total: number;
+  available: number;
   recorded_at: string;
 };
 
@@ -46,6 +44,7 @@ function ToolTip({ x, y, value }: { x: SharedValue<number>; y: SharedValue<numbe
 
 export default function CarparkTrend({ carpark }: CarparkTrendProps) {
   const [graphData, setGraphData] = useState<{ time: number, availability: number }[]>([]);
+  const [forecastData, setForecastData] = useState<{ time: number, availability: number }[]>([]);
   const [currentTime, setCurrentTime] = useState<number>(0);
   const [selectedRange, setSelectedRange] = useState<'Hour' | '6hr' | 'Day' | 'Month' | 'Year'>('Hour');
   const [startTime, setStartTime] = useState(0);
@@ -70,7 +69,28 @@ export default function CarparkTrend({ carpark }: CarparkTrendProps) {
       }
     };
 
+    const getForecast = async () => {
+      try {
+        const response = await fetch(`http://192.168.68.60:3000/getAvailabilityForecastDemo/1`, {
+          method: 'POST',
+        });
+        if (!response.ok || response.status == 500) throw new Error("Forecast not available");
+        const data: CarparkAvailability[] = await response.json();
+
+        const processedData = data.map(entry => ({
+          time: new Date(entry.recorded_at).getTime(),
+          availability: Number(entry.available)
+        }));
+
+        setForecastData(processedData)
+        console.log("forecast done")
+      } catch (error) {
+        console.log("Failed to get forecast", error)
+      }
+    }
+
     getCurrentTime();
+    getForecast();
   }, []);
 
   useEffect(() => {
@@ -113,14 +133,12 @@ export default function CarparkTrend({ carpark }: CarparkTrendProps) {
         const response = await fetch(`http://192.168.68.60:3000/fetchCarparkHistoryDemo/1/${startTime / 1000}/${endTime / 1000}`);
         if (!response.ok) throw new Error("Carpark History not Available");
         const data: CarparkAvailability[] = await response.json();
-
-        console.log(data)
-
+        //console.log(data)
         const processedData = data.map(entry => ({
           time: new Date(entry.recorded_at).getTime(),
-          availability: Number(entry.occupied)
+          availability: Number(entry.available)
         }));
-        console.log(processedData)
+        //console.log(processedData)
         setGraphData(processedData);
       } catch (error) {
         console.log("Error fetching history:", error);
@@ -136,14 +154,14 @@ export default function CarparkTrend({ carpark }: CarparkTrendProps) {
     const startDate = new Date(startTime);
     const endDate = new Date(endTime);
 
-    console.log(startDate, " ", endDate)
+    //console.log(startDate, " ", endDate)
 
     const scale = scaleTime()
       .domain([startDate, endDate]);
 
     // Generate ticks every 15 minutes
     const interval = timeMinute.every(15);
-    console.log(interval ? scale.ticks(interval).map(d => d.getTime()) : [])
+    //console.log(interval ? scale.ticks(interval).map(d => d.getTime()) : [])
     return interval ? scale.ticks(interval).map(d => d.getTime()) : [];
   }, [startTime, endTime]);
 
@@ -205,6 +223,18 @@ export default function CarparkTrend({ carpark }: CarparkTrendProps) {
 
       </CartesianChart>
       <TimeRangeSelector selected={selectedRange} onSelect={setSelectedRange}></TimeRangeSelector>
+      <Button label="forecast" onPress={() => {
+        if (forecastData.length > 0) {
+          const minTime = Math.min(...forecastData.map(d => d.time));
+          const maxTime = Math.max(...forecastData.map(d => d.time));
+          console.log(minTime, " ", maxTime)
+          console.log(currentTime)
+
+          setGraphData(forecastData);
+          setStartTime(minTime);
+          setEndTime(maxTime);
+        }
+      }}></Button>
     </View>
 
   )
