@@ -55,15 +55,38 @@ const CappedParkingApplicationForm = () => {
     return true;
   };
 
-  const handleSubmit = () => {
+  // handle submit and store info to database by communicating with backend first
+  const handleSubmit = async () => {
     if (!validateForm()) return;
-    
-    // if valid
-    setShowModal(true);
-    setTimeout(() => {
-      setShowModal(false);
-      router.replace('/capped?signedUp=true');
-    }, 2000);
+
+    const payload = {
+      ...formData, // ... to include all user input key-value pairs  
+      engineCapacity,
+    };
+
+    try {
+      const response = await fetch('http://192.168.1.91:3000/applyCappedParking', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      // get response and decode whether it is successful or not
+      const result = await response.json();
+      if (result.success) {
+        console.log("vehicle registered")
+        setShowModal(true);
+        setTimeout(() => {
+          setShowModal(false);
+          router.replace('/capped?signedUp=true');
+        }, 2000);
+      } else {
+        Alert.alert('Submission failed', result.error);
+      }
+    } catch (err) {
+      // if no response, likely network error
+      Alert.alert('Network error', 'Unable to connect to server');
+    }
   };
 
   return (
