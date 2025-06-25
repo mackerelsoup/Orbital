@@ -2,7 +2,7 @@ import CarparkList from '@/components/CarparkList';
 import { getLocation } from '@/components/LocationService';
 import MapComponent from '@/components/MapComponent';
 import { Portal } from 'react-native-portalize'
-import { Link } from 'expo-router';
+import { Link, useLocalSearchParams } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
 import { Pressable, StyleSheet, Text, View, Linking, Dimensions, Platform } from 'react-native';
 import MapView, { MapMarker, Region } from 'react-native-maps';
@@ -19,8 +19,20 @@ export default function App() {
   const [coordinateSelected, setCoords] = useState<Region | null>(null);
   const [selectedCarpark, setSelectedCarpark] = useState<Carpark | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
+  const { carparkId, triggerClick } = useLocalSearchParams();
 
-  //retreiving user location data
+  // allows for car park modal to pop up when clicked from pricing file
+  useEffect(() => {
+    if (carparkId && triggerClick === 'true') {
+      const id = parseInt(carparkId.toString(), 10);
+      const target = carparks.find(cp => cp.id === id);
+      if (target) {
+        handleCarparkSelect(target);
+      }
+    }
+  }, [carparkId, triggerClick]);
+
+  // retreiving user location data
   useEffect(() => {
     const initializeLocation = async () => {
       const locationData = await getLocation();
