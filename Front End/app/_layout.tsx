@@ -4,7 +4,7 @@ import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { Link } from 'expo-router';
 import { Drawer } from 'expo-router/drawer';
 import { useContext } from 'react';
-import { StyleSheet } from 'react-native';
+import { Platform, View, StyleSheet } from 'react-native';
 import 'react-native-gesture-handler'
 import { GestureHandlerRootView, Pressable } from 'react-native-gesture-handler';
 import { Host } from 'react-native-portalize';
@@ -17,6 +17,7 @@ export default function RootLayout() {
           <BottomSheetModalProvider>
             <Drawer>
               <Drawer.Screen name="index" options={{
+                headerStyle: { height: 96},
                 title: "Home",
                 drawerIcon: ({ color, size }) => (
                   <FontAwesome name="home" size={size} color={color} />
@@ -25,11 +26,13 @@ export default function RootLayout() {
                 headerRight: () => {
                   const { user } = useContext(UserContext)!
                   return (
-                    <Link href={user.username ? '/profile' : '/login'} asChild style={styles.profileContainer}>
-                      <Pressable>
-                        <FontAwesome name="user-circle-o" size={35} />
-                      </Pressable>
-                    </Link>
+                    <View style={{marginTop: Platform.OS === 'ios' ? -10 : 0, paddingRight: 8}}>
+                      <Link href={user.username ? '/profile' : '/login'} asChild style={styles.profileContainer}>
+                        <Pressable>
+                          <FontAwesome name="user-circle-o" size={32} />
+                        </Pressable>
+                      </Link>
+                    </View>
 
                   )
                 }
