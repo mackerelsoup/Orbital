@@ -1,4 +1,4 @@
-  import { router } from "expo-router"
+  import { useLocalSearchParams, router } from "expo-router"
   import React, { useState , useContext} from "react";
   import {
     View,
@@ -54,8 +54,8 @@
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [errors, setErrors] = useState<FormErrors>({});
-    const {setUser} = useContext(UserContext)!
-
+    const {setUser,setLoggedIn} = useContext(UserContext)!
+    const { from } = useLocalSearchParams();
 
     //check if the user submitted the right info
     const validateLogin = () => {
@@ -84,8 +84,8 @@
 
       try {
         let response
-        if (isEmail()) response = await fetch(`http://192.168.68.60:3000/fetchbyEmail/${username}`);
-        else response = await fetch(`http://192.168.68.60:3000/fetchbyUsername/${username}`);
+        if (isEmail()) response = await fetch(`http://192.168.1.91:3000/fetchbyEmail/${username}`);
+        else response = await fetch(`http://192.168.1.91:3000/fetchbyUsername/${username}`);
 
         if (response.status === 404) throw new UserNotFoundError("User not found")
         if (!response.ok) throw new ConnectionError("Network response was not ok")
@@ -102,7 +102,7 @@
         setUserData(data[0]);
         setUsername("");
         setPassword("");
-        router.replace('/');
+        router.replace((from?.toString() || '/') as any);
       } catch (error) {
         if (error instanceof ConnectionError) {
           console.log("Connection error", error)
@@ -120,7 +120,7 @@
     const setUserData = async (data: userDataIncomplete) => {
       console.log(data)
       try {
-        let response = await fetch(`http://192.168.68.60:3000/fetchUserData/${username}`)
+        let response = await fetch(`http://192.168.1.91:3000/fetchUserData/${username}`)
         if (response.status === 404) throw new userDataNotFoundError("User not found")
         if (!response.ok) throw new ConnectionError("Network response was not ok")
 
@@ -138,6 +138,7 @@
         console.log(mergedData)
 
         setUser(mergedData)
+        setLoggedIn(true);
 
       } catch (error) {
         if (error instanceof ConnectionError) {
