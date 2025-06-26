@@ -262,15 +262,16 @@ app.post('/getAvailabilityForecastDemo/:id', async (request, response) => {
 
   try {
     // Fetch historical carpark data
-    const res = await fetch(`http://192.168.68.60:3000/getAllHistoricalDataDemo/${id}`);
+    const res = await fetch(`http://192.168.1.91:3000/getAllHistoricalDataDemo/${id}`);
     if (!res.ok) {
+      // console.log("failed to fetch carpark data");
       return response.status(res.status).json({ error: `Failed to fetch carpark data: ${res.statusText}` });
     }
 
     const carparkAvailData = await res.json();;
 
     // Spawn python process
-    const py = spawn('C:/Users/Admin/miniconda3/envs/arima-env/python.exe', ['./scripts/Carpark Availability Prediction Script.py']);
+    const py = spawn('python', ['./scripts/Carpark Availability Prediction Script.py']);
 
     console.log("spawned")
 
