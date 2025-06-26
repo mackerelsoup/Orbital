@@ -1,9 +1,13 @@
 import React, { createContext, useState } from 'react';
 
 type UserContextType = {
-  user:  UserData;
+  user: UserData;
   setUser: React.Dispatch<React.SetStateAction<UserData>>;
+  loggedIn: boolean;
+  setLoggedIn: React.Dispatch<React.SetStateAction<boolean>>;
+  logout: () => void;
 };
+
 
 // Create context with the correct type
 export const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -19,9 +23,23 @@ export const UserProvider = ({ children }: UserProviderProps) => {
     season_parking_type: 'nil'
   });
 
+  const [loggedIn, setLoggedIn] = useState(false);
+
+  const logout = () => {
+    setUser({
+      staff: false,
+      season_parking: false,
+      season_parking_type: 'nil'
+    });
+    setLoggedIn(false);
+  };
+
   const value = {
     user,
-    setUser
+    setUser,
+    loggedIn,
+    setLoggedIn,
+    logout
   };
 
   return (

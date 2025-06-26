@@ -1,8 +1,10 @@
 import { FontAwesome } from '@expo/vector-icons';
 import * as WebBrowser from 'expo-web-browser';
 import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { UserContext } from "@/context/userContext";
+import { LogOut } from 'iconoir-react-native';
 
 /*
 Parent file of:
@@ -12,13 +14,18 @@ season.tsx
 */
 
 export default function DigitalPermits() {
-  const [loggedIn, setLoggedIn] = useState(false);
+  const { loggedIn } = useContext(UserContext)!;
   const [userType, setUserType] = useState<'Student' | 'Staff' | null>(null);
   const router = useRouter();
+  const { logout } = useContext(UserContext)!;
 
+  // redirects to log in page and ensures it redirects back upon success
   const handleLogin = (selectedUserType: 'Student' | 'Staff') => {
     if (selectedUserType === 'Student') {
-      setLoggedIn(true);
+      router.push({
+        pathname: '/login',
+        params: { from: '/digitalpermits' }
+      });
       setUserType(selectedUserType);
     } else {
       Alert.alert('Feature is not yet available.');
@@ -34,10 +41,7 @@ export default function DigitalPermits() {
         {
           text: 'Logout',
           style: 'destructive',
-          onPress: () => {
-            setLoggedIn(false);
-            setUserType(null);
-          },
+          onPress: logout,
         },
       ],
       { cancelable: true }
