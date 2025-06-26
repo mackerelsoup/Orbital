@@ -17,8 +17,12 @@ export default function DigitalPermits() {
   const router = useRouter();
 
   const handleLogin = (selectedUserType: 'Student' | 'Staff') => {
-    setLoggedIn(true);
-    setUserType(selectedUserType);
+    if (selectedUserType === 'Student') {
+      setLoggedIn(true);
+      setUserType(selectedUserType);
+    } else {
+      Alert.alert('Feature is not yet available.');
+    }
   };
 
   const handleLogout = () => {
