@@ -105,7 +105,7 @@ export default function RootLayout() {
                 }
               }}></Drawer.Screen>
 
-              <Drawer.Screen name="carparkTrend" options={{
+              <Drawer.Screen name="carparkTrendSelect" options={{
                 headerStyle: { height: 96 },
                 title: "Parking Trends",
                 drawerIcon: ({ color, size }) => (
@@ -173,6 +173,11 @@ export default function RootLayout() {
                 }} />
               <Drawer.Screen
                 name="registration"
+                options={{
+                  drawerItemStyle: { display: 'none' }
+                }} />
+              <Drawer.Screen
+                name="carparkTrend"
                 options={{
                   drawerItemStyle: { display: 'none' }
                 }} />

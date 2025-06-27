@@ -8,6 +8,8 @@ import { subMonths, subYears } from 'date-fns';
 import { scaleTime } from 'd3-scale';
 import { timeMinute } from 'd3-time';
 import Button from '@/components/Button'
+import CarparkList from '@/components/CarparkList'
+import { useLocalSearchParams } from 'expo-router';
 
 
 type CarparkTrendProps = {
@@ -42,7 +44,9 @@ function ToolTip({ x, y, value }: { x: SharedValue<number>; y: SharedValue<numbe
 
 }
 
-export default function CarparkTrend({ carpark }: CarparkTrendProps) {
+export default function CarparkTrend() {
+  const { carpark } = useLocalSearchParams();
+  const parsedCarpark: Carpark = JSON.parse(carpark as string); 
   const [graphData, setGraphData] = useState<{ time: number, availability: number }[]>([]);
   const [forecastData, setForecastData] = useState<{ time: number, availability: number }[]>([]);
   const [currentTime, setCurrentTime] = useState<number>(0);
@@ -71,7 +75,7 @@ export default function CarparkTrend({ carpark }: CarparkTrendProps) {
 
     const getForecast = async () => {
       try {
-        const response = await fetch(`https://orbital-1y2b.onrender.com/getAvailabilityForecastDemo/1`, {
+        const response = await fetch(`https://orbital-1y2b.onrender.com/getAvailabilityForecastDemo/${parsedCarpark.id}`, {
           method: 'POST',
         });
         if (!response.ok || response.status == 500) throw new Error("Forecast not available");
@@ -133,9 +137,10 @@ export default function CarparkTrend({ carpark }: CarparkTrendProps) {
   useEffect(() => {
     if (startTime === 0 || endTime === 0) return;
 
-    const getAvailabilityHistory = async (carpark: Carpark) => {
+    const getAvailabilityHistory = async () => {
+      console.log("CarparkTrend received carpark:", carpark);
       try {
-        const response = await fetch(`https://orbital-1y2b.onrender.com/fetchCarparkHistoryDemo/1/${startTime / 1000}/${endTime / 1000}`);
+        const response = await fetch(`https://orbital-1y2b.onrender.com/fetchCarparkHistoryDemo/${parsedCarpark.id}/${startTime / 1000}/${endTime / 1000}`);
         if (!response.ok) throw new Error("Carpark History not Available");
         const data: CarparkAvailability[] = await response.json();
         //console.log(data)
@@ -150,7 +155,7 @@ export default function CarparkTrend({ carpark }: CarparkTrendProps) {
       }
     };
 
-    getAvailabilityHistory(carpark);
+    getAvailabilityHistory();
   }, [startTime, endTime]);
 
   const tickValues = useMemo(() => {
