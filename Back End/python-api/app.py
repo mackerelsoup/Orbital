@@ -8,24 +8,30 @@ def index():
     return "Flask is up"
 
 
-@app.route('/run', methods=['GET'])
+@app.route('/run', methods=['POST'])
 def run_prediction():
     try:
-        result = subprocess.run(
-            ['python3', '../scripts/Carpark Availability Prediction Script.py'],
-            capture_output=True,
-            text=True,
-            check=True
-        )
+        input_data = request.get_json(force=True)  # 🔧 accept JSON body
+        # Optionally print/log input
+        print("Received data:", input_data)
+
+        # Stub: return dummy forecast for now
+        forecast = [
+            {"timestamp": "2025-06-27 18:00:00", "available": 10},
+            {"timestamp": "2025-06-27 19:00:00", "available": 12}
+        ]
+
         return jsonify({
-            'status': 'success',
-            'output': result.stdout
+            "message": "Prediction successful",
+            "forecast": forecast
         })
-    except subprocess.CalledProcessError as e:
+
+    except Exception as e:
         return jsonify({
             'status': 'error',
-            'error': e.stderr
+            'error': str(e)
         }), 500
-
+    
+    
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=10000)
