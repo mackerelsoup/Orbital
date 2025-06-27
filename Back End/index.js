@@ -277,7 +277,7 @@ app.post('/getAvailabilityForecastDemo/:id', async (request, response) => {
     const carparkAvailData = await res.json();;
 
     // Spawn python process
-    const py = spawn('python', ['./scripts/Carpark Availability Prediction Script.py']);
+    const py = spawn('python3', ['./scripts/Carpark Availability Prediction Script.py']);
 
     console.log("spawned")
 
