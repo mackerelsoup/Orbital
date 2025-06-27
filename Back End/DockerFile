@@ -17,7 +17,8 @@ COPY . .
 # Install Python dependencies if you have requirements.txt
 # (Assuming your Python script needs some packages)
 COPY requirements.txt ./
-RUN pip3 install --no-cache-dir -r requirements.txt
+RUN pip3 install --break-system-packages --no-cache-dir -r requirements.txt
+
 
 # Expose port your backend listens on
 EXPOSE 3000

@@ -65,7 +65,7 @@ const CappedParkingApplicationForm = () => {
     };
 
     try {
-      const response = await fetch('http://192.168.1.91:3000/applyCappedParking', {
+      const response = await fetch('https://orbital-05em.onrender.com/applyCappedParking', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
