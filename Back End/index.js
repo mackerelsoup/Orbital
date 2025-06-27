@@ -17,6 +17,11 @@ const connection = new Client({
   }
 });
 
+// test
+app.get('/', (req, res) => {
+  res.send('Backend is live');
+});
+
 
 //log that we are connected to the database
 connection.connect().then(() => console.log("connected"))
