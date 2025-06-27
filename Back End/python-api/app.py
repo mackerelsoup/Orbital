@@ -11,14 +11,13 @@ def index():
 @app.route('/run', methods=['POST'])
 def run_prediction():
     try:
-        input_data = request.get_json(force=True)  # 🔧 accept JSON body
-        # Optionally print/log input
+        input_data = request.get_json(force=True)
         print("Received data:", input_data)
 
-        # Stub: return dummy forecast for now
+        # return dummy forecast for now
         forecast = [
-            {"timestamp": "2025-06-27 18:00:00", "available": 10},
-            {"timestamp": "2025-06-27 19:00:00", "available": 12}
+            {"recorded_at": "2025-06-27 18:00:00", "available": 10},
+            {"recorded_at": "2025-06-27 19:00:00", "available": 12}
         ]
 
         return jsonify({

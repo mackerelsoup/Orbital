@@ -75,9 +75,14 @@ export default function CarparkTrend({ carpark }: CarparkTrendProps) {
           method: 'POST',
         });
         if (!response.ok || response.status == 500) throw new Error("Forecast not available");
-        const data: CarparkAvailability[] = await response.json();
+        const data = await response.json();
 
-        const processedData = data.map(entry => ({
+        if (!data.forecast || !Array.isArray(data.forecast)) {
+          console.log("Unexpected forecast format:", data);
+          return;
+        }
+
+        const processedData = data.forecast.map((entry: CarparkAvailability) => ({
           time: new Date(entry.recorded_at).getTime(),
           availability: Number(entry.available)
         }));
