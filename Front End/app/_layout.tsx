@@ -17,7 +17,7 @@ export default function RootLayout() {
           <BottomSheetModalProvider>
             <Drawer>
               <Drawer.Screen name="index" options={{
-                headerStyle: { height: 96},
+                headerStyle: { height: 96 },
                 title: "Home",
                 drawerIcon: ({ color, size }) => (
                   <FontAwesome name="home" size={size} color={color} />
@@ -26,7 +26,7 @@ export default function RootLayout() {
                 headerRight: () => {
                   const { user } = useContext(UserContext)!
                   return (
-                    <View style={{marginTop: Platform.OS === 'ios' ? -10 : 0, paddingRight: 8}}>
+                    <View style={{ marginTop: Platform.OS === 'ios' ? -10 : 0, paddingRight: 8 }}>
                       <Link href={user.username ? '/profile' : '/login'} asChild style={styles.profileContainer}>
                         <Pressable>
                           <FontAwesome name="user-circle-o" size={32} />
@@ -106,32 +106,37 @@ export default function RootLayout() {
                 name="profile"
                 options={{
                   drawerItemStyle: { display: 'none' }
-                }}/>
+                }} />
               <Drawer.Screen
                 name="capped"
                 options={{
                   drawerItemStyle: { display: 'none' }
-                }}/>
+                }} />
               <Drawer.Screen
                 name="season"
                 options={{
                   drawerItemStyle: { display: 'none' }
-                }}/>
+                }} />
               <Drawer.Screen
                 name="cappedForm"
                 options={{
                   drawerItemStyle: { display: 'none' }
-                }}/>
+                }} />
               <Drawer.Screen
                 name="seasonForm"
                 options={{
                   drawerItemStyle: { display: 'none' }
-                }}/>
+                }} />
               <Drawer.Screen
                 name="reservation"
                 options={{
                   drawerItemStyle: { display: 'none' }
-                }}/>
+                }} />
+              <Drawer.Screen
+                name="registration"
+                options={{
+                  drawerItemStyle: { display: 'none' }
+                }} />
 
             </Drawer>
           </BottomSheetModalProvider>
