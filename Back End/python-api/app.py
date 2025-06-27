@@ -3,6 +3,11 @@ import subprocess
 
 app = Flask(__name__)
 
+@app.route('/')
+def index():
+    return "Flask is up"
+
+
 @app.route('/run', methods=['GET'])
 def run_prediction():
     try:
