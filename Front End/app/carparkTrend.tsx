@@ -58,7 +58,7 @@ export default function CarparkTrend({ carpark }: CarparkTrendProps) {
   useEffect(() => {
     const getCurrentTime = async () => {
       try {
-        const response = await fetch("https://orbital-05em.onrender.com/getCurrentTimeDemo");
+        const response = await fetch("https://orbital-1y2b.onrender.com/getCurrentTimeDemo");
         if (!response.ok) throw new Error("Current Time not Available");
         const data = await response.json();
         const latestTime = new Date(data[0].latest_time).getTime();
@@ -71,7 +71,7 @@ export default function CarparkTrend({ carpark }: CarparkTrendProps) {
 
     const getForecast = async () => {
       try {
-        const response = await fetch(`https://orbital-05em.onrender.com/getAvailabilityForecastDemo/1`, {
+        const response = await fetch(`https://orbital-1y2b.onrender.com/getAvailabilityForecastDemo/1`, {
           method: 'POST',
         });
         if (!response.ok || response.status == 500) throw new Error("Forecast not available");
@@ -130,7 +130,7 @@ export default function CarparkTrend({ carpark }: CarparkTrendProps) {
 
     const getAvailabilityHistory = async (carpark: Carpark) => {
       try {
-        const response = await fetch(`https://orbital-05em.onrender.com/fetchCarparkHistoryDemo/1/${startTime / 1000}/${endTime / 1000}`);
+        const response = await fetch(`https://orbital-1y2b.onrender.com/fetchCarparkHistoryDemo/1/${startTime / 1000}/${endTime / 1000}`);
         if (!response.ok) throw new Error("Carpark History not Available");
         const data: CarparkAvailability[] = await response.json();
         //console.log(data)
