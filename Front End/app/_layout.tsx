@@ -1,13 +1,14 @@
 import { UserContext, UserProvider } from '@/context/userContext';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
-import { Link } from 'expo-router';
+import { Link, router } from 'expo-router';
 import { Drawer } from 'expo-router/drawer';
 import { useContext } from 'react';
 import { Platform, View, StyleSheet } from 'react-native';
 import 'react-native-gesture-handler'
 import { GestureHandlerRootView, Pressable } from 'react-native-gesture-handler';
 import { Host } from 'react-native-portalize';
+import { Feather, Ionicons } from '@expo/vector-icons';
 
 export default function RootLayout() {
   return (
@@ -39,6 +40,7 @@ export default function RootLayout() {
               }}></Drawer.Screen>
 
               <Drawer.Screen name="pricing" options={{
+                headerStyle: { height: 96 },
                 title: "Pricing Information",
                 drawerIcon: ({ color, size }) => (
                   <FontAwesome name="money" size={size} color={color} />
@@ -47,17 +49,20 @@ export default function RootLayout() {
                 headerRight: () => {
                   const { user } = useContext(UserContext)!
                   return (
-                    <Link href={user.username ? '/profile' : '/login'} asChild style={styles.profileContainer}>
-                      <Pressable>
-                        <FontAwesome name="user-circle-o" size={28} />
-                      </Pressable>
-                    </Link>
+                    <View style={{ marginTop: Platform.OS === 'ios' ? -10 : 0, paddingRight: 8 }}>
+                      <Link href={user.username ? '/profile' : '/login'} asChild style={styles.profileContainer}>
+                        <Pressable>
+                          <FontAwesome name="user-circle-o" size={32} />
+                        </Pressable>
+                      </Link>
+                    </View>
 
                   )
                 }
               }}></Drawer.Screen>
 
               <Drawer.Screen name="calculator" options={{
+                headerStyle: { height: 96 },
                 title: "Fee Calculator",
                 drawerIcon: ({ color, size }) => (
                   <FontAwesome name="calculator" size={size} color={color} />
@@ -66,17 +71,20 @@ export default function RootLayout() {
                 headerRight: () => {
                   const { user } = useContext(UserContext)!
                   return (
-                    <Link href={user.username ? '/profile' : '/login'} asChild style={styles.profileContainer}>
-                      <Pressable>
-                        <FontAwesome name="user-circle-o" size={28} />
-                      </Pressable>
-                    </Link>
+                    <View style={{ marginTop: Platform.OS === 'ios' ? -10 : 0, paddingRight: 8 }}>
+                      <Link href={user.username ? '/profile' : '/login'} asChild style={styles.profileContainer}>
+                        <Pressable>
+                          <FontAwesome name="user-circle-o" size={32} />
+                        </Pressable>
+                      </Link>
+                    </View>
 
                   )
                 }
               }}></Drawer.Screen>
 
               <Drawer.Screen name="digitalpermits" options={{
+                headerStyle: { height: 96 },
                 title: "Digital Permits",
                 drawerIcon: ({ color, size }) => (
                   <FontAwesome name="id-card" size={size} color={color} />
@@ -85,23 +93,54 @@ export default function RootLayout() {
                 headerRight: () => {
                   const { user } = useContext(UserContext)!
                   return (
-                    <Link href={user.username ? '/profile' : '/login'} asChild style={styles.profileContainer}>
-                      <Pressable>
-                        <FontAwesome name="user-circle-o" size={28} />
-                      </Pressable>
-                    </Link>
+                    <View style={{ marginTop: Platform.OS === 'ios' ? -10 : 0, paddingRight: 8 }}>
+                      <Link href={user.username ? '/profile' : '/login'} asChild style={styles.profileContainer}>
+                        <Pressable>
+                          <FontAwesome name="user-circle-o" size={32} />
+                        </Pressable>
+                      </Link>
+                    </View>
 
                   )
                 }
               }}></Drawer.Screen>
 
-              {/* hidden drawers */}
+              <Drawer.Screen name="carparkTrend" options={{
+                headerStyle: { height: 96 },
+                title: "Parking Trends",
+                drawerIcon: ({ color, size }) => (
+                  <FontAwesome name="line-chart" size={size} color={color} />
+                ),
+                headerTitle: "Parking Trends",
+                headerRight: () => {
+                  const { user } = useContext(UserContext)!
+                  return (
+                    <View style={{ marginTop: Platform.OS === 'ios' ? -10 : 0, paddingRight: 8 }}>
+                      <Link href={user.username ? '/profile' : '/login'} asChild style={styles.profileContainer}>
+                        <Pressable>
+                          <FontAwesome name="user-circle-o" size={32} />
+                        </Pressable>
+                      </Link>
+                    </View>
+
+                  )
+                }
+              }}></Drawer.Screen>
+
+              {/* others + hidden drawers */}
               <Drawer.Screen
                 name="login"
                 options={{
-                  headerShown: false,
+                  title: "Login",
+                  headerShown: true,
+                  headerRight: () => (
+                    <Pressable onPress={() => router.back()} style={{ paddingRight: 20 }}>
+                      <Feather name="x" size={24} color="#007AFF" />
+                    </Pressable>
+                  ),
                   drawerItemStyle: { display: 'none' }
                 }} />
+
               <Drawer.Screen
                 name="profile"
                 options={{

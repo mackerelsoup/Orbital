@@ -88,7 +88,7 @@ export default function App() {
     setModalVisible(true);
   };
 
-  // Add this function to handle marker press from MapComponent 
+  // Added this function to handle marker press from MapComponent 
   const handleMarkerPress = (carpark: Carpark) => {
     setSelectedCarpark(carpark);
     setModalVisible(true);
