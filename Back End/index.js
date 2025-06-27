@@ -298,7 +298,10 @@ app.post('/getAvailabilityForecastDemo/:id', async (request, response) => {
 
   } catch (error) {
     console.error('Server error:', error);
-    response.status(500).json({ error: 'Internal server error' });
+    response.status(500).json({
+      error: 'Internal server error',
+      details: error.message || error.toString(),
+    });
   }
 });
 
