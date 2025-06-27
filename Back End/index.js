@@ -268,7 +268,7 @@ app.post('/getAvailabilityForecastDemo/:id', async (request, response) => {
 
   try {
     // Fetch historical carpark data
-    const res = await fetch(`https://nuspots.onrender.com/getAllHistoricalDataDemo/${id}`);
+    const res = await fetch(`https://orbital-05em.onrender.com/getAllHistoricalDataDemo/${id}`);
     if (!res.ok) {
       // console.log("failed to fetch carpark data");
       return response.status(res.status).json({ error: `Failed to fetch carpark data: ${res.statusText}` });
