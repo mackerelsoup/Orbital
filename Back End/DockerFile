@@ -1,0 +1,29 @@
+# Use official Node.js image as base
+FROM node:18
+
+# Install Python 3 and pip
+RUN apt-get update && apt-get install -y python3 python3-pip
+
+# Set working directory inside container
+WORKDIR /usr/src/app
+
+# Copy package files and install dependencies
+COPY package*.json ./
+RUN npm install
+
+# Copy all project files
+COPY . .
+
+# Install Python dependencies if you have requirements.txt
+# (Assuming your Python script needs some packages)
+COPY requirements.txt ./
+RUN pip3 install --no-cache-dir -r requirements.txt
+
+# Expose port your backend listens on
+EXPOSE 3000
+
+# Set environment variable to not buffer output (useful for logs)
+ENV PYTHONUNBUFFERED=1
+
+# Start the Node.js app
+CMD ["node", "index.js"]
