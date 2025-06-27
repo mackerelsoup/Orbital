@@ -19,7 +19,6 @@ COPY . .
 COPY requirements.txt ./
 RUN pip3 install --break-system-packages --no-cache-dir -r requirements.txt
 
-
 # Expose port your backend listens on
 EXPOSE 3000
 
