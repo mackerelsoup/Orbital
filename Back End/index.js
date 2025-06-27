@@ -296,18 +296,29 @@ app.post('/getAvailabilityForecastDemo/:id', async (request, response) => {
 
     // When python finishes
     py.on('close', (code) => {
-      if (code !== 0) {
-        console.error(`Python process exited with code ${code}, stderr: ${errorOutput}`);
-        return response.status(500).json({ error: 'Python script error', details: errorOutput });
+      console.log(`Python process exited with code ${code}`);
+
+      if (errorOutput) {
+        console.error("Python stderr:", errorOutput);
       }
+
+      if (code !== 0) {
+        return response.status(500).json({
+          error: 'Python script error',
+          details: errorOutput || 'Unknown error'
+        });
+      }
+
       try {
-        // Parse the JSON output from python
-        console.log(forecast)
+        console.log("Python stdout:", forecast);
         const forecastJson = JSON.parse(forecast);
         return response.json(forecastJson);
       } catch (parseErr) {
         console.error('Error parsing JSON from python:', parseErr);
-        return response.status(500).json({ error: 'Invalid JSON output from python' });
+        return response.status(500).json({
+          error: 'Invalid JSON output from python',
+          rawOutput: forecast
+        });
       }
     });
 
