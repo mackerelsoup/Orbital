@@ -3,6 +3,8 @@ const { Client } = require('pg')
 const express = require('express')
 const axios = require('axios')
 const { spawn } = require('child_process')
+const fetch = require('node-fetch');
+
 
 const app = express()
 //parses incoming request 
@@ -267,70 +269,103 @@ app.post('/getAvailabilityForecastDemo/:id', async (request, response) => {
   const id = request.params.id;
 
   try {
-    // Fetch historical carpark data
-    const res = await fetch(`https://nuspots.onrender.com/getAllHistoricalDataDemo/${id}`);
+    const res = await fetch(`https://orbital-1-9fo5.onrender.com/getAllHistoricalDataDemo/${id}`);
     if (!res.ok) {
-      // console.log("failed to fetch carpark data");
       return response.status(res.status).json({ error: `Failed to fetch carpark data: ${res.statusText}` });
     }
 
-    const carparkAvailData = await res.json();;
+    const carparkAvailData = await res.json();
 
-    // Spawn python process
-    const py = spawn('python3', ['./scripts/Carpark Availability Prediction Script.py']);
-
-    console.log("spawned")
-
-    let forecast = '';
-    let errorOutput = '';
-
-    // Collect data from python stdout
-    py.stdout.on('data', (data) => {
-      forecast += data.toString();
+    // Step 2: Send to Flask prediction API
+    const predictRes = await fetch(`${process.env.PYTHON_API_URL}/run`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(carparkAvailData),
     });
 
-    // Collect data from python stderr
-    py.stderr.on('data', (err) => {
-      errorOutput += err.toString();
-    });
+    if (!predictRes.ok) {
+      const errorText = await predictRes.text();
+      return response.status(500).json({ error: 'Flask API error', details: errorText });
+    }
 
-    // When python finishes
-    py.on('close', (code) => {
-      console.log(`Python process exited with code ${code}`);
-
-      if (errorOutput) {
-        console.error("Python stderr:", errorOutput);
-      }
-
-      if (code !== 0) {
-        return response.status(500).json({
-          error: 'Python script error',
-          details: errorOutput || 'Unknown error'
-        });
-      }
-
-      try {
-        console.log("Python stdout:", forecast);
-        const forecastJson = JSON.parse(forecast);
-        return response.json(forecastJson);
-      } catch (parseErr) {
-        console.error('Error parsing JSON from python:', parseErr);
-        return response.status(500).json({
-          error: 'Invalid JSON output from python',
-          rawOutput: forecast
-        });
-      }
-    });
-
-    // Send JSON input to python stdin
-    py.stdin.write(JSON.stringify(carparkAvailData));
-    py.stdin.end();
+    const forecast = await predictRes.json();
+    return response.json(forecast);
 
   } catch (error) {
     console.error('Server error:', error);
     response.status(500).json({ error: 'Internal server error' });
   }
 });
+
+// app.post('/getAvailabilityForecastDemo/:id', async (request, response) => {
+//   console.log("predicting avail");
+//   const id = request.params.id;
+
+//   try {
+//     // Fetch historical carpark data
+//     const res = await fetch(`https://orbital-1-9fo5.onrender.com/getAllHistoricalDataDemo/${id}`);
+//     if (!res.ok) {
+//       // console.log("failed to fetch carpark data");
+//       return response.status(res.status).json({ error: `Failed to fetch carpark data: ${res.statusText}` });
+//     }
+
+//     const carparkAvailData = await res.json();;
+
+//     // Spawn python process
+//     const py = spawn('python3', ['./scripts/Carpark Availability Prediction Script.py']);
+
+//     console.log("spawned")
+
+//     let forecast = '';
+//     let errorOutput = '';
+
+//     // Collect data from python stdout
+//     py.stdout.on('data', (data) => {
+//       forecast += data.toString();
+//     });
+
+//     // Collect data from python stderr
+//     py.stderr.on('data', (err) => {
+//       errorOutput += err.toString();
+//     });
+
+//     // When python finishes
+//     py.on('close', (code) => {
+//       console.log(`Python process exited with code ${code}`);
+
+//       if (errorOutput) {
+//         console.error("Python stderr:", errorOutput);
+//       }
+
+//       if (code !== 0) {
+//         return response.status(500).json({
+//           error: 'Python script error',
+//           details: errorOutput || 'Unknown error'
+//         });
+//       }
+
+//       try {
+//         console.log("Python stdout:", forecast);
+//         const forecastJson = JSON.parse(forecast);
+//         return response.json(forecastJson);
+//       } catch (parseErr) {
+//         console.error('Error parsing JSON from python:', parseErr);
+//         return response.status(500).json({
+//           error: 'Invalid JSON output from python',
+//           rawOutput: forecast
+//         });
+//       }
+//     });
+
+//     // Send JSON input to python stdin
+//     py.stdin.write(JSON.stringify(carparkAvailData));
+//     py.stdin.end();
+
+//   } catch (error) {
+//     console.error('Server error:', error);
+//     response.status(500).json({ error: 'Internal server error' });
+//   }
+// });
 
 app.post('/register', (request, response) => {
   const { username, email, password, is_staff, season_pass, season_pass_type } = request.body;
