@@ -2,7 +2,7 @@ import CarparkList from '@/components/CarparkList';
 import { getLocation } from '@/components/LocationService';
 import MapComponent from '@/components/MapComponent';
 import { Portal } from 'react-native-portalize'
-import { Link, useLocalSearchParams } from 'expo-router';
+import { Link, useLocalSearchParams, router } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
 import { Pressable, StyleSheet, Text, View, Linking, Dimensions, Platform } from 'react-native';
 import MapView, { MapMarker, Region } from 'react-native-maps';
