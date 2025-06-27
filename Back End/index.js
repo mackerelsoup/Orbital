@@ -8,7 +8,13 @@ const app = express()
 //parses incoming request 
 app.use(express.json())
 
-const connection = new Client()
+const connection = new Client({
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false,
+  }
+});
+
 
 //log that we are connected to the database
 connection.connect().then(() => console.log("connected"))
@@ -262,7 +268,7 @@ app.post('/getAvailabilityForecastDemo/:id', async (request, response) => {
 
   try {
     // Fetch historical carpark data
-    const res = await fetch(`http://192.168.1.91:3000/getAllHistoricalDataDemo/${id}`);
+    const res = await fetch(`http://192.168.68.60:3000/getAllHistoricalDataDemo/${id}`);
     if (!res.ok) {
       // console.log("failed to fetch carpark data");
       return response.status(res.status).json({ error: `Failed to fetch carpark data: ${res.statusText}` });
@@ -315,6 +321,28 @@ app.post('/getAvailabilityForecastDemo/:id', async (request, response) => {
   }
 });
 
+app.post('/register', (request, response) => {
+  const { username, email, password, is_staff, season_pass, season_pass_type } = request.body;
+  const login_update_query = "INSERT INTO login VALUES($1, $2, $3)";
+  const user_info_update_query = "INSERT INTO user_info VALUES($1, $2, $3, $4)"
+
+  connection.query(login_update_query, [username, email, password], (err, result) => {
+    if (err) {
+      console.error("log info update failed", err)
+      response.status(500).send("Login info update failed")
+    }
+    else {
+      connection.query(user_info_update_query, [username, is_staff, season_pass, season_pass_type], (err, result) => {
+        if (err) {
+          console.error("user info update failed", err)
+          response.status(500).send("User info update failed");
+        }
+      })
+      response.status(200).send("User registered successfully");
+    }
+  })
+
+})
 
 
 
