@@ -271,6 +271,7 @@ app.get('/getAllHistoricalDataDemo/:id', (request, response) => {
 
 app.post('/getAvailabilityForecastDemo/:id', async (request, response) => {
   console.log("predicting avail");
+  console.log("Fetching forecast for carpark_id:", id);
   const id = request.params.id;
 
   try {
@@ -280,6 +281,12 @@ app.post('/getAvailabilityForecastDemo/:id', async (request, response) => {
     }
 
     const carparkAvailData = await res.json();
+
+    console.log("Historical rows received:", carparkAvailData.length);
+
+    if (carparkAvailData.length === 0) {
+      return response.status(404).json({ error: "No historical data available" });
+    }
 
     // Step 2: Send to Flask prediction API
     const predictRes = await fetch(`${process.env.PYTHON_API_URL}/run`, {

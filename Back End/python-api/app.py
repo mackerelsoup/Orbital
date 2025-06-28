@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, json, request, jsonify
 import subprocess
 
 app = Flask(__name__)
@@ -13,12 +13,18 @@ def run_prediction():
     try:
         input_data = request.get_json(force=True)
         print("Received data:", input_data)
+        
+        result = subprocess.run(
+            ['python3', 'Carpark Availability Prediction Script.py'],
+            input=json.dumps(input_data),
+            text=True,
+            capture_output=True,
+            check=True
+        )
 
-        # return dummy forecast for now
-        forecast = [
-            {"recorded_at": "2025-06-27 18:00:00", "available": 10},
-            {"recorded_at": "2025-06-27 19:00:00", "available": 12}
-        ]
+        print("Script output:", result.stdout)
+
+        forecast = json.loads(result.stdout)
 
         return jsonify({
             "message": "Prediction successful",
@@ -26,6 +32,7 @@ def run_prediction():
         })
 
     except Exception as e:
+        print("Prediction failed:", e)
         return jsonify({
             'status': 'error',
             'error': str(e)
