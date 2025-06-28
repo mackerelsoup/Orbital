@@ -18,7 +18,7 @@ def run_prediction():
         print(f"Received data with {len(input_data)} rows")
 
         result = subprocess.run(
-            ['python3', 'Carpark Availability Prediction Script.py'],
+            ['python3', './Back End/scripts/Carpark Availability Prediction Script.py'],
             input=json.dumps(input_data),
             text=True,
             capture_output=True,
