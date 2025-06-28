@@ -38,6 +38,11 @@ def run_prediction():
             'error': str(e)
         }), 500
     
+    def run():
+        print("Received request to /run")
+        input_data = request.get_json()
+        print("Input data:", input_data)
+    
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=10000)

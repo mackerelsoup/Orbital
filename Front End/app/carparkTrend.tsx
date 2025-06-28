@@ -140,13 +140,13 @@ export default function CarparkTrend() {
         const data = await response.json();
 
         if (!data.forecast || !Array.isArray(data.forecast)) {
-          console.log("Unexpected forecast format:", JSON.stringify(data));
-          return;
+          console.warn("Unexpected forecast format:", data);
+          throw new Error("Forecast not available");
         }
 
-        const processedData = data.forecast.map((entry: CarparkAvailability) => ({
-          time: new Date(entry.recorded_at).getTime(),
-          availability: Number(entry.available)
+        const processedData = data.forecast.map((entry: any) => ({
+          time: entry.time,
+          availability: Number(entry.availability)
         }));
 
         setForecastData(processedData)
