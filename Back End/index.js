@@ -250,7 +250,7 @@ app.get('/getCurrentTimeDemo', (request, response) => {
 app.get('/getAllHistoricalDataDemo/:id', (request, response) => {
   console.log("fecthing time")
   const id = request.params.id
-  const fetch_id_query = "SELECT to_char(recorded_at, 'YYYY-MM-DD HH24:MI:SS') AS recorded_at, available FROM temp_carpark_avail WHERE carpark_id = $1 ORDER BY recorded_at ASC"
+  const fetch_id_query = "SELECT to_char(recorded_at AT TIME ZONE 'Asia/Singapore', 'YYYY-MM-DD HH24:MI:SS') AS recorded_at, available FROM temp_carpark_avail WHERE carpark_id = $1 ORDER BY recorded_at ASC"
   connection.query(fetch_id_query, [id], (err, result) => {
     if (err) {
       response.send(err)

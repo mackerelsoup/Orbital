@@ -1,10 +1,10 @@
-import { StyleSheet, Text, View } from 'react-native'
+import { StyleSheet, Text, View, Dimensions } from 'react-native'
 import React, { useEffect, useState, useMemo } from 'react'
 import { CartesianChart, Line, useChartPressState } from "victory-native"
-import { useFont, Circle, Text as SKText } from '@shopify/react-native-skia'
+import { useFont, Circle, Text as SKText, RoundedRect } from '@shopify/react-native-skia'
 import { SharedValue, useDerivedValue, Easing } from 'react-native-reanimated'
 import TimeRangeSelector from '@/components/TimeRangeSelector'
-import { subMonths, subYears } from 'date-fns';
+import { subMonths, subYears, subWeeks } from 'date-fns';
 import { scaleTime } from 'd3-scale';
 import { timeMinute } from 'd3-time';
 import Button from '@/components/Button'
@@ -21,36 +21,77 @@ type CarparkAvailability = {
   recorded_at: string;
 };
 
-const SpaceMono = require("../assets/fonts/SpaceMono-Regular.ttf")
+type TooltipProps = {
+  x: SharedValue<number>;
+  y: SharedValue<number>;
+  value: SharedValue<number>;
+  screenWidth?: number;
+};
 
+const SCREEN_WIDTH = Dimensions.get('window').width;
+const SpaceMono = require("../assets/fonts/SpaceMono-Regular.ttf");
 
-function ToolTip({ x, y, value }: { x: SharedValue<number>; y: SharedValue<number>, value: SharedValue<number> }) {
+function ToolTipWithBackground({ x, y, value, screenWidth = SCREEN_WIDTH }: TooltipProps) {
+  const font = useFont(SpaceMono, 10);
   const label = useDerivedValue(() => `Availability: ${value.value}`, [value]);
-  const font = useFont(SpaceMono, 10)
+
+  const textWidth = 100;
+  const textHeight = 16;
+  const padding = 4;
+
+  const textX = useDerivedValue(() => {
+    const circleX = x.value;
+    const margin = 10; // minimum margin from screen edges
+    const halfTextWidth = textWidth / 2;
+    const totalWidth = textWidth + padding * 2; // total tooltip width including padding
+
+    // Start by centering the tooltip horizontally over the circle
+    let startX = circleX - halfTextWidth;
+    // Clamp to screen edges with margin:
+    if (startX < margin) {
+      startX = margin + 20;
+    }
+    if (startX + totalWidth > screenWidth - margin) {
+      startX = screenWidth - margin - totalWidth;
+    }
+
+    return startX;
+  }, [x]);
+
+  const textY = useDerivedValue(() => y.value - 15, [y]);
+  const backgroundX = useDerivedValue(() => textX.value - padding, [textX]);
+  const backgroundY = useDerivedValue(() => textY.value - textHeight + 2, [textY]);
+
   return (
     <>
-      <Circle cx={x} cy={y} r={8} color={"grey"} opacity={0.8} />
+      <Circle cx={x} cy={y} r={8} color="grey" opacity={0.8} />
+      <RoundedRect
+        x={backgroundX}
+        y={backgroundY}
+        width={textWidth + padding * 2}
+        height={textHeight + padding}
+        color="white"
+        opacity={0.9}
+        r={4}
+      />
       <SKText
-        x={x}
-        y={useDerivedValue(() => y.value - 12, [y])} // display above circle
+        x={useDerivedValue(() => textX.value + padding, [textX])}
+        y={textY}
         text={label}
         font={font}
         color="black"
       />
     </>
-
-  )
-
-
+  );
 }
 
 export default function CarparkTrend() {
   const { carpark } = useLocalSearchParams();
-  const parsedCarpark: Carpark = JSON.parse(carpark as string); 
+  const parsedCarpark: Carpark = JSON.parse(carpark as string);
   const [graphData, setGraphData] = useState<{ time: number, availability: number }[]>([]);
   const [forecastData, setForecastData] = useState<{ time: number, availability: number }[]>([]);
   const [currentTime, setCurrentTime] = useState<number>(0);
-  const [selectedRange, setSelectedRange] = useState<'Hour' | '6hr' | 'Day' | 'Month' | 'Year'>('Hour');
+  const [selectedRange, setSelectedRange] = useState<'4HR' | 'Day' | 'Week' | 'Month' | 'Year'>('4HR');
   const [startTime, setStartTime] = useState(0);
   const [endTime, setEndTime] = useState(0);
   const fonts = useFont(SpaceMono, 8)
@@ -108,17 +149,17 @@ export default function CarparkTrend() {
     let rangeStart = currentTime;
 
     switch (selectedRange) {
-      case 'Hour':
-        rangeStart = currentTime - 3600000;
-        setEndTime(currentTime);
-        break;
-      case '6hr':
-        rangeStart = currentTime - 21600000;
+      case '4HR':
+        rangeStart = currentTime - 14400000;
         setEndTime(currentTime);
         break;
       case 'Day':
         rangeStart = currentTime - 86400000;
         setEndTime(currentTime);
+        break;
+      case 'Week':
+        rangeStart = subWeeks(currentTime, 1).getTime();
+        setEndTime(rangeStart + 86400000);
         break;
       case 'Month':
         rangeStart = subMonths(currentTime, 1).getTime();
@@ -138,17 +179,17 @@ export default function CarparkTrend() {
     if (startTime === 0 || endTime === 0) return;
 
     const getAvailabilityHistory = async () => {
-      console.log("CarparkTrend received carpark:", carpark);
+      //console.log("CarparkTrend received carpark:", carpark);
       try {
         const response = await fetch(`https://orbital-1y2b.onrender.com/fetchCarparkHistoryDemo/${parsedCarpark.id}/${startTime / 1000}/${endTime / 1000}`);
         if (!response.ok) throw new Error("Carpark History not Available");
         const data: CarparkAvailability[] = await response.json();
-        //console.log(data)
+        console.log(data)
         const processedData = data.map(entry => ({
           time: new Date(entry.recorded_at).getTime(),
           availability: Number(entry.available)
         }));
-        //console.log(processedData)
+        console.log(processedData)
         setGraphData(processedData);
       } catch (error) {
         console.log("Error fetching history:", error);
@@ -221,11 +262,9 @@ export default function CarparkTrend() {
 
 
               ></Line>
-              {
-                isActive ? (
-                  <ToolTip x={state.x.position} y={state.y.availability.position} value={state.y.availability.value} />
-                ) : null
-              }
+              {isActive &&
+                <ToolTipWithBackground x={state.x.position} y={state.y.availability.position} value={state.y.availability.value} />}
+
             </>
 
           )
@@ -234,16 +273,14 @@ export default function CarparkTrend() {
       </CartesianChart>
       <TimeRangeSelector selected={selectedRange} onSelect={setSelectedRange}></TimeRangeSelector>
       <Button label="forecast" onPress={() => {
-        if (forecastData.length > 0) {
-          const minTime = Math.min(...forecastData.map(d => d.time));
-          const maxTime = Math.max(...forecastData.map(d => d.time));
-          console.log(minTime, " ", maxTime)
-          console.log(currentTime)
+        const minTime = Math.min(...forecastData.map(d => d.time));
+        const maxTime = Math.max(...forecastData.map(d => d.time));
+        console.log(minTime, " ", maxTime)
+        console.log(currentTime)
 
-          setGraphData(forecastData);
-          setStartTime(minTime);
-          setEndTime(maxTime);
-        }
+        setGraphData(forecastData);
+        setStartTime(minTime);
+        setEndTime(maxTime);
       }}></Button>
     </View>
 

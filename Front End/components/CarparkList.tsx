@@ -38,7 +38,7 @@ const FILTER_OPTIONS = {
 };
 
 // API URLs
-const API_BASE_URL = 'https://orbital-05em.onrender.com';
+const API_BASE_URL = 'https://orbital-1y2b.onrender.com';
 const API_ENDPOINTS = {
   DISTANCE: `${API_BASE_URL}/computeDistance`,
   AVAILABILITY: (id: number) => `${API_BASE_URL}/fetchCarparkData/${id}`
@@ -151,29 +151,29 @@ const CarparkList = ({
   //   fetchDistances();
   // }, [origin]);
 
-  // useEffect(() => {
-  //   const fetchAvailability = async () => {
-  //     try {
-  //       const availabilityPromises = carparks.map(async (carpark) => {
-  //         const response = await fetch(API_ENDPOINTS.AVAILABILITY(carpark.id));
-  //         if (!response.ok) throw new Error("Failed to fetch availability");
-  //         return await response.json();
-  //       });
+  useEffect(() => {
+    const fetchAvailability = async () => {
+      try {
+        const availabilityPromises = carparks.map(async (carpark) => {
+          const response = await fetch(API_ENDPOINTS.AVAILABILITY(carpark.id));
+          if (!response.ok) throw new Error("Failed to fetch availability");
+          return await response.json();
+        });
 
-  //       const availabilities = await Promise.all(availabilityPromises);
-  //       const availabilityMap = availabilities.reduce((acc, item) => {
-  //         acc[item[0].id] = [item[0].capacity, item[0].measure];
-  //         return acc;
-  //       }, {} as AvailabilityData);
+        const availabilities = await Promise.all(availabilityPromises);
+        const availabilityMap = availabilities.reduce((acc, item) => {
+          acc[item[0].id] = [item[0].capacity, item[0].measure];
+          return acc;
+        }, {} as AvailabilityData);
 
-  //       setCarparkAvailability(availabilityMap);
-  //     } catch (error) {
-  //       console.error("Error fetching availability", error);
-  //     }
-  //   };
+        setCarparkAvailability(availabilityMap);
+      } catch (error) {
+        console.error("Error fetching availability", error);
+      }
+    };
 
-  //   fetchAvailability();
-  // }, [carparks]);
+    fetchAvailability();
+  }, [carparks]);
 
   // Filtering and Sorting
   const filteredCarparkList = useMemo(() => {

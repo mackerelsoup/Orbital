@@ -56,7 +56,7 @@ export default function RegisterForm() {
     };
 
     try {
-      const response = await fetch("https://orbital-05em.onrender.com/register", {
+      const response = await fetch("https://orbital-1y2b.onrender.com/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
