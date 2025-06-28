@@ -38,10 +38,10 @@ def run_prediction():
             'error': str(e)
         }), 500
     
-    def run():
-        print("Received request to /run")
-        input_data = request.get_json()
-        print("Input data:", input_data)
+def run():
+    print("Received request to /run")
+    input_data = request.get_json()
+    print("Input data:", input_data)
     
 
 if __name__ == '__main__':
