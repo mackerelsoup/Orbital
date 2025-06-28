@@ -38,10 +38,17 @@ def run_prediction():
             'error': str(e)
         }), 500
     
+@app.route("/run", methods=["POST"])
 def run():
-    print("Received request to /run")
-    input_data = request.get_json()
-    print("Input data:", input_data)
+    print(">> Flask: /run endpoint hit")
+    try:
+        data = request.get_json()
+        print(">> Flask: Received data:", data)
+        # Your forecast logic here
+    except Exception as e:
+        print(">> Flask: Error during prediction", str(e))
+        return jsonify({"error": str(e)}), 500
+
     
 
 if __name__ == '__main__':
