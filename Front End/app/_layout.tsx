@@ -178,8 +178,10 @@ export default function RootLayout() {
                 }} />
               <Drawer.Screen
                 name="carparkTrend"
+                
                 options={{
-                  drawerItemStyle: { display: 'none' }
+                  drawerItemStyle: { display: 'none' },
+                  title: "Carpark Trend"
                 }} />
 
             </Drawer>

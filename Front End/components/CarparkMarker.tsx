@@ -1,6 +1,6 @@
 import React, { forwardRef } from 'react';
 import { View, Text, StyleSheet } from "react-native"
-import { Marker, MapMarker } from 'react-native-maps';
+import { Marker, MapMarker, Callout } from 'react-native-maps';
 
 // Remove the local Carpark type definition since it conflicts with the global one
 // The global Carpark type should be available from your types file
@@ -34,6 +34,7 @@ const CarparkMarker = forwardRef<MapMarker, CarparkMarkerProps>(
         }}
         title={carpark.name}
         description={`Rate: $${carpark.pricing?.rate_per_minute?.toFixed(4)}/min`}
+        calloutOffset={{x: 0, y: -3}}
         onPress={() => onPress?.(carpark)}
         anchor={{ x: 0.5, y: 1 }}
       >
