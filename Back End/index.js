@@ -275,6 +275,7 @@ app.post('/getAvailabilityForecastDemo/:id', async (request, response) => {
   console.log("Fetching forecast for carpark_id:", id);
 
   try {
+    console.log(process.env.API_BASE_URL)
     const res = await fetch(`${process.env.API_BASE_URL}/getAllHistoricalDataDemo/${id}`);
     if (!res.ok) {
       return response.status(res.status).json({ error: `Failed to fetch carpark data: ${res.statusText}` });
