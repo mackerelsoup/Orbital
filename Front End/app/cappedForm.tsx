@@ -65,7 +65,7 @@ const CappedParkingApplicationForm = () => {
     };
 
     try {
-      const response = await fetch('https://orbital-1y2b.onrender.com/applyCappedParking', {
+      const response = await fetch('https://back-end-o2lr.onrender.com/applyCappedParking', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
