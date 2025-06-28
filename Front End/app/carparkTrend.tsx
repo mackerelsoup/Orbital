@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, Dimensions } from 'react-native'
+import { StyleSheet, Text, View, Dimensions, Modal, Pressable } from 'react-native'
 import React, { useEffect, useState, useMemo } from 'react'
 import { CartesianChart, Line, useChartPressState } from "victory-native"
 import { useFont, Circle, Text as SKText, RoundedRect } from '@shopify/react-native-skia'
@@ -8,8 +8,10 @@ import { subMonths, subYears, subWeeks } from 'date-fns';
 import { scaleTime } from 'd3-scale';
 import { timeMinute } from 'd3-time';
 import Button from '@/components/Button'
+import SquareButton from '@/components/SquareButton'
 import CarparkList from '@/components/CarparkList'
 import { useLocalSearchParams } from 'expo-router';
+import { Portal } from 'react-native-portalize'
 
 
 type CarparkTrendProps = {
@@ -24,65 +26,77 @@ type CarparkAvailability = {
 type TooltipProps = {
   x: SharedValue<number>;
   y: SharedValue<number>;
-  value: SharedValue<number>;
+  availValue: SharedValue<number>;
+  timeValue: SharedValue<number>;
   screenWidth?: number;
 };
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const SpaceMono = require("../assets/fonts/SpaceMono-Regular.ttf");
 
-function ToolTipWithBackground({ x, y, value, screenWidth = SCREEN_WIDTH }: TooltipProps) {
+function ToolTipWithBackground({ x, y, availValue, timeValue, screenWidth = SCREEN_WIDTH }: TooltipProps) {
   const font = useFont(SpaceMono, 10);
-  const label = useDerivedValue(() => `Availability: ${value.value}`, [value]);
+  const availLabel = useDerivedValue(() => `Availability: ${availValue.value}`, [availValue]);
+  const timeLabel = useDerivedValue(() => {
+    const date = new Date(timeValue.value);
+    return `Time: ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+  }, [timeValue]);
 
-  const textWidth = 100;
-  const textHeight = 16;
-  const padding = 4;
+const textWidth = 120;
+const textHeight = 16;
+const padding = 4;
 
-  const textX = useDerivedValue(() => {
-    const circleX = x.value;
-    const margin = 10; // minimum margin from screen edges
-    const halfTextWidth = textWidth / 2;
-    const totalWidth = textWidth + padding * 2; // total tooltip width including padding
+const textX = useDerivedValue(() => {
+  const circleX = x.value;
+  const margin = 10; // minimum margin from screen edges
+  const halfTextWidth = textWidth / 2;
+  const totalWidth = textWidth + padding * 2; // total tooltip width including padding
 
-    // Start by centering the tooltip horizontally over the circle
-    let startX = circleX - halfTextWidth;
-    // Clamp to screen edges with margin:
-    if (startX < margin) {
-      startX = margin + 20;
-    }
-    if (startX + totalWidth > screenWidth - margin) {
-      startX = screenWidth - margin - totalWidth;
-    }
+  // Start by centering the tooltip horizontally over the circle
+  let startX = circleX - halfTextWidth;
+  // Clamp to screen edges with margin:
+  if (startX < margin) {
+    startX = margin + 20;
+  }
+  if (startX + totalWidth > screenWidth - margin) {
+    startX = screenWidth - margin - totalWidth;
+  }
 
-    return startX;
-  }, [x]);
+  return startX;
+}, [x]);
 
-  const textY = useDerivedValue(() => y.value - 15, [y]);
-  const backgroundX = useDerivedValue(() => textX.value - padding, [textX]);
-  const backgroundY = useDerivedValue(() => textY.value - textHeight + 2, [textY]);
+const textY = useDerivedValue(() => y.value - 15, [y]);
+const backgroundX = useDerivedValue(() => textX.value - padding, [textX]);
+const backgroundY = useDerivedValue(() => textY.value - textHeight + 2, [textY]);
 
-  return (
-    <>
-      <Circle cx={x} cy={y} r={8} color="grey" opacity={0.8} />
-      <RoundedRect
-        x={backgroundX}
-        y={backgroundY}
-        width={textWidth + padding * 2}
-        height={textHeight + padding}
-        color="white"
-        opacity={0.9}
-        r={4}
-      />
-      <SKText
-        x={useDerivedValue(() => textX.value + padding, [textX])}
-        y={textY}
-        text={label}
-        font={font}
-        color="black"
-      />
-    </>
-  );
+return (
+  <>
+    <Circle cx={x} cy={y} r={8} color="grey" opacity={0.8} />
+    <RoundedRect
+      x={backgroundX}
+      y={backgroundY}
+      width={textWidth + padding * 2}
+      height={textHeight * 2 + padding}
+      color="white"
+      opacity={0.9}
+      r={4}
+    />
+    <SKText
+      x={useDerivedValue(() => textX.value + padding, [textX])}
+      y={textY}
+      text={availLabel}
+      font={font}
+      color="black"
+    />
+    <SKText
+      x={useDerivedValue(() => textX.value + padding, [textX])}
+      y={useDerivedValue(() => textY.value + textHeight - 1, [textY])}
+      text={timeLabel}
+      font={font}
+      color="black"
+    />
+  </>
+);
 }
 
 export default function CarparkTrend() {
@@ -90,6 +104,7 @@ export default function CarparkTrend() {
   const parsedCarpark: Carpark = JSON.parse(carpark as string);
   const [graphData, setGraphData] = useState<{ time: number, availability: number }[]>([]);
   const [forecastData, setForecastData] = useState<{ time: number, availability: number }[]>([]);
+  const [showForecastModal, setShowForecastModal] = useState(false);
   const [currentTime, setCurrentTime] = useState<number>(0);
   const [selectedRange, setSelectedRange] = useState<'4HR' | 'Day' | 'Week' | 'Month' | 'Year'>('4HR');
   const [startTime, setStartTime] = useState(0);
@@ -219,72 +234,146 @@ export default function CarparkTrend() {
 
 
   return (
-    <View style={{ height: 600, justifyContent: 'center' }}>
-      <CartesianChart
-        data={graphData}
-        xKey={"time"}
-        yKeys={["availability"]}
-        domainPadding={{ top: 10, bottom: 20, left: 10, right: 10 }}
-        chartPressState={state}
-        viewport={{ x: [startTime, endTime + 300000] }}
-        xAxis={{
-          font: fonts,
-          formatXLabel(label) {
-            const date = new Date(label);
-            return date.toLocaleTimeString('en-SG', {
-              hour: 'numeric',
-              minute: '2-digit',
-              hour12: true,
-            });
-          },
-          labelOffset: -30,
-          tickValues: tickValues
+    <View>
+      <Portal>
+        <Modal
+          visible={showForecastModal}
+          transparent
+          animationType="fade"
+          onRequestClose={() => setShowForecastModal(false)}
+        >
+          <View style={styles.modalBackground}>
+            <View style={styles.modalContainer}>
+              <Text style={styles.modalText}>Forecast not ready</Text>
+              <Pressable onPress={() => setShowForecastModal(false)} style={styles.modalButton}>
+                <Text style={{ color: 'white' }}>OK</Text>
+              </Pressable>
+            </View>
+          </View>
+        </Modal>
+      </Portal>
 
-        }}
-        yAxis={[{
-          font: fonts,
-          labelPosition: 'outset'
-        }]}
-      >
-        {({ points, chartBounds }) => {
-          return (
-            <>
-              <Line
-                points={points.availability}
-                color={"green"}
-                strokeWidth={3}
-                animate={{
-                  type: 'timing',
-                  duration: 500,
-                  easing: Easing.out(Easing.quad),
-                }}
-                curveType='monotoneX'
+      <View style={[{ height: 600, justifyContent: 'center' }, styles.chartContainer]}>
+        <CartesianChart
+          data={graphData}
+          xKey={"time"}
+          yKeys={["availability"]}
+          domainPadding={{ top: 10, bottom: 20, left: 10, right: 10 }}
+          chartPressState={state}
+          viewport={{ x: [startTime, endTime + 300000] }}
+          xAxis={{
+            font: fonts,
+            formatXLabel(label) {
+              const date = new Date(label);
+              return date.toLocaleTimeString('en-SG', {
+                hour: 'numeric',
+                minute: '2-digit',
+                hour12: true,
+              });
+            },
+            labelOffset: -30,
+            tickValues: tickValues
+
+          }}
+          yAxis={[{
+            font: fonts,
+            labelPosition: 'outset'
+          }]}
+        >
+          {({ points, chartBounds }) => {
+            return (
+              <>
+                <Line
+                  points={points.availability}
+                  color={"green"}
+                  strokeWidth={3}
+                  animate={{
+                    type: 'timing',
+                    duration: 500,
+                    easing: Easing.out(Easing.quad),
+                  }}
+                  curveType='monotoneX'
 
 
-              ></Line>
-              {isActive &&
-                <ToolTipWithBackground x={state.x.position} y={state.y.availability.position} value={state.y.availability.value} />}
+                ></Line>
+                {isActive &&
+                  <ToolTipWithBackground x={state.x.position} y={state.y.availability.position} availValue={state.y.availability.value} timeValue={state.x.value} />}
 
-            </>
+              </>
 
-          )
-        }}
+            )
+          }}
 
-      </CartesianChart>
-      <TimeRangeSelector selected={selectedRange} onSelect={setSelectedRange}></TimeRangeSelector>
-      <Button label="forecast" onPress={() => {
-        const minTime = Math.min(...forecastData.map(d => d.time));
-        const maxTime = Math.max(...forecastData.map(d => d.time));
-        console.log(minTime, " ", maxTime)
-        console.log(currentTime)
+        </CartesianChart>
+        <TimeRangeSelector selected={selectedRange} onSelect={setSelectedRange}></TimeRangeSelector>
+      </View>
+      <View style={{ alignItems: 'center' }}>
+        <SquareButton
+          label='Forecast'
+          size={150}
+          backgroundColor={forecastData ? 'red' : 'green'}
+          onPress={() => {
+            if (forecastData.length == 0) {
+              setShowForecastModal(true);
+              return;
+            }
+            else {
+              const minTime = Math.min(...forecastData.map(d => d.time));
+              const maxTime = Math.max(...forecastData.map(d => d.time));
+              console.log(minTime, " ", maxTime)
+              console.log(currentTime)
 
-        setGraphData(forecastData);
-        setStartTime(minTime);
-        setEndTime(maxTime);
-      }}></Button>
+              setGraphData(forecastData);
+              setStartTime(minTime);
+              setEndTime(maxTime);
+            }
+
+          }}
+        >
+        </SquareButton>
+      </View>
+
     </View>
 
   )
 }
 
-const styles = StyleSheet.create({})
+const styles = StyleSheet.create({
+  chartContainer: {
+    height: 600,
+    marginBottom: 24,
+    padding: 12,
+    backgroundColor: '#fdfdfd',
+    borderRadius: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    elevation: 4,
+    justifyContent: 'center',
+  },
+  modalBackground: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContainer: {
+    width: '80%',
+    backgroundColor: 'white',
+    borderRadius: 12,
+    padding: 20,
+    alignItems: 'center',
+  },
+  modalText: {
+    fontSize: 16,
+    marginBottom: 12,
+    color: '#333',
+  },
+  modalButton: {
+    backgroundColor: '#007aff',
+    borderRadius: 8,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+  },
+})
