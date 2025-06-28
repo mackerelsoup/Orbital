@@ -271,8 +271,8 @@ app.get('/getAllHistoricalDataDemo/:id', (request, response) => {
 
 app.post('/getAvailabilityForecastDemo/:id', async (request, response) => {
   console.log("predicting avail");
-  console.log("Fetching forecast for carpark_id:", id);
   const id = request.params.id;
+  console.log("Fetching forecast for carpark_id:", id);
 
   try {
     const res = await fetch(`${process.env.API_BASE_URL}/getAllHistoricalDataDemo/${id}`);
