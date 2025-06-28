@@ -8,7 +8,10 @@ export default function CarparkTrendSelect() {
     router.push({
       pathname: '/carparkTrend',
       params: {
-        carpark: JSON.stringify(carpark),
+        carpark: JSON.stringify({
+            ...carpark,
+            id: 1,
+        }),
       },
     });
   };

@@ -109,7 +109,8 @@ export default function CarparkTrend() {
   const [selectedRange, setSelectedRange] = useState<'4HR' | 'Day' | 'Week' | 'Month' | 'Year'>('4HR');
   const [startTime, setStartTime] = useState(0);
   const [endTime, setEndTime] = useState(0);
-  const fonts = useFont(SpaceMono, 8)
+  const fonts = useFont(SpaceMono, 8);
+  const [isForecastMode, setIsForecastMode] = useState(false);
   const { state, isActive } = useChartPressState({
     x: 0,
     y: { availability: 0 }   // Note: This should match the yKeys in CartesianChart
@@ -130,6 +131,7 @@ export default function CarparkTrend() {
     };
 
     const getForecast = async () => {
+      console.log(parsedCarpark.id);
       try {
         const response = await fetch(`https://back-end-o2lr.onrender.com/getAvailabilityForecastDemo/${parsedCarpark.id}`, {
           method: 'POST',
@@ -138,7 +140,7 @@ export default function CarparkTrend() {
         const data = await response.json();
 
         if (!data.forecast || !Array.isArray(data.forecast)) {
-          console.log("Unexpected forecast format:", data);
+          console.log("Unexpected forecast format:", JSON.stringify(data));
           return;
         }
 
@@ -149,8 +151,12 @@ export default function CarparkTrend() {
 
         setForecastData(processedData)
         console.log("forecast done")
-      } catch (error) {
-        console.log("Failed to get forecast", error)
+      } catch (error : unknown) {
+        if (error instanceof Error) {
+          console.log("Failed to get forecast", error.message);
+        } else {
+          console.log("Failed to get forecast", error);
+        }
       }
     }
 
@@ -326,6 +332,7 @@ export default function CarparkTrend() {
               setGraphData(forecastData);
               setStartTime(minTime);
               setEndTime(maxTime);
+              setIsForecastMode(true);
             }
 
           }}
