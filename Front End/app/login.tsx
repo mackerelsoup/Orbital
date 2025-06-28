@@ -84,8 +84,8 @@ export default function LoginForm() {
 
     try {
       let response
-      if (isEmail()) response = await fetch(`https://orbital-1y2b.onrender.com/fetchbyEmail/${username}`);
-      else response = await fetch(`https://orbital-1y2b.onrender.com/fetchbyUsername/${username}`);
+      if (isEmail()) response = await fetch(`https://back-end-o2lr.onrender.com/fetchbyEmail/${username}`);
+      else response = await fetch(`https://back-end-o2lr.onrender.com/fetchbyUsername/${username}`);
 
       if (response.status === 404) throw new UserNotFoundError("User not found")
       if (!response.ok) throw new ConnectionError("Network response was not ok")
@@ -120,7 +120,7 @@ export default function LoginForm() {
   const setUserData = async (data: userDataIncomplete) => {
     console.log(data)
     try {
-      let response = await fetch(`https://orbital-1y2b.onrender.com/fetchUserData/${username}`)
+      let response = await fetch(`https://back-end-o2lr.onrender.com/fetchUserData/${username}`)
       if (response.status === 404) throw new userDataNotFoundError("User not found")
       if (!response.ok) throw new ConnectionError("Network response was not ok")
 
