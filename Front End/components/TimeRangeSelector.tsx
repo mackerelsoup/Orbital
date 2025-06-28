@@ -1,14 +1,14 @@
 import React from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 
-type TimeRange = 'Hour' | '6hr' | 'Day' | 'Month' | 'Year';
+type TimeRange = '4HR' | 'Day' | 'Week' | 'Month' | 'Year';
 
 type Props = {
   selected: TimeRange;
   onSelect: (range: TimeRange) => void;
 };
 
-const ranges: TimeRange[] = ['Hour', '6hr', 'Day', 'Month', 'Year'];
+const ranges: TimeRange[] = ['4HR', 'Day', 'Week', 'Month', 'Year'];
 
 export default function TimeRangeSelector({ selected, onSelect }: Props) {
   return (
