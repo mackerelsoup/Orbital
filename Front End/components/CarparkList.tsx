@@ -158,7 +158,10 @@ const CarparkList = ({
             })
           });
 
-          if (!response.ok) throw new Error("Failed to fetch distance");
+          //if (!response.ok) throw new Error("Failed to fetch distance");
+          if (response.status == 504) {
+            return {id :carpark.id, distance: Infinity}
+          }
           const data = await response.json();
           return { id: carpark.id, distance: data.distance / 1000 };
         });
