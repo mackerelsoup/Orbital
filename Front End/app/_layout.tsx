@@ -30,7 +30,7 @@ export default function RootLayout() {
                     <View style={{ marginTop: Platform.OS === 'ios' ? -10 : 0, paddingRight: 8 }}>
                       <Link href={user.username ? '/profile' : '/login'} asChild style={styles.profileContainer}>
                         <Pressable>
-                          <FontAwesome name="user-circle-o" size={32} />
+                          <FontAwesome name="user-circle-o" size={32} testID="user-icon"/>
                         </Pressable>
                       </Link>
                     </View>
