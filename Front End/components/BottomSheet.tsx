@@ -18,7 +18,7 @@ const CustomBottomSheet = forwardRef<BottomSheetModal, CustomBottomSheetProps>(
       >
         <BottomSheetView style={styles.contentContainer}>
           <Pressable
-            onPress={() => onSelect("distance")}
+            onPress={() => onSelect("Distance")}
             style={({ pressed }) => [
               styles.optionButton,
               pressed && styles.pressed,
@@ -27,7 +27,7 @@ const CustomBottomSheet = forwardRef<BottomSheetModal, CustomBottomSheetProps>(
             <Text style={styles.optionText}>Distance</Text>
           </Pressable>
           <Pressable
-            onPress={() => onSelect("availability")}
+            onPress={() => onSelect("Availability")}
             style={({ pressed }) => [
               styles.optionButton,
               pressed && styles.pressed,

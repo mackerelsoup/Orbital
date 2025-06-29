@@ -28,8 +28,8 @@ type AvailabilityData = Record<number, [number, number]>;
 // Constants
 const SORT_OPTIONS = {
   DEFAULT: 'Sort',
-  DISTANCE: 'distance',
-  AVAILABILITY: 'availability'
+  DISTANCE: 'Distance',
+  AVAILABILITY: 'Availability'
 };
 
 const FILTER_OPTIONS = {
