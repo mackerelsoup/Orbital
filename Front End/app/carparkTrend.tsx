@@ -7,11 +7,10 @@ import TimeRangeSelector from '@/components/TimeRangeSelector'
 import { subMonths, subYears, subWeeks } from 'date-fns';
 import { scaleTime } from 'd3-scale';
 import { timeMinute } from 'd3-time';
-import Button from '@/components/Button'
 import SquareButton from '@/components/SquareButton'
-import CarparkList from '@/components/CarparkList'
 import { useLocalSearchParams } from 'expo-router';
 import { Portal } from 'react-native-portalize'
+import forecasts from '../assets/forecast.json'
 
 
 type CarparkTrendProps = {
@@ -42,61 +41,61 @@ function ToolTipWithBackground({ x, y, availValue, timeValue, screenWidth = SCRE
     return `Time: ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
   }, [timeValue]);
 
-const textWidth = 120;
-const textHeight = 16;
-const padding = 4;
+  const textWidth = 120;
+  const textHeight = 16;
+  const padding = 4;
 
-const textX = useDerivedValue(() => {
-  const circleX = x.value;
-  const margin = 10; // minimum margin from screen edges
-  const halfTextWidth = textWidth / 2;
-  const totalWidth = textWidth + padding * 2; // total tooltip width including padding
+  const textX = useDerivedValue(() => {
+    const circleX = x.value;
+    const margin = 10; // minimum margin from screen edges
+    const halfTextWidth = textWidth / 2;
+    const totalWidth = textWidth + padding * 2; // total tooltip width including padding
 
-  // Start by centering the tooltip horizontally over the circle
-  let startX = circleX - halfTextWidth;
-  // Clamp to screen edges with margin:
-  if (startX < margin) {
-    startX = margin + 20;
-  }
-  if (startX + totalWidth > screenWidth - margin) {
-    startX = screenWidth - margin - totalWidth;
-  }
+    // Start by centering the tooltip horizontally over the circle
+    let startX = circleX - halfTextWidth;
+    // Clamp to screen edges with margin:
+    if (startX < margin) {
+      startX = margin + 20;
+    }
+    if (startX + totalWidth > screenWidth - margin) {
+      startX = screenWidth - margin - totalWidth;
+    }
 
-  return startX;
-}, [x]);
+    return startX;
+  }, [x]);
 
-const textY = useDerivedValue(() => y.value - 15, [y]);
-const backgroundX = useDerivedValue(() => textX.value - padding, [textX]);
-const backgroundY = useDerivedValue(() => textY.value - textHeight + 2, [textY]);
+  const textY = useDerivedValue(() => y.value - 15, [y]);
+  const backgroundX = useDerivedValue(() => textX.value - padding, [textX]);
+  const backgroundY = useDerivedValue(() => textY.value - textHeight + 2, [textY]);
 
-return (
-  <>
-    <Circle cx={x} cy={y} r={8} color="grey" opacity={0.8} />
-    <RoundedRect
-      x={backgroundX}
-      y={backgroundY}
-      width={textWidth + padding * 2}
-      height={textHeight * 2 + padding}
-      color="white"
-      opacity={0.9}
-      r={4}
-    />
-    <SKText
-      x={useDerivedValue(() => textX.value + padding, [textX])}
-      y={textY}
-      text={availLabel}
-      font={font}
-      color="black"
-    />
-    <SKText
-      x={useDerivedValue(() => textX.value + padding, [textX])}
-      y={useDerivedValue(() => textY.value + textHeight - 1, [textY])}
-      text={timeLabel}
-      font={font}
-      color="black"
-    />
-  </>
-);
+  return (
+    <>
+      <Circle cx={x} cy={y} r={8} color="grey" opacity={0.8} />
+      <RoundedRect
+        x={backgroundX}
+        y={backgroundY}
+        width={textWidth + padding * 2}
+        height={textHeight * 2 + padding}
+        color="white"
+        opacity={0.9}
+        r={4}
+      />
+      <SKText
+        x={useDerivedValue(() => textX.value + padding, [textX])}
+        y={textY}
+        text={availLabel}
+        font={font}
+        color="black"
+      />
+      <SKText
+        x={useDerivedValue(() => textX.value + padding, [textX])}
+        y={useDerivedValue(() => textY.value + textHeight - 1, [textY])}
+        text={timeLabel}
+        font={font}
+        color="black"
+      />
+    </>
+  );
 }
 
 export default function CarparkTrend() {
@@ -123,7 +122,8 @@ export default function CarparkTrend() {
         if (!response.ok) throw new Error("Current Time not Available");
         const data = await response.json();
         const latestTime = new Date(data[0].latest_time).getTime();
-        //console.log("latest", latestTime)
+        console.log("latest", latestTime)
+        console.log(new Date(latestTime).toLocaleString("en-US", { timeZone: "Asia/Singapore" }))
         setCurrentTime(latestTime);
       } catch (error) {
         console.log("Failed to fetch current time", error);
@@ -133,25 +133,34 @@ export default function CarparkTrend() {
     const getForecast = async () => {
       console.log(parsedCarpark.id);
       try {
-        const response = await fetch(`https://back-end-o2lr.onrender.com/getAvailabilityForecastDemo/${parsedCarpark.id}`, {
-          method: 'POST',
-        });
-        if (!response.ok || response.status == 500) throw new Error("Forecast not available");
-        const data = await response.json();
 
-        if (!data.forecast || !Array.isArray(data.forecast)) {
-          console.warn("Unexpected forecast format:", data);
-          throw new Error("Forecast not available");
-        }
+        /*
+          const response = await fetch(`https://back-end-o2lr.onrender.com/getAvailabilityForecastDemo/${parsedCarpark.id}`, {
+            method: 'POST',
+          });
+          if (!response.ok || response.status == 500) throw new Error("Forecast not available");
+          const data = await response.json();
+  
+          if (!data.forecast || !Array.isArray(data.forecast)) {
+            console.warn("Unexpected forecast format:", data);
+            throw new Error("Forecast not available");
+          }
+            */
+
+        //hard coded for this milestone
+        const data = forecasts
+        console.log("forecast", forecasts)
 
         const processedData = data.forecast.map((entry: any) => ({
-          time: entry.time,
-          availability: Number(entry.availability)
+          time: new Date(entry.recorded_at).getTime() + (8 * 60 * 60 * 1000),
+          availability: Number(entry.available)
         }));
+
+        console.log("processed", processedData)
 
         setForecastData(processedData)
         console.log("forecast done")
-      } catch (error : unknown) {
+      } catch (error: unknown) {
         if (error instanceof Error) {
           console.log("Failed to get forecast", error.message);
         } else {
@@ -197,7 +206,11 @@ export default function CarparkTrend() {
   }, [selectedRange, currentTime]);
 
   useEffect(() => {
-    if (startTime === 0 || endTime === 0) return;
+    if (startTime === 0 || endTime === 0 || isForecastMode) {
+      setIsForecastMode(false)
+      return;
+    }
+
 
     const getAvailabilityHistory = async () => {
       //console.log("CarparkTrend received carpark:", carpark);
@@ -205,7 +218,7 @@ export default function CarparkTrend() {
         const response = await fetch(`https://back-end-o2lr.onrender.com/fetchCarparkHistoryDemo/${parsedCarpark.id}/${startTime / 1000}/${endTime / 1000}`);
         if (!response.ok) throw new Error("Carpark History not Available");
         const data: CarparkAvailability[] = await response.json();
-        console.log(data)
+        //console.log(data)
         const processedData = data.map(entry => ({
           time: new Date(entry.recorded_at).getTime(),
           availability: Number(entry.available)
@@ -266,7 +279,7 @@ export default function CarparkTrend() {
           yKeys={["availability"]}
           domainPadding={{ top: 10, bottom: 20, left: 10, right: 10 }}
           chartPressState={state}
-          viewport={{ x: [startTime, endTime + 300000] }}
+          viewport={{ x: [startTime, endTime + 15 * 60 * 1000] }}
           xAxis={{
             font: fonts,
             formatXLabel(label) {
@@ -324,6 +337,7 @@ export default function CarparkTrend() {
               return;
             }
             else {
+              //console.log(forecastData)
               const minTime = Math.min(...forecastData.map(d => d.time));
               const maxTime = Math.max(...forecastData.map(d => d.time));
               console.log(minTime, " ", maxTime)
