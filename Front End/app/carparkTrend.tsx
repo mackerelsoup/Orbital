@@ -330,7 +330,7 @@ export default function CarparkTrend() {
         <SquareButton
           label='Forecast'
           size={150}
-          backgroundColor={forecastData ? 'red' : 'green'}
+          backgroundColor={forecastData.length == 0 ? 'grey' : 'red'}
           onPress={() => {
             if (forecastData.length == 0) {
               setShowForecastModal(true);
