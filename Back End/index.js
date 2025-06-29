@@ -55,6 +55,7 @@ app.post('/computeDistance', async (request, response) => {
           'X-Goog-Api-Key': process.env.GOOGLE_MAPS_API_KEY,
           'X-Goog-FieldMask': 'routes.duration,routes.distanceMeters'
         },
+        timeout: 2000
       }
     );
     console.log("here2")
@@ -64,7 +65,14 @@ app.post('/computeDistance', async (request, response) => {
       duration: route.duration
     });
   } catch (error) {
+    console.error("Distance API error:", error.message);
 
+    // Optional: Respond with default values or indicate timeout
+    response.status(504).json({
+      distance: Infinity,
+      duration: null,
+      error: "Distance computation timed out or failed."
+    });
   }
 }
 )

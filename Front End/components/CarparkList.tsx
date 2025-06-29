@@ -130,6 +130,15 @@ const CarparkList = ({
   
   useEffect(() => {
     if (!origin) return;
+    
+    const fetchWithTimeout = (promise: Promise<Response>, timeout: number) => {
+    return Promise.race([
+      promise,
+      new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error("Timeout")), timeout)
+      ),
+    ]);
+  };
 
     const fetchDistances = async () => {
       try {
