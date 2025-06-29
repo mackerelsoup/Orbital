@@ -28,8 +28,8 @@ type AvailabilityData = Record<number, [number, number]>;
 // Constants
 const SORT_OPTIONS = {
   DEFAULT: 'Sort',
-  DISTANCE: 'Distance',
-  AVAILABILITY: 'Availability'
+  DISTANCE: 'distance',
+  AVAILABILITY: 'availability'
 };
 
 const FILTER_OPTIONS = {
@@ -54,13 +54,17 @@ const FilterButton = ({
   isActive: boolean;
   onPress: () => void
 }) => (
-  <Pressable onPress={onPress}>
-    <View style={[
-      styles.filterButton,
-      isActive && styles.activeFilterButton
+  <Pressable onPress={onPress} style={({ pressed }) => [
+    styles.filterButton,
+    isActive && styles.activeFilterButton,
+    pressed && styles.pressedFilterButton
+  ]}>
+    <Text style={[
+      styles.filterButtonText,
+      isActive && styles.activeFilterButtonText
     ]}>
-      <Text style={styles.filterButtonText}>{label}</Text>
-    </View>
+      {label}
+    </Text>
   </Pressable>
 );
 
@@ -71,9 +75,28 @@ const SortButton = ({
   onPress: () => void;
   currentOption: string
 }) => (
-  <Pressable onPress={onPress} style={styles.sortButton}>
-    <FontAwesome name="sort" size={16} color="black" />
-    <Text style={styles.sortButtonText}>{currentOption}</Text>
+  <Pressable 
+    onPress={onPress} 
+    style={({ pressed }) => [
+      styles.sortButton,
+      pressed && styles.pressedSortButton
+    ]}
+  >
+    <View style={styles.sortButtonContent}>
+      <FontAwesome 
+        name="sort" 
+        size={14} 
+        color="#6366F1" 
+        style={styles.sortIcon}
+      />
+      <Text style={styles.sortButtonText}>{currentOption}</Text>
+      <FontAwesome 
+        name="chevron-down" 
+        size={10} 
+        color="#6B7280" 
+        style={styles.chevronIcon}
+      />
+    </View>
   </Pressable>
 );
 
@@ -266,26 +289,29 @@ const CarparkList = ({
         onSelect={handleSortOption}
       />
 
-      <View style={styles.filterRow}>
-        {user.username && (
-          <FilterButton
-            label="Season Parking"
-            isActive={visualFilterOption === FILTER_OPTIONS.SEASON_PARKING}
-            onPress={() => handleFilterOption(FILTER_OPTIONS.SEASON_PARKING)}
-          />
-        )}
-        <FilterButton
-          label="Allowed Parking"
-          isActive={visualFilterOption === FILTER_OPTIONS.CAN_PARK}
-          onPress={() => handleFilterOption(FILTER_OPTIONS.CAN_PARK)}
-        />
-      </View>
+      {/* filter buttons */}
+      <View style={styles.headerSection}>
+        <View style={styles.controlsRow}>
+          <View style={styles.filtersContainer}>
+            {user.username && (
+              <FilterButton
+                label="Season Parking"
+                isActive={visualFilterOption === FILTER_OPTIONS.SEASON_PARKING}
+                onPress={() => handleFilterOption(FILTER_OPTIONS.SEASON_PARKING)}
+              />
+            )}
+            <FilterButton
+              label="Allowed Parking"
+              isActive={visualFilterOption === FILTER_OPTIONS.CAN_PARK}
+              onPress={() => handleFilterOption(FILTER_OPTIONS.CAN_PARK)}
+            />
+          </View>
 
-      <View style={styles.sortContainer}>
-        <SortButton
-          onPress={() => sheetRef.current?.present()}
-          currentOption={sortOption}
-        />
+          <SortButton
+            onPress={() => sheetRef.current?.present()}
+            currentOption={sortOption}
+          />
+        </View>
       </View>
 
       <Animated.View style={[styles.listContainer, animatedStyle]}>
@@ -301,6 +327,7 @@ const CarparkList = ({
           )}
           keyExtractor={item => item.id.toString()}
           contentContainerStyle={styles.listContent}
+          showsVerticalScrollIndicator={false}
         />
       </Animated.View>
     </View>
@@ -311,42 +338,88 @@ const CarparkList = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#F8FAFC',
   },
-  filterRow: {
+  headerSection: {
+    backgroundColor: '#FFFFFF',
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E5E7EB',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
+  },
+  controlsRow: {
     flexDirection: 'row',
-    paddingHorizontal: 8,
-  },
-  filterButton: {
-    padding: 6,
-    borderRadius: 20,
-    margin: 7,
-    backgroundColor: 'white',
-  },
-  activeFilterButton: {
-    backgroundColor: '#90ee90',
-  },
-  filterButtonText: {
-    fontSize: 14,
-  },
-  sortContainer: {
-    flexDirection: 'column',
-    alignItems: 'flex-start',
-    paddingLeft: 10,
-  },
-  sortButton: {
-    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
   },
+  filtersContainer: {
+    flexDirection: 'row',
+    gap: 6,
+    flex: 1,
+  },
+  filterButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    backgroundColor: '#F1F5F9',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  activeFilterButton: {
+    backgroundColor: '#6366F1',
+    borderColor: '#6366F1',
+  },
+  pressedFilterButton: {
+    opacity: 0.8,
+    transform: [{ scale: 0.96 }],
+  },
+  filterButtonText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#475569',
+  },
+  activeFilterButtonText: {
+    color: '#FFFFFF',
+  },
+  sortButton: {
+    marginLeft: 8,
+  },
+  pressedSortButton: {
+    opacity: 0.7,
+  },
+  sortButtonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    backgroundColor: '#F8FAFC',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    borderRadius: 16,
+  },
+  sortIcon: {
+    marginRight: 6,
+  },
   sortButtonText: {
-    color: 'black',
-    fontSize: 15,
-    marginLeft: 6,
+    color: '#374151',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  chevronIcon: {
+    marginLeft: 2,
   },
   listContainer: {
     flex: 1,
   },
   listContent: {
-    paddingTop: 10,
+    paddingTop: 12,
+    paddingHorizontal: 16,
+    paddingBottom: 20,
   },
 });
 export default CarparkList;
