@@ -14,6 +14,7 @@ module.exports = {
     '^react-native-paper$': '<rootDir>/__mocks__/reactNativePaperMock.js',
     '^@expo/vector-icons$': '<rootDir>/__mocks__/vectorIconsMock.js',
     '^expo-router$': '<rootDir>/__mocks__/expoRouterMock.js',
+    '^@/(.*)$': '<rootDir>/$1',
   },
   testEnvironment: 'jsdom',
 };

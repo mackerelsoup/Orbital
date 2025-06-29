@@ -1,6 +1,6 @@
 import React, { createContext, useState } from 'react';
 
-type UserContextType = {
+export type UserContextType = {
   user: UserData;
   setUser: React.Dispatch<React.SetStateAction<UserData>>;
   loggedIn: boolean;
