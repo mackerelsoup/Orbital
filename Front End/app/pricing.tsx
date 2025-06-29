@@ -3,7 +3,6 @@ import { Image, FlatList, Keyboard, StyleSheet, Text, View, TextInput, Touchable
 import { FontAwesome } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import carparks from '../assets/carparks.json';
-import { Iconoir } from 'iconoir-react-native';
 
 interface Carpark {
   id: number;

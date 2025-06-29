@@ -4,7 +4,6 @@ import { useRouter } from 'expo-router';
 import React, { useState, useContext } from 'react';
 import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { UserContext } from "@/context/userContext";
-import { LogOut } from 'iconoir-react-native';
 
 /*
 Parent file of:
