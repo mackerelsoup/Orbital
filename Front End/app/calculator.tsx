@@ -1,6 +1,6 @@
 import { FontAwesome } from '@expo/vector-icons';
-import DateTimePicker, {DateTimePickerAndroid} from '@react-native-community/datetimepicker';
-import React, { useEffect, useState } from 'react';
+import DateTimePicker, { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
+import React, { useState } from 'react';
 import { Alert, Keyboard, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Switch, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import ModalSelector from 'react-native-modal-selector';
 import carparks from '../assets/carparks.json';
@@ -8,13 +8,9 @@ import carparks from '../assets/carparks.json';
 export default function CalculatorScreen() {
   const [carparkId, setCarparkId] = useState<number>(carparks[0].id);
   const [carparkLabel, setCarparkLabel] = useState<string>(carparks[0].name);
-  const [startDate, setStartDate] = useState<Date>(new Date());
   const [startTime, setStartTime] = useState<Date>(new Date());
-  const [dateSet, setDateSet] = useState(false)
-  const [timeset, setTimeSet] = useState(false)
-  const [startDateTime, setStartDateTime] = useState<Date>(new Date());
   const [duration, setDuration] = useState<number | null>(60);
-  const [showStart, setShowStart] = useState(false);
+  const [showDatePicker, setShowDatePicker] = useState(false); // New state to control date picker visibility for iOS
   const [fee, setFee] = useState<number | null>(null);
   const [isRegistered, setIsRegistered] = useState<boolean>(false);
   const selectorRef = React.useRef<any>(null);
@@ -25,85 +21,38 @@ export default function CalculatorScreen() {
     return `${monthNames[date.getMonth()]} ${date.getDate()} ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
   };
 
-  const toggleDatePicker = () => {
-    if (Platform.OS === 'ios') {
-      <DateTimePicker
-        value={startTime}
-        mode="date"
-        display='compact'
-        onChange={(e, date) => {
-          if (date) {
-            setStartDate(date);
-            setDateSet(true);
-          }
-        }}
-        style={styles.datePicker}
-      />
-    }
-    else DateTimePickerAndroid.open({
+  // Function to handle opening the date/time picker for Android
+  const showAndroidDatePicker = () => {
+    DateTimePickerAndroid.open({
       value: startTime,
       mode: 'date',
-      onChange: (e, date) => {
-        if (e.type === 'dismissed') {
-          DateTimePickerAndroid.dismiss('date')
-          return;
+      is24Hour: true,
+      onChange: (event, selectedDate) => {
+        if (event.type === 'set' && selectedDate) {
+          const updatedDate = new Date(selectedDate);
+          DateTimePickerAndroid.open({ // Open time picker after date is set
+            value: updatedDate,
+            mode: 'time',
+            is24Hour: true,
+            onChange: (event2, selectedTime) => {
+              if (event2.type === 'set' && selectedTime) {
+                updatedDate.setHours(selectedTime.getHours());
+                updatedDate.setMinutes(selectedTime.getMinutes());
+                setStartTime(updatedDate);
+              }
+              // No need to dismiss explicitly, DateTimePickerAndroid handles its own dismissal
+            },
+          });
         }
-        if (date) {
-          setStartDate(date);
-          setDateSet(true);
-        }
-      }
-    })
+      },
+    });
   };
 
-  useEffect(() => {
-    //console.log(startTime)
-    if (dateSet) {
-      toggleTimePicker();
-      setDateSet(false)
-    }
-    
-  }, [startDate])
+  // Function to toggle the date picker visibility for iOS
+  const toggleDatePicker = () => {
+    setShowDatePicker(!showDatePicker);
+  };
 
-  const toggleTimePicker = () => {
-    if (Platform.OS === 'ios') {
-      <DateTimePicker
-        value={startTime}
-        mode="time"
-        display='compact'
-        onChange={(e, time) => {
-          if (time) {
-            setTimeSet(true)
-            setStartTime(time);
-          }
-        }}
-        style={styles.datePicker}
-      />
-    }
-    else DateTimePickerAndroid.open({
-      value: startTime,
-      mode: 'time',
-      onChange: (e, time) => {
-        if (e.type === 'dismissed') {
-          DateTimePickerAndroid.dismiss('date')
-          return;
-        }
-        if (time) {
-          setTimeSet(true)
-          setStartTime(time);
-        }
-      }
-    })
-  }
-
-  useEffect(() => {
-    //console.log(startTime)
-    if (timeset) {
-      setStartDateTime(new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate(), startTime.getHours(), startTime.getMinutes(), startTime.getSeconds()));
-      setTimeSet(false)
-    }
-    
-  }, [startTime])
 
   const calculateFee = () => {
     if (duration === null || isNaN(duration)) {
@@ -255,12 +204,48 @@ export default function CalculatorScreen() {
               </Text>
               <TouchableOpacity 
                 style={styles.timeButton} 
-                onPress={toggleDatePicker}
+                onPress={Platform.OS === 'ios' ? toggleDatePicker : showAndroidDatePicker} // Use platform-specific handler
               >
-                <Text style={styles.timeButtonText}>{formatTime(startDateTime)}</Text>
+                <Text style={styles.timeButtonText}>{formatTime(startTime)}</Text>
                 <FontAwesome name="calendar" size={16} color="#6366F1" />
               </TouchableOpacity>
               
+              {showDatePicker && Platform.OS === 'ios' && ( // Only render for iOS when showDatePicker is true
+                <View style={styles.datePickerContainer}>
+                  <View style={styles.datePickerHeader}>
+                    <Text style={styles.datePickerTitle}>Select Date & Time</Text>
+                    <TouchableOpacity 
+                      style={styles.closeButton}
+                      onPress={toggleDatePicker}
+                    >
+                      <FontAwesome name="times" size={18} color="#6B7280" />
+                    </TouchableOpacity>
+                  </View>
+                  <View style={styles.datePickerWrapper}>
+                    <DateTimePicker
+                      value={startTime}
+                      mode="datetime"
+                      display="compact" // Use compact for iOS for better UI
+                      onChange={(e, date) => {
+                        if (e.type === 'dismissed' ) {
+                          setShowDatePicker(false);
+                          return;
+                        }
+                        if (date) {
+                          setStartTime(date);
+                        }
+                      }}
+                      style={styles.datePicker}
+                    />
+                  </View>
+                  <TouchableOpacity 
+                    style={styles.doneButton}
+                    onPress={toggleDatePicker} // Close the picker on Done
+                  >
+                    <Text style={styles.doneButtonText}>Done</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
             </View>
 
             {/* Duration */}
