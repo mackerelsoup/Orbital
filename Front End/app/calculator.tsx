@@ -10,7 +10,7 @@ export default function CalculatorScreen() {
   const [carparkLabel, setCarparkLabel] = useState<string>(carparks[0].name);
   const [startTime, setStartTime] = useState<Date>(new Date());
   const [duration, setDuration] = useState<number | null>(60);
-  const [showDatePicker, setShowDatePicker] = useState(false); // New state to control date picker visibility for iOS
+  const [showDatePicker, setShowDatePicker] = useState(false);
   const [fee, setFee] = useState<number | null>(null);
   const [isRegistered, setIsRegistered] = useState<boolean>(false);
   const selectorRef = React.useRef<any>(null);
@@ -21,7 +21,7 @@ export default function CalculatorScreen() {
     return `${monthNames[date.getMonth()]} ${date.getDate()} ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
   };
 
-  // Function to handle opening the date/time picker for Android
+  // android
   const showAndroidDatePicker = () => {
     DateTimePickerAndroid.open({
       value: startTime,
@@ -30,7 +30,7 @@ export default function CalculatorScreen() {
       onChange: (event, selectedDate) => {
         if (event.type === 'set' && selectedDate) {
           const updatedDate = new Date(selectedDate);
-          DateTimePickerAndroid.open({ // Open time picker after date is set
+          DateTimePickerAndroid.open({ 
             value: updatedDate,
             mode: 'time',
             is24Hour: true,
@@ -40,7 +40,6 @@ export default function CalculatorScreen() {
                 updatedDate.setMinutes(selectedTime.getMinutes());
                 setStartTime(updatedDate);
               }
-              // No need to dismiss explicitly, DateTimePickerAndroid handles its own dismissal
             },
           });
         }
@@ -48,7 +47,7 @@ export default function CalculatorScreen() {
     });
   };
 
-  // Function to toggle the date picker visibility for iOS
+  // ios
   const toggleDatePicker = () => {
     setShowDatePicker(!showDatePicker);
   };
@@ -85,6 +84,7 @@ export default function CalculatorScreen() {
     const isSaturday = day === 6;
     const isSunday = day === 0;
     const isSpecialLot = selected.name.includes("CP3:") || selected.name.includes("CP10B");
+    const isVacationLot = selected.name.includes("CP4/4A:") || selected.name.includes("CP5:") || selected.name.includes("Stephen");
 
     let charge = 0;
     let cappedMinutes = 0;
@@ -99,18 +99,23 @@ export default function CalculatorScreen() {
       const isCurrentWeekday = currentDay >= 1 && currentDay <= 5;
       const isCurrentSaturday = currentDay === 6;
       const isCurrentSunday = currentDay === 0;
+      const isVacationMonth = cursor.getMonth() + 1 === 6 || cursor.getMonth() + 1 === 7 || cursor.getMonth() + 1 === 12;
+      const isVacationTime = cursor.getHours() == 12 || cursor.getHours() == 13;
 
       if (isCurrentSunday) {
         // nothing since parking is free on sundays
       } else if (isCurrentSaturday) {
-        if (timeInt >= 830 && timeInt < 1700) {
+        if (isVacationLot && isVacationMonth && isVacationTime) {
+          // nothing since vacation period
+        } else if (timeInt >= 830 && timeInt < 1700) {
           charge += rate;
         }
       } else if (isCurrentWeekday) {
         const isFreeTime = timeInt < 830 || timeInt >= 1930;
-
         if (isFreeTime) {
           // nothing since it is outside parking charge hours
+        } else if (isVacationLot && isVacationMonth && isVacationTime) {
+          // nothing since vacation period
         } else if (isRegistered && isSpecialLot) {
           if (timeInt > 1800 && timeInt < 1930) {
             charge += rate;
@@ -225,7 +230,7 @@ export default function CalculatorScreen() {
                     <DateTimePicker
                       value={startTime}
                       mode="datetime"
-                      display="compact" // Use compact for iOS for better UI
+                      display="compact" 
                       onChange={(e, date) => {
                         if (e.type === 'dismissed' ) {
                           setShowDatePicker(false);
@@ -240,7 +245,7 @@ export default function CalculatorScreen() {
                   </View>
                   <TouchableOpacity 
                     style={styles.doneButton}
-                    onPress={toggleDatePicker} // Close the picker on Done
+                    onPress={toggleDatePicker}
                   >
                     <Text style={styles.doneButtonText}>Done</Text>
                   </TouchableOpacity>
