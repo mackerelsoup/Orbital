@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { Alert, Keyboard, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Switch, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import ModalSelector from 'react-native-modal-selector';
 import carparks from '../assets/carparks.json';
+import { PUBLIC_HOLIDAYS } from '../assets/publicHolidays';
 
 export default function CalculatorScreen() {
   const [carparkId, setCarparkId] = useState<number>(carparks[0].id);
@@ -15,10 +16,14 @@ export default function CalculatorScreen() {
   const [isRegistered, setIsRegistered] = useState<boolean>(false);
   const selectorRef = React.useRef<any>(null);
 
-
   const formatTime = (date: Date) => {
-    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-    return `${monthNames[date.getMonth()]} ${date.getDate()} ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
+    return date.toLocaleString('en-US', { 
+      month: 'short', 
+      day: 'numeric', 
+      hour: '2-digit', 
+      minute: '2-digit', 
+      hour12: false
+    });
   };
 
   // android
@@ -96,14 +101,17 @@ export default function CalculatorScreen() {
       const minute = cursor.getMinutes();
       const timeInt = hour * 100 + minute;
       const currentDay = cursor.getDay();
+      const currentMonth = cursor.getMonth() + 1;
       const isCurrentWeekday = currentDay >= 1 && currentDay <= 5;
       const isCurrentSaturday = currentDay === 6;
       const isCurrentSunday = currentDay === 0;
-      const isVacationMonth = cursor.getMonth() + 1 === 6 || cursor.getMonth() + 1 === 7 || cursor.getMonth() + 1 === 12;
+      const isVacationMonth = currentMonth === 6 || currentMonth === 7 || currentMonth === 12;
       const isVacationTime = cursor.getHours() == 12 || cursor.getHours() == 13;
+      const fullDate = cursor.getFullYear().toString() + "-" + currentMonth + "-" + cursor.getDate().toString();
+      const isHoliday = PUBLIC_HOLIDAYS.includes(fullDate);
 
-      if (isCurrentSunday) {
-        // nothing since parking is free on sundays
+      if (isCurrentSunday || isHoliday) {
+        // nothing since parking is free on sundays and public holidays
       } else if (isCurrentSaturday) {
         if (isVacationLot && isVacationMonth && isVacationTime) {
           // nothing since vacation period
