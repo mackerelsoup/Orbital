@@ -203,4 +203,4 @@ app.use((err, req, res, next) => {
 });
 
 // Serverless handler
-module.exports.handler = serverless(router);
+module.exports.handler = serverless(app);
