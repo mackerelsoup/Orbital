@@ -15,7 +15,8 @@
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
     "node-fetch": "^2.7.0",
-    "pg": "^8.16.2"
+    "pg": "^8.16.2",
+    "serverless-http": "^3.2.0"
   },
   "description": ""
 }
