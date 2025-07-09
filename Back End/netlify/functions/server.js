@@ -6,6 +6,7 @@ const fetch = require('node-fetch');
 const serverless = require('serverless-http');
 
 const app = express();
+const router = express.Router();
 app.use(express.json());
 
 // Neon PostgreSQL connection pool configuration
@@ -20,7 +21,7 @@ const pool = new Pool({
 });
 
 // Database middleware - attaches a client to each request
-app.use(async (req, res, next) => {
+router.use(async (req, res, next) => {
   try {
     const client = await pool.connect();
     req.db = {
@@ -47,12 +48,12 @@ app.use(async (req, res, next) => {
 });
 
 // Test endpoint
-app.get('/', (req, res) => {
+router.get('/', (req, res) => {
   res.send('Backend is live');
 });
 
 // Compute distance endpoint
-app.post('/computeDistance', async (req, res) => {
+router.post('/computeDistance', async (req, res) => {
   const { origin, destination } = req.body;
   try {
     const response = await axios.post(
@@ -91,7 +92,7 @@ app.post('/computeDistance', async (req, res) => {
 });
 
 // User data endpoints
-app.get('/fetchbyUsername/:username', async (req, res) => {
+router.get('/fetchbyUsername/:username', async (req, res) => {
   try {
     const result = await req.db.query(
       "SELECT * FROM login WHERE username = $1",
@@ -109,7 +110,7 @@ app.get('/fetchbyUsername/:username', async (req, res) => {
   }
 });
 
-app.get('/fetchbyEmail/:email', async (req, res) => {
+router.get('/fetchbyEmail/:email', async (req, res) => {
   try {
     const result = await req.db.query(
       "SELECT * FROM login WHERE email = $1",
@@ -128,7 +129,7 @@ app.get('/fetchbyEmail/:email', async (req, res) => {
 });
 
 // Carpark data endpoints
-app.get('/fetchCarparkData/:id', async (req, res) => {
+router.get('/fetchCarparkData/:id', async (req, res) => {
   try {
     const result = await req.db.query(
       "SELECT * FROM carpark_info WHERE id = $1",
@@ -147,7 +148,7 @@ app.get('/fetchCarparkData/:id', async (req, res) => {
 });
 
 // Current time endpoint
-app.get('/getCurrentTime', async (req, res) => {
+router.get('/getCurrentTime', async (req, res) => {
   try {
     const result = await req.db.query(
       "SELECT MAX(recorded_at) AS latest_time FROM carpark_availability_history"
@@ -165,7 +166,7 @@ app.get('/getCurrentTime', async (req, res) => {
 });
 
 // Registration endpoint
-app.post('/register', async (req, res) => {
+router.post('/register', async (req, res) => {
   const { username, email, password, is_staff, season_pass, season_pass_type } = req.body;
   
   try {
@@ -192,6 +193,9 @@ app.post('/register', async (req, res) => {
   }
 });
 
+app.use('/api', router);
+
+
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
@@ -199,4 +203,4 @@ app.use((err, req, res, next) => {
 });
 
 // Serverless handler
-module.exports.handler = serverless(app);
+module.exports.handler = serverless(router);
