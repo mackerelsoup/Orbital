@@ -71,15 +71,14 @@ const CappedParkingApplicationForm = () => {
         body: JSON.stringify(payload),
       });
 
-      await fetch("http://back-end-o2lr.onrender.com/sendConfirmationEmail", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: "testttt@gmail.com", username: "billy" }),
-      });
-
       // get response and decode whether it is successful or not
       const result = await response.json();
       if (result.success) {
+        await fetch("https://back-end-o2lr.onrender.com/sendConfirmationEmail", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: formData.email, username: formData.name }),
+        });
         console.log("vehicle registered")
         setShowModal(true);
         setTimeout(() => {

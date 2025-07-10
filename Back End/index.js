@@ -447,7 +447,7 @@ app.post('/sendConfirmationEmail', async (req, res) => {
   const mailOptions = {
     from: process.env.EMAIL_USER,
     to: email,
-    subject: "Registration Confirmation",
+    subject: "NUSpots Registration Confirmation",
     text: `Hi ${username},\n\nThank you for registering!\n\nBest regards,\nNUSpots`,
   };
 
