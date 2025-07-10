@@ -26,6 +26,7 @@
     "d3-scale": "^4.0.2",
     "d3-time": "^3.1.0",
     "date-fns": "^4.1.0",
+    "dotenv": "^17.2.0",
     "expo": "~53.0.9",
     "expo-blur": "~14.1.4",
     "expo-constants": "~17.1.6",
@@ -41,8 +42,10 @@
     "expo-symbols": "~0.4.4",
     "expo-system-ui": "~5.0.7",
     "expo-web-browser": "~14.1.6",
+    "express": "^5.1.0",
     "iconoir": "^7.11.0",
     "install": "^0.13.0",
+    "nodemailer": "^7.0.5",
     "npm": "^11.4.2",
     "react": "19.0.0",
     "react-dom": "19.0.0",
@@ -81,5 +84,9 @@
     "ts-jest": "^29.4.0",
     "typescript": "~5.8.3"
   },
-  "private": true
+  "private": true,
+  "description": "This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).",
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
 }
