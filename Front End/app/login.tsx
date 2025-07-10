@@ -1,71 +1,69 @@
-import { useLocalSearchParams, router } from "expo-router"
-import React, { useState, useContext } from "react";
-import {
-  View,
-  TextInput,
-  Button,
-  StyleSheet,
-  KeyboardAvoidingView,
-  Text,
-  Image,
-  Platform,
-  Alert,
-} from "react-native";
-
 import { UserContext } from "@/context/userContext";
-
+import { Ionicons } from "@expo/vector-icons";
+import { router, useLocalSearchParams } from "expo-router";
+import React, { useContext, useState } from "react";
+import {
+  Alert,
+  Image,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 type FormErrors = {
   username?: string;
   password?: string;
-}
+  both?: string;
+};
 
 type userDataIncomplete = {
-  username: string
-  email: string
-  password: string
-}
-
+  username: string;
+  email: string;
+  password: string;
+};
 
 class ConnectionError extends Error {
   constructor(message: string) {
     super(message);
-    this.name = "Connection Error"
+    this.name = "Connection Error";
   }
 }
 
 class UserNotFoundError extends Error {
   constructor(message: string) {
     super(message);
-    this.name = "User not found error"
+    this.name = "User not found error";
   }
 }
 
 class userDataNotFoundError extends Error {
   constructor(message: string) {
     super(message);
-    this.name = "User data not found error"
+    this.name = "User data not found error";
   }
 }
-
-
 
 export default function LoginForm() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [errors, setErrors] = useState<FormErrors>({});
-  const { setUser, setLoggedIn } = useContext(UserContext)!
+  const [showPassword, setShowPassword] = useState(false);
+  const [inlineError, setInlineError] = useState("");
+  const { setUser, setLoggedIn } = useContext(UserContext)!;
   const { from } = useLocalSearchParams();
 
-  //check if the user submitted the right info
   const validateLogin = () => {
     let tempErrors: FormErrors = {};
-    if (!username) tempErrors.username = "Username/Email is required";
-    if (!password) tempErrors.password = "Password is required";
+    if (!username && password) tempErrors.username = "Username/Email is required";
+    if (!password && username) tempErrors.password = "Password is required";
+    if (!password && !username) tempErrors.both = "Username/Email and Password are required";
 
-    setErrors(tempErrors)
     if (Object.keys(tempErrors).length > 0) {
-      //console.log(errors)
       Object.values(tempErrors).reverse().forEach(error => Alert.alert(error));
     }
 
@@ -73,160 +71,237 @@ export default function LoginForm() {
   };
 
   const isEmail = () => {
-    let emailRegex = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/
-    return emailRegex.test(username)
-  }
-
-
+    let emailRegex = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/;
+    return emailRegex.test(username);
+  };
 
   const handleLogin = async () => {
-    if (!validateLogin()) return;
+    if (!validateLogin()) {
+      setInlineError("Email or password incorrect. Please try again.");
+      return;
+    }
 
     try {
-      let response
-      if (isEmail()) response = await fetch(`https://back-end-o2lr.onrender.com/fetchbyEmail/${username}`);
+      let response;
+      if (isEmail())
+        response = await fetch(`https://back-end-o2lr.onrender.com/fetchbyEmail/${username}`);
       else response = await fetch(`https://back-end-o2lr.onrender.com/fetchbyUsername/${username}`);
 
-      if (response.status === 404) throw new UserNotFoundError("User not found")
-      if (!response.ok) throw new ConnectionError("Network response was not ok")
+      if (response.status === 404) throw new UserNotFoundError("User not found");
+      if (!response.ok) throw new ConnectionError("Network response was not ok");
 
-      const data = await response.json()
+      const data = await response.json();
 
       if (data[0].password !== password) {
-        Alert.alert("Error", "Incorrect password");
+        setInlineError("Email or password incorrect. Please try again.");
         setPassword("");
         return;
       }
 
-      // Successful login
+      setInlineError("");
       setUserData(data[0]);
       setUsername("");
       setPassword("");
-      router.replace((from?.toString() || '/') as any);
+      router.replace((from?.toString() || "/") as any);
     } catch (error) {
       if (error instanceof ConnectionError) {
-        console.log("Connection error", error)
-        Alert.alert("Login failed. Please try again later.")
+        Alert.alert("Login failed. Please try again later.");
+      } else if (error instanceof UserNotFoundError) {
+        setInlineError("Email or password incorrect. Please try again.");
       }
-      else if (error instanceof UserNotFoundError) {
-        console.log("User not found", error)
-        Alert.alert("Please enter a valid username or email")
-      }
-      setUsername("")
-      setPassword("")
+      setUsername("");
+      setPassword("");
     }
-  }
+  };
 
   const setUserData = async (data: userDataIncomplete) => {
-    console.log(data)
     try {
-      let response = await fetch(`https://back-end-o2lr.onrender.com/fetchUserData/${username}`)
-      if (response.status === 404) throw new userDataNotFoundError("User not found")
-      if (!response.ok) throw new ConnectionError("Network response was not ok")
+      let response = await fetch(`https://back-end-o2lr.onrender.com/fetchUserData/${username}`);
+      if (response.status === 404) throw new userDataNotFoundError("User not found");
+      if (!response.ok) throw new ConnectionError("Network response was not ok");
 
-      const userdata = await response.json()
-      console.log(userdata)
-      console.log(data)
+      const userdata = await response.json();
 
       const mergedData = {
         username: data.username,
         email: data.email,
         staff: userdata[0].is_staff,
         season_parking: userdata[0].season_pass,
-        season_parking_type: userdata[0].season_pass_type
-      }
-      console.log(mergedData)
+        season_parking_type: userdata[0].season_pass_type,
+      };
 
-      setUser(mergedData)
+      setUser(mergedData);
       setLoggedIn(true);
-
     } catch (error) {
       if (error instanceof ConnectionError) {
-        console.log("Connection error", error)
-        Alert.alert("Login failed. Please try again later.")
+        Alert.alert("Login failed. Please try again later.");
+      } else if (error instanceof userDataNotFoundError) {
+        Alert.alert("User info not in database, contact support");
       }
-      else if (error instanceof userDataNotFoundError) {
-        console.log("User info not found", error)
-        Alert.alert("User info not in database, contact support")
-      }
-      setUsername("")
-      setPassword("")
+      setUsername("");
+      setPassword("");
     }
-  }
+  };
 
   return (
     <KeyboardAvoidingView
-      behavior="padding"
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
       style={styles.container}
+      keyboardVerticalOffset={90}
     >
-      <View style={styles.form}>
-        <Text style={styles.label}>Username</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Enter your username"
-          placeholderTextColor={"black"}
-          value={username}
-          onChangeText={setUsername}
+      <ScrollView
+        contentContainerStyle={{ flexGrow: 1, justifyContent: "center" }}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+        <Image
+          source={require("../assets/images/undraw_login_weas.png")}
+          style={styles.image}
         />
+        <View style={styles.innerContainer}>
+          <Text style={styles.title}>Log into account</Text>
 
-        <Text style={styles.label}>Password</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Enter your password"
-          placeholderTextColor={"black"}
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-        />
-
-        <Button title="Login" onPress={handleLogin} />
-        <View style={{ marginTop: 10 }}>
-          <Button
-            title="Don't have an account? Register"
-            onPress={() => router.push("./registration")}
-            color="#007AFF"
+          <Text style={styles.label}>Email</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="example@example.com"
+            placeholderTextColor="#A0A0A0"
+            value={username}
+            onChangeText={setUsername}
+            keyboardType="email-address"
+            autoCapitalize="none"
           />
+
+          <Text style={styles.label}>Password</Text>
+          <View style={styles.passwordContainer}>
+            <TextInput
+              style={styles.passwordInput}
+              placeholder="Enter password"
+              placeholderTextColor="#A0A0A0"
+              secureTextEntry={!showPassword}
+              value={password}
+              onChangeText={setPassword}
+            />
+            <Pressable onPress={() => setShowPassword(!showPassword)}>
+              <Ionicons
+                name={showPassword ? "eye" : "eye-off"}
+                size={20}
+                color="#777"
+                style={{ marginRight: 10 }}
+              />
+            </Pressable>
+          </View>
+
+          {inlineError !== "" && (
+            <Text style={styles.inlineError}>
+              <Text style={{ fontWeight: "bold" }}>Oops! </Text>
+              <Text>{inlineError}</Text>
+            </Text>
+          )}
+
+          <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
+            <Text style={styles.loginButtonText}>Log in</Text>
+          </TouchableOpacity>
+        
+          <TouchableOpacity onPress={() => Alert.alert("Create New Account")}>
+            <Text style={styles.create}>Create an Account</Text>
+          </TouchableOpacity>
+
+          <Text style={styles.footer}>
+            By logging in, you agree to the{" "}
+            <Text style={styles.link}>Terms and Privacy Policy</Text>.
+          </Text>
         </View>
-      </View>
+      </ScrollView>
     </KeyboardAvoidingView>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
-    paddingHorizontal: 20,
-    backgroundColor: "#f5f5f5",
+    backgroundColor: "#fff",
+    paddingHorizontal: 24,
   },
-  form: {
-    backgroundColor: "#ffffff",
-    padding: 20,
-    borderRadius: 10,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
+  innerContainer: {
+    width: "100%",
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: "bold",
+    marginBottom: 30,
+    textAlign: "center",
   },
   label: {
-    fontSize: 16,
-    marginBottom: 5,
-    fontWeight: "bold",
+    marginBottom: 4,
+    fontSize: 14,
+    fontWeight: "500",
   },
   input: {
-    height: 40,
-    borderColor: "#ddd",
+    height: 48,
+    borderColor: "#CFCFCF",
     borderWidth: 1,
-    marginBottom: 15,
-    padding: 10,
-    borderRadius: 5,
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    marginBottom: 16,
+    fontSize: 14,
+    backgroundColor: "#F9F9F9",
   },
-  errorText: {
+  passwordContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderColor: "#CFCFCF",
+    borderWidth: 1,
+    borderRadius: 10,
+    backgroundColor: "#F9F9F9",
+    marginBottom: 16,
+    paddingHorizontal: 12,
+  },
+  passwordInput: {
+    flex: 1,
+    height: 48,
+    fontSize: 14,
+  },
+  loginButton: {
+    backgroundColor: "#6d62fe",
+    borderRadius: 10,
+    paddingVertical: 14,
+    alignItems: "center",
+    marginBottom: 20,
+    marginTop: 12,
+  },
+  loginButtonText: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 16,
+  },
+  create: {
+    textAlign: "center",
+    color: "#1E1E1E",
+    fontWeight: "500",
+    marginBottom: 24,
+  },
+  footer: {
+    textAlign: "center",
+    fontSize: 12,
+    color: "#808080",
+  },
+  link: {
+    color: "#808080",
+    fontWeight: "700",
+  },
+  image: {
+    width: 200,
+    height: 200,
+    resizeMode: "contain",
+    backgroundColor: "transparent",
+    alignSelf: "center",
+    marginBottom: 24,
+    marginTop: -64,
+  },
+  inlineError: {
     color: "red",
-    marginBottom: 10,
+    marginBottom: 12,
+    textAlign: "left",
   },
 });
