@@ -4,7 +4,15 @@ const express = require('express')
 const axios = require('axios')
 const { spawn } = require('child_process')
 const fetch = require('node-fetch');
+const nodemailer = require("nodemailer");
 
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+});
 
 const app = express()
 //parses incoming request 
@@ -431,6 +439,28 @@ app.post('/applyCappedParking', (request, response) => {
     response.status(201).json({ success: true, data: result.rows[0] });
   });
 });
+
+// confirmation email
+app.post('/sendConfirmationEmail', async (req, res) => {
+  const { email, username } = req.body;
+
+  const mailOptions = {
+    from: process.env.EMAIL_USER,
+    to: email,
+    subject: "Registration Confirmation",
+    text: `Hi ${username},\n\nThank you for registering!\n\nBest regards,\nNUSpots`,
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+    console.log("Confirmation email sent to", email);
+    res.status(200).json({ message: "Email sent successfully!" });
+  } catch (error) {
+    console.error("Email sending error:", error);
+    res.status(500).json({ message: "Failed to send email." });
+  }
+});
+
 
 app.listen(3000, () => {
   console.log("server is running")
