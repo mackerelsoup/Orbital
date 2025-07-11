@@ -1,6 +1,6 @@
 import { UserContext } from "@/context/userContext";
 import { Ionicons } from "@expo/vector-icons";
-import { router, useLocalSearchParams } from "expo-router";
+import { router, useLocalSearchParams, Stack } from "expo-router";
 import React, { useContext, useState } from "react";
 import {
   Alert,
@@ -15,6 +15,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { useNavigation } from "@react-navigation/native";
 
 type FormErrors = {
   username?: string;
@@ -56,6 +57,8 @@ export default function LoginForm() {
   const [inlineError, setInlineError] = useState("");
   const { setUser, setLoggedIn } = useContext(UserContext)!;
   const { from } = useLocalSearchParams();
+  const nav = useNavigation();
+
 
   const validateLogin = () => {
     let tempErrors: FormErrors = {};
@@ -144,6 +147,23 @@ export default function LoginForm() {
   };
 
   return (
+    <>
+    <Stack.Screen
+      options={{
+        headerLeft: () => (
+          <TouchableOpacity
+            onPress={() => nav.goBack()}
+            style={{ marginLeft: 16 }}
+          >
+            <Ionicons name="arrow-back" size={24} color="#6d62fe" />
+          </TouchableOpacity>
+        ),
+        headerShown: true,
+        title: "",
+        headerShadowVisible: false,
+      }}
+    />
+    
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : undefined}
       style={styles.container}
@@ -203,17 +223,22 @@ export default function LoginForm() {
             <Text style={styles.loginButtonText}>Log in</Text>
           </TouchableOpacity>
         
-          <TouchableOpacity onPress={() => Alert.alert("Create New Account")}>
-            <Text style={styles.create}>Create an Account</Text>
+          <TouchableOpacity onPress={() => router.push("/registration")}>
+            <Text style = {styles.createPre}>
+              Dont have an account?{" "}
+              <Text style={styles.create}>Create an Account</Text>
+            </Text>
           </TouchableOpacity>
 
           <Text style={styles.footer}>
             By logging in, you agree to the{" "}
-            <Text style={styles.link}>Terms and Privacy Policy</Text>.
+            <Text style={styles.link}>Terms and Conditions</Text>.
           </Text>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
+
+    </>
   );
 }
 
@@ -275,10 +300,17 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     fontSize: 16,
   },
+  createPre: {
+    textAlign: "center",
+    color: "#808080",
+    marginBottom: 32,
+    marginTop: -4,
+    fontSize: 14,
+  },
   create: {
     textAlign: "center",
     color: "#1E1E1E",
-    fontWeight: "500",
+    fontWeight: "600",
     marginBottom: 24,
   },
   footer: {
@@ -287,7 +319,7 @@ const styles = StyleSheet.create({
     color: "#808080",
   },
   link: {
-    color: "#808080",
+    color: "#6d62fe",
     fontWeight: "700",
   },
   image: {

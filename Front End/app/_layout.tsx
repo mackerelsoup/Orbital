@@ -1,7 +1,7 @@
 import { UserContext, UserProvider } from '@/context/userContext';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
-import { Link, router } from 'expo-router';
+import { Link, router, Stack } from 'expo-router';
 import { Drawer } from 'expo-router/drawer';
 import { useContext } from 'react';
 import { Platform, View, StyleSheet } from 'react-native';
@@ -131,16 +131,8 @@ export default function RootLayout() {
               <Drawer.Screen
                 name="login"
                 options={{
-                  title: "Login",
-                  headerShown: true,
-                  headerRight: () => (
-                    <Pressable onPress={() => router.back()} style={{ paddingRight: 20 }}>
-                      <Feather name="x" size={24} color="#007AFF" />
-                    </Pressable>
-                  ),
                   drawerItemStyle: { display: 'none' }
                 }} />
-
               <Drawer.Screen
                 name="profile"
                 options={{
@@ -178,10 +170,14 @@ export default function RootLayout() {
                 }} />
               <Drawer.Screen
                 name="carparkTrend"
-                
                 options={{
                   drawerItemStyle: { display: 'none' },
                   title: "Carpark Trend"
+                }} />
+              <Drawer.Screen
+                name="registrationSuccess"
+                options={{
+                  drawerItemStyle: { display: 'none' }
                 }} />
 
             </Drawer>
