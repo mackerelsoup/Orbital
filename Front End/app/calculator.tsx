@@ -6,6 +6,23 @@ import ModalSelector from 'react-native-modal-selector';
 import carparks from '../assets/carparks.json';
 import { PUBLIC_HOLIDAYS } from '../assets/publicHolidays';
 
+interface FeeBreakdownItem {
+  period: string;
+  minutes: number;
+  rate: number;
+  amount: number;
+  description: string;
+}
+
+interface FeeBreakdown {
+  items: FeeBreakdownItem[];
+  totalMinutes: number;
+  totalAmount: number;
+  cappedAmount?: number;
+  freeMinutes: number;
+  chargedMinutes: number;
+}
+
 export default function CalculatorScreen() {
   const [carparkId, setCarparkId] = useState<number>(carparks[0].id);
   const [carparkLabel, setCarparkLabel] = useState<string>(carparks[0].name);
@@ -14,33 +31,48 @@ export default function CalculatorScreen() {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [fee, setFee] = useState<number | null>(null);
   const [isRegistered, setIsRegistered] = useState<boolean>(false);
+  const [showBreakdown, setShowBreakdown] = useState<boolean>(false);
+  const [feeBreakdown, setFeeBreakdown] = useState<FeeBreakdown | null>(null);
   const selectorRef = React.useRef<any>(null);
 
   const formatTime = (date: Date) => {
-    return date.toLocaleString('en-US', { 
-      month: 'short', 
-      day: 'numeric', 
-      hour: '2-digit', 
-      minute: '2-digit', 
+    return date.toLocaleString("en-US", { 
+      month: "short", 
+      day: "numeric", 
+      hour: "2-digit", 
+      minute: "2-digit", 
       hour12: false
     });
+  };
+
+  const formatTimeOnly = (date: Date) => {
+    return date.toLocaleString("en-US", { 
+      hour: "2-digit", 
+      minute: "2-digit", 
+      hour12: false
+    });
+  };
+
+  const getDayName = (dayNum: number) => {
+    const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    return days[dayNum];
   };
 
   // android
   const showAndroidDatePicker = () => {
     DateTimePickerAndroid.open({
       value: startTime,
-      mode: 'date',
+      mode: "date",
       is24Hour: true,
       onChange: (event, selectedDate) => {
-        if (event.type === 'set' && selectedDate) {
+        if (event.type === "set" && selectedDate) {
           const updatedDate = new Date(selectedDate);
           DateTimePickerAndroid.open({ 
             value: updatedDate,
-            mode: 'time',
+            mode: "time",
             is24Hour: true,
             onChange: (event2, selectedTime) => {
-              if (event2.type === 'set' && selectedTime) {
+              if (event2.type === "set" && selectedTime) {
                 updatedDate.setHours(selectedTime.getHours());
                 updatedDate.setMinutes(selectedTime.getMinutes());
                 setStartTime(updatedDate);
@@ -57,7 +89,6 @@ export default function CalculatorScreen() {
     setShowDatePicker(!showDatePicker);
   };
 
-
   const calculateFee = () => {
     if (duration === null || isNaN(duration)) {
       Alert.alert("No Duration", "Please enter a duration");
@@ -72,12 +103,20 @@ export default function CalculatorScreen() {
     if (duration <= 10){
       Alert.alert("All carparks have a grace period of 10 minutes")
       setFee(0);
+      setFeeBreakdown({
+        items: [],
+        totalMinutes: duration,
+        totalAmount: 0,
+        freeMinutes: duration,
+        chargedMinutes: 0
+      });
       return;
     }
 
     const selected = carparks.find(cp => cp.id === carparkId);
     if (!selected || !selected.pricing || !selected.pricing.rate_per_minute) {
       setFee(null);
+      setFeeBreakdown(null);
       return;
     }
 
@@ -93,8 +132,42 @@ export default function CalculatorScreen() {
 
     let charge = 0;
     let cappedMinutes = 0;
+    let freeMinutes = 0;
+    let chargedMinutes = 0;
+    const breakdownItems: FeeBreakdownItem[] = [];
+    
+    // track periods for breakdown
+    let currentPeriod = {
+      start: new Date(start),
+      minutes: 0,
+      rate: rate,
+      amount: 0,
+      description: "",
+      isFree: false,
+      isCapped: false
+    };
+
+    const addBreakdownItem = () => {
+      if (currentPeriod.minutes > 0) {
+        breakdownItems.push({
+          period: `${formatTimeOnly(currentPeriod.start)} - ${formatTimeOnly(new Date(currentPeriod.start.getTime() + currentPeriod.minutes * 60000))} (${getDayName(currentPeriod.start.getDay())})`,
+          minutes: currentPeriod.minutes,
+          rate: currentPeriod.isFree ? 0 : currentPeriod.rate,
+          amount: currentPeriod.isFree ? 0 : (currentPeriod.isCapped ? Math.min(currentPeriod.amount, 2.568) : currentPeriod.amount),
+          description: currentPeriod.description
+        });
+      }
+    };
 
     let cursor = new Date(start);
+    let lastDescription = "";
+    
+    // grace period
+    let graceMinutes = 0;
+    if (duration <= 10) {
+      graceMinutes = duration;
+    }
+
     // loop to calculate fees minute by minute based on existing conditions
     while (cursor < end) {
       const hour = cursor.getHours();
@@ -110,60 +183,135 @@ export default function CalculatorScreen() {
       const fullDate = cursor.getFullYear().toString() + "-" + currentMonth + "-" + cursor.getDate().toString();
       const isHoliday = PUBLIC_HOLIDAYS.includes(fullDate);
 
+      let currentDescription = "";
+      let isFree = false;
+      let isCapped = false;
+      let shouldCharge = false;
+
+      if (charge >= 1000) {
+        break;
+      }
+
       if (isCurrentSunday || isHoliday) {
-        // nothing since parking is free on sundays and public holidays
+        currentDescription = isHoliday ? "Public Holiday" : "Sunday";
+        isFree = true;
+        freeMinutes++;
       } else if (isCurrentSaturday) {
         if (isVacationLot && isVacationMonth && isVacationTime) {
-          // nothing since vacation period
+          currentDescription = "Vacation Period";
+          isFree = true;
+          freeMinutes++;
         } else if (timeInt >= 830 && timeInt < 1700) {
-          charge += rate;
+          currentDescription = "Saturday Charged Hours (08:30-17:00)";
+          shouldCharge = true;
+          chargedMinutes++;
+        } else {
+          currentDescription = "Saturday Off-Peak";
+          isFree = true;
+          freeMinutes++;
         }
       } else if (isCurrentWeekday) {
         const isFreeTime = timeInt < 830 || timeInt >= 1930;
         if (isFreeTime) {
-          // nothing since it is outside parking charge hours
+          currentDescription = timeInt < 830 ? "Weekday Early Hours" : "Weekday Evening";
+          isFree = true;
+          freeMinutes++;
         } else if (isVacationLot && isVacationMonth && isVacationTime) {
-          // nothing since vacation period
+          currentDescription = "Vacation Period";
+          isFree = true;
+          freeMinutes++;
         } else if (isRegistered && isSpecialLot) {
           if (timeInt > 1800 && timeInt < 1930) {
-            charge += rate;
+            currentDescription = "Weekday Evening Peak (Registered)";
+            shouldCharge = true;
+            chargedMinutes++;
           } else if (timeInt >= 831 && timeInt < 1800) {
-            cappedMinutes += 1;
+            currentDescription = "Weekday Capped Hours (Registered)";
+            isCapped = true;
+            cappedMinutes++;
           }
         } else {
-          charge += rate;
+          currentDescription = "Weekday Charged Hours (08:30-19:30)";
+          shouldCharge = true;
+          chargedMinutes++;
         }
+      }
+
+      // check if we need to start a new period
+      if (currentDescription !== lastDescription) {
+        addBreakdownItem();
+        currentPeriod = {
+          start: new Date(cursor),
+          minutes: 0,
+          rate: rate,
+          amount: 0,
+          description: currentDescription,
+          isFree: isFree,
+          isCapped: isCapped
+        };
+        lastDescription = currentDescription;
+      }
+
+      // Add to current period
+      currentPeriod.minutes++;
+      if (shouldCharge) {
+        charge += rate;
+        currentPeriod.amount += rate;
       }
 
       cursor = new Date(cursor.getTime() + 60000);
     }
 
+    // Add final period
+    addBreakdownItem();
+
+    // Add capped amount
+    let cappedAmount = 0;
     if (cappedMinutes > 0) {
-      charge += Math.min(rate * cappedMinutes, 2.568);
+      cappedAmount = Math.min(rate * cappedMinutes, 2.568);
+      charge += cappedAmount;
+      
+      // Add capped period to breakdown
+      breakdownItems.push({
+        period: "Capped Period Total",
+        minutes: cappedMinutes,
+        rate: rate,
+        amount: cappedAmount,
+        description: "Registered Vehicle Capped Rate (Max $2.568)"
+      });
     }
 
-    setFee(Math.floor(charge * 100) / 100);
+    const finalFee = charge >= 1000 ? 999.99 : Math.floor(charge * 100) / 100;
+    
+    setFee(finalFee);
+    setFeeBreakdown({
+      items: breakdownItems,
+      totalMinutes: duration,
+      totalAmount: finalFee,
+      cappedAmount: cappedAmount > 0 ? cappedAmount : undefined,
+      freeMinutes: freeMinutes,
+      chargedMinutes: chargedMinutes
+    });
   };
 
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}
-      keyboardVerticalOffset={90}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 50 : 0}
     >
-      <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
+      <ScrollView 
+        contentContainerStyle={styles.scrollContainer} 
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
         <View style={styles.container}>
-          {/* Header */}
-          <View style={styles.header}>
-            <FontAwesome name="calculator" size={28} color="#6366F1" style={styles.headerIcon} />
-            <Text style={styles.heading}>Parking Calculator</Text>
-          </View>
-
           {/* Main Content Card */}
           <View style={styles.card}>
             {/* Carpark Selection */}
             <View style={styles.inputGroup}>
               <Text style={styles.label}>
-                <FontAwesome name="map-marker" size={14} color="#6B7280" />  Carpark Location
+                <FontAwesome name="map-marker" size={16} color="#6d62fe" />  Carpark Location
               </Text>
               <ModalSelector
                 ref={selectorRef}
@@ -185,11 +333,12 @@ export default function CalculatorScreen() {
                     <Text
                       style={[
                         styles.selectorText,
-                        { color: carparkLabel ? '#2563EB' : '#9CA3AF' }
+                        { color: carparkLabel ? "#1F2937" : "#9CA3AF" }
                       ]}
                     >
-                      {carparkLabel || 'Select a carpark'}
+                      {carparkLabel || "Select a carpark"}
                     </Text>
+                    <FontAwesome name="chevron-down" size={14} color="#6d62fe" />
                   </TouchableOpacity>
                 }
               />
@@ -198,14 +347,17 @@ export default function CalculatorScreen() {
             {/* Registered or not Switch */}
             <View style={styles.inputGroup}>
               <View style={styles.switchRow}>
-                <Text style={styles.label}>
-                  <FontAwesome name="id-card" size={14} color="#6B7280" />  Registered Vehicle
-                </Text>
+                <View style={styles.switchLabelContainer}>
+                  <Text style={styles.label}>
+                    <FontAwesome name="id-card" size={16} color="#6d62fe" />  Registered Vehicle?
+                  </Text>
+                </View>
                 <Switch 
                   value={isRegistered} 
                   onValueChange={setIsRegistered}
-                  trackColor={{ false: '#E5E7EB', true: '#A78BFA' }}
-                  thumbColor={isRegistered ? '#6366F1' : '#F3F4F6'}
+                  trackColor={{ false: "#E5E7EB", true: "#B8B3FF" }}
+                  thumbColor={isRegistered ? "#6d62fe" : "#F9FAFB"}
+                  ios_backgroundColor="#E5E7EB"
                 />
               </View>
             </View>
@@ -213,17 +365,17 @@ export default function CalculatorScreen() {
             {/* Start Time */}
             <View style={styles.inputGroup}>
               <Text style={styles.label}>
-                <FontAwesome name="clock-o" size={14} color="#6B7280" />  Start Time
+                <FontAwesome name="clock-o" size={16} color="#6d62fe" />  Start Time
               </Text>
               <TouchableOpacity 
                 style={styles.timeButton} 
-                onPress={Platform.OS === 'ios' ? toggleDatePicker : showAndroidDatePicker} // Use platform-specific handler
+                onPress={Platform.OS === "ios" ? toggleDatePicker : showAndroidDatePicker}
               >
                 <Text style={styles.timeButtonText}>{formatTime(startTime)}</Text>
-                <FontAwesome name="calendar" size={16} color="#6366F1" />
+                <FontAwesome name="calendar" size={18} color="#6d62fe" />
               </TouchableOpacity>
               
-              {showDatePicker && Platform.OS === 'ios' && ( // Only render for iOS when showDatePicker is true
+              {showDatePicker && Platform.OS === "ios" && (
                 <View style={styles.datePickerContainer}>
                   <View style={styles.datePickerHeader}>
                     <Text style={styles.datePickerTitle}>Select Date & Time</Text>
@@ -240,7 +392,7 @@ export default function CalculatorScreen() {
                       mode="datetime"
                       display="compact" 
                       onChange={(e, date) => {
-                        if (e.type === 'dismissed' ) {
+                        if (e.type === "dismissed" ) {
                           setShowDatePicker(false);
                           return;
                         }
@@ -264,25 +416,35 @@ export default function CalculatorScreen() {
             {/* Duration */}
             <View style={styles.inputGroup}>
               <Text style={styles.label}>
-                <FontAwesome name="hourglass-half" size={14} color="#6B7280" />  Duration (minutes)
+                <FontAwesome name="hourglass-half" size={16} color="#6d62fe" />  Duration (minutes)
               </Text>
               <TextInput
                 style={styles.input}
                 keyboardType="numeric"
                 returnKeyType="done"
                 blurOnSubmit={true}
-                value={duration?.toString() ?? ''}
-                onChangeText={(text) => setDuration(text === '' ? null : Number(text))}
+                value={duration?.toString() ?? ""}
+                onChangeText={(text) => {
+                  if (text === "") {
+                    setDuration(null);
+                  } else {
+                    const numValue = Number(text);
+                    if (!isNaN(numValue)) {
+                      setDuration(numValue);
+                    }
+                  }
+                }}
                 onSubmitEditing={() => Keyboard.dismiss()}
-                placeholder="Enter duration"
+                placeholder="Enter duration in minutes"
                 placeholderTextColor="#9CA3AF"
               />
             </View>
 
             {/* Calculate Button */}
             <TouchableOpacity style={styles.calculateButton} onPress={calculateFee}>
-              <FontAwesome name="calculator" size={18} color="#FFFFFF" style={styles.buttonIcon} />
-              <Text style={styles.calculateButtonText}>Calculate Fee</Text>
+              <View style={styles.buttonGradient}>
+                <Text style={styles.calculateButtonText}>Calculate Fee</Text>
+              </View>
             </TouchableOpacity>
 
             {/* Result */}
@@ -290,6 +452,75 @@ export default function CalculatorScreen() {
               <View style={styles.resultCard}>
                 <FontAwesome name="dollar" size={20} color="#10B981" style={styles.resultIcon} />
                 <Text style={styles.resultText}>Estimated Fee: ${fee.toFixed(2)}</Text>
+              </View>
+            )}
+
+            {/* Breakdown Toggle */}
+            {fee !== null && feeBreakdown && (
+              <TouchableOpacity 
+                style={styles.breakdownToggle}
+                onPress={() => setShowBreakdown(!showBreakdown)}
+              >
+                <Text style={styles.breakdownToggleText}>
+                  {showBreakdown ? "Hide" : "Show"} Fee Breakdown
+                </Text>
+                <FontAwesome 
+                  name={showBreakdown ? "chevron-up" : "chevron-down"} 
+                  size={14} 
+                  color="#6d62fe" 
+                />
+              </TouchableOpacity>
+            )}
+
+            {/* Fee Breakdown */}
+            {fee !== null && feeBreakdown && showBreakdown && (
+              <View style={styles.breakdownCard}>
+                  <View style={styles.summaryRow}>
+                    <Text style={styles.summaryLabel}>Total Duration:</Text>
+                    <Text style={styles.summaryValue}>{feeBreakdown.totalMinutes} minutes</Text>
+                  </View>
+                  <View style={styles.summaryRow}>
+                    <Text style={styles.summaryLabel}>Free Minutes:</Text>
+                    <Text style={[styles.summaryValue, { color: "#10B981" }]}>
+                      {feeBreakdown.freeMinutes} minutes
+                    </Text>
+                  </View>
+                  <View style={styles.summaryRow}>
+                    <Text style={styles.summaryLabel}>Charged Minutes:</Text>
+                    <Text style={[styles.summaryValue, { color: "#F59E0B" }]}>
+                      {feeBreakdown.chargedMinutes} minutes
+                    </Text>
+                  </View>
+
+                {/* Detailed Breakdown */}
+                <Text style={styles.breakdownSubtitle}>Detailed Breakdown:</Text>
+                {feeBreakdown.items.map((item, index) => (
+                  <View key={index} style={styles.breakdownItem}>
+                    <View style={styles.breakdownItemHeader}>
+                      <Text style={styles.breakdownPeriod}>{item.period}</Text>
+                      {item.amount !== 0 && (
+                        <Text style={styles.breakdownAmount}>${item.amount.toFixed(2)}</Text>
+                      )}
+                      {item.amount === 0 && (
+                        <Text style={styles.freeLabel}>FREE</Text>
+                      )}
+                    </View>
+                    <Text style={styles.breakdownDescription}>{item.description}</Text>
+                    <View style={styles.breakdownDetails}>
+                      <Text style={styles.breakdownDetailText}>
+                        {item.minutes} min × ${item.rate.toFixed(4)}/min
+                      </Text>
+                    </View>
+                  </View>
+                ))}
+
+                {/* Total Fee */}
+                <View style={styles.breakdownTotal}>
+                  <Text style={styles.breakdownTotalLabel}>Total Fee:</Text>
+                  <Text style={styles.breakdownTotalAmount}>
+                    ${feeBreakdown.totalAmount.toFixed(2)}
+                  </Text>
+                </View>
               </View>
             )}
           </View>
@@ -303,7 +534,7 @@ const styles = StyleSheet.create({
   scrollContainer: {
     flexGrow: 1,
     paddingBottom: 40,
-    backgroundColor: '#F9FAFB',
+    backgroundColor: '#F8FAFC',
   },
   container: {
     flex: 1,
@@ -312,60 +543,72 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 24,
-    paddingTop: 10,
+    marginBottom: 28,
+    paddingBottom: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F1F5F9',
   },
   headerIcon: {
     marginRight: 12,
   },
   heading: {
-    fontSize: 24,
+    fontSize: 32,
     fontWeight: '700',
     color: '#1F2937',
   },
   card: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    padding: 24,
+    borderRadius: 24,
+    padding: 28,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 16,
+    elevation: 8,
+    borderWidth: 1,
+    borderColor: '#F1F5F9',
   },
   inputGroup: {
-    marginBottom: 24,
+    marginBottom: 28,
   },
   label: {
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: 17,
+    fontWeight: '700',
     color: '#374151',
-    marginBottom: 8,
+    marginBottom: 12,
+    letterSpacing: 0.5,
   },
   selectorContainer: {
     marginBottom: 0,
   },
   selector: {
-    backgroundColor: '#F9FAFB',
-    borderColor: '#D1D5DB',
-    borderWidth: 1,
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    minHeight: 52,
+    backgroundColor: '#FFFFFF',
+    borderColor: '#E2E8F0',
+    borderWidth: 2,
+    borderRadius: 16,
+    paddingHorizontal: 20,
+    paddingVertical: 18,
+    minHeight: 58,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    shadowColor: '#6d62fe',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
   },
   selectorText: {
     fontSize: 16,
-    color: '#111827',
-    fontWeight: '500',
+    fontWeight: '600',
     lineHeight: 20,
-    flexShrink: 1,
-    textAlign: 'left',
+    flex: 1,
   },
   modalOption: {
     fontSize: 16,
     paddingVertical: 12,
     color: '#374151',
+    fontWeight: '500',
   },
   cancelButton: {
     backgroundColor: '#F3F4F6',
@@ -380,46 +623,60 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    marginBottom: 0,
+  },
+  switchLabelContainer: {
+    flex: 1,
+    marginRight: 16,
+    marginBottom: -10,
   },
   timeButton: {
-    backgroundColor: '#F9FAFB',
-    borderColor: '#D1D5DB',
-    borderWidth: 1,
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
+    backgroundColor: '#FFFFFF',
+    borderColor: '#E2E8F0',
+    borderWidth: 2,
+    borderRadius: 16,
+    paddingHorizontal: 20,
+    paddingVertical: 18,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    shadowColor: '#6d62fe',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
   },
   timeButtonText: {
     fontSize: 16,
     color: '#374151',
-    fontWeight: '500',
+    fontWeight: '600',
   },
   datePickerContainer: {
-    marginTop: 12,
-    backgroundColor: '#F9FAFB',
-    borderRadius: 12,
-    padding: 16,
-    borderColor: '#E5E7EB',
-    borderWidth: 1,
-    width: '100%',
-    alignSelf: 'center',
+    marginTop: 16,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 16,
+    padding: 20,
+    borderColor: '#E2E8F0',
+    borderWidth: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 12,
+    elevation: 6,
   },
   datePickerHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 16,
   },
   datePickerTitle: {
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: 18,
+    fontWeight: '700',
     color: '#374151',
   },
   closeButton: {
-    padding: 4,
+    padding: 6,
   },
   datePickerWrapper: {
     alignItems: 'center',
@@ -432,50 +689,65 @@ const styles = StyleSheet.create({
     height: Platform.OS === 'ios' ? 200 : 'auto',
   },
   doneButton: {
-    backgroundColor: '#6366F1',
-    borderRadius: 8,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
+    backgroundColor: '#6d62fe',
+    borderRadius: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
     alignSelf: 'center',
-    marginTop: 12,
+    marginTop: 16,
+    shadowColor: '#6d62fe',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 4,
   },
   doneButtonText: {
     color: '#FFFFFF',
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '700',
   },
   input: {
-    backgroundColor: '#F9FAFB',
-    borderColor: '#D1D5DB',
-    borderWidth: 1,
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
+    backgroundColor: '#FFFFFF',
+    borderColor: '#E2E8F0',
+    borderWidth: 2,
+    borderRadius: 16,
+    paddingHorizontal: 20,
+    paddingVertical: 18,
     fontSize: 16,
     color: '#374151',
+    fontWeight: '600',
+    shadowColor: '#6d62fe',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
   },
   calculateButton: {
-    backgroundColor: '#6366F1',
-    borderRadius: 12,
-    paddingVertical: 16,
-    paddingHorizontal: 24,
+    borderRadius: 18,
+    marginTop: 12,
+    shadowColor: '#6d62fe',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.4,
+    shadowRadius: 16,
+    elevation: 10,
+  },
+  buttonGradient: {
+    backgroundColor: '#6d62fe',
+    borderRadius: 18,
+    paddingVertical: 20,
+    paddingHorizontal: 28,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#6366F1',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 6,
-    marginTop: 8,
   },
   buttonIcon: {
-    marginRight: 8,
+    marginRight: 12,
   },
   calculateButtonText: {
     color: '#FFFFFF',
-    fontSize: 18,
-    fontWeight: '700',
+    fontSize: 24,
+    fontWeight: '600',
+    letterSpacing: 0.5,
   },
   resultCard: {
     backgroundColor: '#ECFDF5',
@@ -496,4 +768,128 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#10B981',
   },
-});
+  breakdownToggle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    marginTop: 16,
+    backgroundColor: '#F8FAFC',
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  breakdownToggleText: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#6d62fe',
+    marginRight: 8,
+  },
+  breakdownCard: {
+    backgroundColor: '#FAFBFC',
+    borderRadius: 16,
+    padding: 20,
+    marginTop: 16,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  breakdownTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#374151',
+    marginBottom: 16,
+  },
+  summaryRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  summaryLabel: {
+    fontSize: 14,
+    color: '#6B7280',
+    fontWeight: '500',
+  },
+  summaryValue: {
+    fontSize: 14,
+    color: '#374151',
+    fontWeight: '600',
+  },
+  breakdownSubtitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#374151',
+    marginBottom: 12,
+    marginTop: 24,
+  },
+  breakdownItem: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  breakdownItemHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  breakdownPeriod: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#374151',
+    flex: 1,
+  },
+  breakdownAmount: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#10B981',
+  },
+  breakdownDescription: {
+    fontSize: 13,
+    color: '#6B7280',
+    marginBottom: 8,
+    fontStyle: 'italic',
+  },
+  breakdownDetails: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  breakdownDetailText: {
+    fontSize: 12,
+    color: '#9CA3AF',
+    fontWeight: '500',
+  },
+  freeLabel: {
+    fontSize: 12,
+    color: '#10B981',
+    fontWeight: '700',
+    backgroundColor: '#ECFDF5',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 6,
+  },
+  breakdownTotal: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingTop: 16,
+    marginTop: 16,
+    borderTopWidth: 2,
+    borderTopColor: '#E2E8F0',
+  },
+  breakdownTotalLabel: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#374151',
+  },
+  breakdownTotalAmount: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#10B981',
+  },
+})
