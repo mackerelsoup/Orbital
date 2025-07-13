@@ -1,5 +1,4 @@
 import pandas as pd
-import matplotlib.pyplot as plt
 from prophet import Prophet
 import sys
 import json
