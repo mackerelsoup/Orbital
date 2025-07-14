@@ -45,7 +45,7 @@ export default function RootLayout() {
                 drawerIcon: ({ color, size }) => (
                   <FontAwesome name="money" size={size} color={color} />
                 ),
-                headerTitle: "Pricing",
+                headerTitle: "Pricing Information",
                 headerRight: () => {
                   const { user } = useContext(UserContext)!
                   return (

@@ -1,8 +1,11 @@
-import React, { useState, useMemo } from 'react';
-import { Image, FlatList, Keyboard, StyleSheet, Text, View, TextInput, TouchableOpacity, SafeAreaView, StatusBar } from 'react-native';
-import { FontAwesome } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
+import React, { useMemo, useState, useRef } from 'react';
+import { Animated, Dimensions, FlatList, Image, SafeAreaView, StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import carparks from '../assets/carparks.json';
+
+const { width } = Dimensions.get("window");
 
 interface Carpark {
   id: number;
@@ -12,13 +15,15 @@ interface Carpark {
     max_daily_cap?: number;
     charged_hours?: string;
   };
+  type?: string;
+  staff?: boolean;
 }
 
 export default function PricingScreen() {
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [expandedCard, setExpandedCard] = useState<number | null>(null);
   const router = useRouter();
 
-  // filters the car parks based on input
   const filteredCarparks = useMemo(() => {
     return carparks.filter((carpark: Carpark) =>
       carpark.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -26,356 +31,488 @@ export default function PricingScreen() {
   }, [searchQuery]);
 
   const clearSearch = () => {
-    setSearchQuery('');
+    setSearchQuery("");
   };
-
 
   const handleCardPress = (carpark: Carpark) => {
-    router.push({ pathname: '/', params: { carparkId: carpark.id.toString(), triggerClick: 'true' } });
+    router.push({ pathname: "/", params: { carparkId: carpark.id.toString(), triggerClick: "true" } });
   };
 
-  // displays all the carpark cards and makes them interactable
-  const renderCarparkCard = ({ item }: { item: Carpark }) => (
-    <TouchableOpacity style={styles.card} onPress={() => handleCardPress(item)}>
-      <View style={styles.cardHeader}>
-        <View style={styles.carparkInfo}>
-          <FontAwesome name="building" size={20} color="#6366F1" />
-          <Text style={styles.carparkName}>{item.name}</Text>
-        </View>
-        <View style={styles.carparkId}>
-          <Text style={styles.carparkIdText}>#{item.id}</Text>
-        </View>
-      </View>
+  const toggleExpanded = (carparkId: number) => {
+    setExpandedCard(expandedCard === carparkId ? null : carparkId);
+  };
 
-      <View style={styles.pricingGrid}>
-        <View style={styles.pricingItem}>
-          <View style={styles.pricingIcon}>
-            <FontAwesome name="clock-o" size={20} color="#10B981" />
+  const formatPrice = (price: number | undefined) => {
+    if (price) return price.toFixed(4);
+  };
+
+  const formatDailyCap = (cap: number | undefined) => {
+    if (cap === undefined) {
+      return "NIL";
+    } else {
+      return `$${Math.floor(cap * 100) / 100}`;
+    }
+  };
+
+  const renderCarparkCard = ({ item }: { item: Carpark }) => {
+    const isExpanded = expandedCard === item.id;
+    
+    return (
+      <Animated.View style={styles.cardContainer}>
+        <View style={styles.card}>
+          <TouchableOpacity 
+            style={styles.cardHeader}
+            onPress={() => toggleExpanded(item.id)}
+            activeOpacity={0.8}
+          >
+            <View style={styles.cardHeaderLeft}>
+              <Text style={styles.carparkName}>{item.name}</Text>
+              <Text style={styles.carparkId}>#{item.id}</Text>
+            </View>
+            <View style={styles.expandButton}>
+              <Ionicons 
+                name={isExpanded ? "chevron-up" : "chevron-down"} 
+                size={20} 
+                color="#667085" 
+              />
+            </View>
+          </TouchableOpacity>
+
+          {/* pricing */}
+          <View style={styles.pricingContainer}>
+            <View style={styles.pricingCard}>
+              <View style={styles.pricingIcon}>
+                <Ionicons name="time-outline" size={18} color="#3B82F6" />
+              </View>
+              <View>
+                <Text style={styles.pricingLabel}>Per Minute</Text>
+                <Text style={styles.pricingValue}>${formatPrice(item.pricing?.rate_per_minute)}</Text>
+              </View>
+            </View>
+            
+            <View style={styles.pricingCard}>
+              <View style={styles.pricingIcon}>
+                <Ionicons name="calendar-outline" size={18} color="#3B82F6" />
+              </View>
+              <View>
+                <Text style={styles.pricingLabel}>Daily Cap</Text>
+                <Text style={styles.pricingValue}>{formatDailyCap(item.pricing?.max_daily_cap)}</Text>
+              </View>
+            </View>
           </View>
-          <View style={styles.pricingDetails}>
-            <Text style={styles.pricingLabel}>Rate per Minute</Text>
-            <Text style={styles.pricingValue}>
-              ${item.pricing?.rate_per_minute?.toFixed(4) || '0.0000'}
-            </Text>
-          </View>
-        </View>
 
-        <View style={styles.pricingItem}>
-          <View style={styles.pricingIcon}>
-            <FontAwesome name="tachometer" size={20} color="#F59E0B" />
-          </View>
-          <View style={styles.pricingDetails}>
-            <Text style={styles.pricingLabel}>Daily Cap</Text>
-            <Text style={styles.pricingValue}>
-              {item.pricing?.max_daily_cap !== undefined
-                ? `$${Math.floor(item.pricing?.max_daily_cap * 100) / 100}`
-                : 'No Cap'}
-            </Text>
-          </View>
-        </View>
-      </View>
+          {/* card expanded */}
+          {isExpanded && (
+            <View style={styles.expandedContent}>
+              
+              <View style={styles.detailsGrid}>
+                <View style={styles.detailCard}>
+                  <View style={styles.detailIcon}>
+                    <Ionicons 
+                      name={item.type === "sheltered" ? "umbrella-outline" : "sunny-outline"} 
+                      size={20} 
+                      color={item.type === "sheltered" ? "#3B82F6" : "#F59E0B"} 
+                    />
+                  </View>
+                  <View>
+                    <Text style={styles.detailLabel}>Type</Text>
+                    <Text style={[
+                      styles.detailValue,
+                    ]}>
+                      {item.type === "sheltered" ? "Sheltered" : "Open Air"}
+                    </Text>
+                  </View>
+                </View>
 
-      {item.pricing?.charged_hours && (
-        <View style={styles.chargedHours}>
-          <FontAwesome name="info-circle" size={16} color="#6B7280" />
-          <Text style={styles.chargedHoursText}>{item.pricing.charged_hours}</Text>
-        </View>
-      )}
-    </TouchableOpacity>
-  );
+                <View style={styles.detailCard}>
+                  <View style={styles.detailIcon}>
+                    <Ionicons 
+                      name={item.staff ? "lock-closed-outline" : "globe-outline"} 
+                      size={20} 
+                      color={item.staff ? "#EF4444" : "#10B981"} 
+                    />
+                  </View>
+                  <View>
+                    <Text style={styles.detailLabel}>Access</Text>
+                    <Text style={[
+                      styles.detailValue,
+                      { color: item.staff ? "#EF4444" : "#10B981" }
+                    ]}>
+                      {item.staff ? "Staff" : "Public"}
+                    </Text>
+                  </View>
+                </View>
+              </View>
 
-  
-  return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#F8FAFC" />
+              {item.pricing?.charged_hours && (
+                <View style={styles.chargedHoursCard}>
+                  <View style={styles.chargedHoursIcon}>
+                    <Ionicons name="information-circle-outline" size={18} color="#6d62fe" />
+                  </View>
+                  <Text style={styles.chargedHoursText}>{item.pricing.charged_hours}</Text>
+                </View>
+              )}
 
-      <View style={styles.header}>
-        <View style={styles.headerContent}>
-          <FontAwesome name="dollar" size={26} color="#6366F1" />
-          <Text style={styles.headerTitle}>Parking Rates</Text>
-        </View>
-        <Text style={styles.headerSubtitle}>{filteredCarparks.length} car parks available</Text>
-      </View>
-
-      {/* search bar */}
-      <View style={styles.searchSection}>
-        <View style={styles.searchContainer}>
-          <FontAwesome name="search" size={17} color="#6B7280" style={styles.searchIcon} />
-          <TextInput
-            style={styles.searchInput}
-            returnKeyType="done"
-            placeholder="Search car parks..."
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-            placeholderTextColor="#9CA3AF"
-          />
-          {searchQuery.length > 0 && (
-            <TouchableOpacity onPress={clearSearch} style={styles.clearButton}>
-              <FontAwesome name="times" size={20} color="#9CA3AF" />
-            </TouchableOpacity>
+              <TouchableOpacity 
+                style={styles.selectButton}
+                onPress={() => handleCardPress(item)}
+                activeOpacity={0.8}
+              >
+                <LinearGradient
+                  colors={["#6d62fe", "#3B82F6"]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1.3, y: 0 }}
+                  style={styles.selectButtonGradient}
+                >
+                  <Text style={styles.selectButtonText}>   Select</Text>
+                  <Ionicons name="arrow-forward" size={18} color="#ffffff" />
+                </LinearGradient>
+              </TouchableOpacity>
+            </View>
           )}
         </View>
-      </View>
+      </Animated.View>
+    );
+  };
 
-      {searchQuery.length > 0 && (
-        <View style={styles.resultsHeader}>
-          <Text style={styles.resultsText}>
-            {filteredCarparks.length} result{filteredCarparks.length !== 1 ? 's' : ''}
-            {searchQuery && ` for "${searchQuery}"`}
-          </Text>
+  const scrollY = useRef(new Animated.Value(0)).current;
+
+  const headerHeight = scrollY.interpolate({
+    inputRange: [0, 100],
+    outputRange: [172, 0],
+    extrapolate: 'clamp',
+  });
+
+  const headerOpacity = scrollY.interpolate({
+    inputRange: [0, 100],
+    outputRange: [1, 0],
+    extrapolate: 'clamp',
+  });
+
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="light-content" backgroundColor="#6d62fe" />
+
+      <Animated.View style={[styles.header, { height: headerHeight, opacity: headerOpacity, overflow: 'hidden' }]}>
+        <LinearGradient colors={["#6d62fe", "#3B82F6"]} style={StyleSheet.absoluteFill}>
+
+        <View style={styles.headerContent}>
         </View>
-      )}
 
-      {/* free parking disclaimer */}
-      <View style={{ paddingHorizontal: 20, paddingVertical: 8 }}>
-        <Text style={{ fontSize: 11, fontStyle: 'italic' }}>
-          * Parking is free on Sundays and Public Holidays at all car parks.
-        </Text>
-      </View>
-
-      {/* empty state (no search results)*/}
-      <FlatList
-        data={filteredCarparks}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={renderCarparkCard}
-        contentContainerStyle={styles.listContainer}
-        showsVerticalScrollIndicator={false}
-        ListEmptyComponent={() => (
-          <View style={styles.emptyState}>
-            <Image source={require('../assets/images/undraw_page-eaten.png')}
-              style={{ width: 200, height: 200, resizeMode: 'contain', backgroundColor: 'transparent' }} />
-            <Text style={styles.emptyStateTitle}>No car parks found</Text>
-            <Text style={styles.emptyStateText}>
-              Oops! No matches. Try adjusting your search terms or browse all available car parks.
-            </Text>
+        {/* search bar */}
+        <View style={styles.searchContainer}>
+          <View style={styles.searchBar}>
+            <Ionicons name="search" size={20} color="#9CA3AF" />
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Search carparks..."
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              placeholderTextColor="#9CA3AF"
+            />
             {searchQuery.length > 0 && (
-              <TouchableOpacity onPress={clearSearch} style={styles.clearSearchButton}>
-                <Text style={styles.clearSearchButtonText}>Clear Search</Text>
+              <TouchableOpacity onPress={clearSearch}>
+                <Ionicons name="close-circle" size={20} color="#6B7280" />
               </TouchableOpacity>
             )}
           </View>
-        )}
-      />
+        </View>
+
+        {/* available lots left */}
+        <Text style={styles.headerSubtitle}>
+          {filteredCarparks.length} carpark{filteredCarparks.length !== 1 ? "s" : ""} available
+        </Text>
+
+        {/* free parking disclaimer */}
+        <View style={styles.disclaimerContainer}>
+          <View style={styles.disclaimerBadge}>
+            <Ionicons name="information-circle-outline" size={16} color="#ffffff" />
+            <Text style={styles.disclaimerText}>
+              Free parking on Sundays and Public Holidays
+            </Text>
+          </View>
+        </View>
+      </LinearGradient>
+    </Animated.View>
+
+      <View style={styles.content}>
+        <Animated.FlatList
+          onScroll={Animated.event(
+            [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+            { useNativeDriver: false }
+          )}
+
+          data={filteredCarparks}
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={renderCarparkCard}
+          contentContainerStyle={styles.listContainer}
+          showsVerticalScrollIndicator={false}
+          ListEmptyComponent={() => (
+            <View style={styles.emptyState}>
+            <Image source={require("../assets/images/undraw_page-eaten.png")}
+              style={{ width: 200, height: 200, resizeMode: "contain", backgroundColor: "transparent" }} />
+              <Text style={styles.emptyStateTitle}>No carparks found</Text>
+              <Text style={styles.emptyStateText}>
+                Try adjusting your search terms or browse all available carparks.
+              </Text>
+            </View>
+          )}
+        />
+      </View>
     </SafeAreaView>
   );
 }
 
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
+    backgroundColor: '#F9FAFB',
   },
   header: {
-    backgroundColor: '#FFFFFF',
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
+    paddingBottom: 24,
+    backgroundColor: '#6d62fe',
   },
   headerContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 1,
-  },
-  headerTitle: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: '#1F2937',
-    marginLeft: 12,
+    paddingHorizontal: 24,
+    paddingTop: 16,
+    paddingBottom: 24,
   },
   headerSubtitle: {
     fontSize: 14,
-    color: '#6B7280',
-    marginLeft: 27,
-  },
-  searchSection: {
-    backgroundColor: '#FFFFFF',
-    paddingHorizontal: 20,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
+    color: '#ffffffcc',
+    fontWeight: '500',
+    marginLeft: 26,
+    marginTop: -4,
+    marginBottom: 24,
   },
   searchContainer: {
+    paddingHorizontal: 24,
+    marginBottom: 16,
+  },
+  searchBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F9FAFB',
-    borderRadius: 12,
+    backgroundColor: '#fff',
+    borderRadius: 16,
     paddingHorizontal: 16,
     paddingVertical: 12,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-  },
-  searchIcon: {
-    marginRight: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
+    minHeight: 0,
+    marginTop: -16,
   },
   searchInput: {
     flex: 1,
     fontSize: 16,
     color: '#1F2937',
+    marginLeft: 12,
   },
-  clearButton: {
-    padding: 4,
+  disclaimerContainer: {
+    paddingHorizontal: 24,
   },
-  resultsHeader: {
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    backgroundColor: '#F1F5F9',
+  disclaimerBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#ffffff26',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+    alignSelf: 'flex-start',
+    borderWidth: 1,
+    borderColor: '#ffffff33',
   },
-  resultsText: {
-    fontSize: 14,
-    color: '#64748B',
+  disclaimerText: {
+    fontSize: 12,
+    color: '#ffffffe6',
+    marginLeft: 6,
     fontWeight: '500',
   },
+  content: {
+    flex: 1,
+  },
   listContainer: {
-    padding: 16,
+    paddingHorizontal: 24,
+    paddingTop: 24,
+    paddingBottom: 100,
+  },
+  cardContainer: {
+    marginBottom: 16,
   },
   card: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 16,
+    backgroundColor: '#fff',
+    borderRadius: 20,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
     elevation: 4,
-    borderWidth: 1,
-    borderColor: '#F1F5F9',
   },
   cardHeader: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 16,
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F3F4F6',
   },
-  carparkInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  cardHeaderLeft: {
     flex: 1,
   },
   carparkName: {
     fontSize: 18,
     fontWeight: '700',
     color: '#1F2937',
-    marginLeft: 8,
+    marginBottom: 4,
   },
   carparkId: {
-    backgroundColor: '#F3F4F6',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 8,
-  },
-  carparkIdText: {
-    fontSize: 12,
-    fontWeight: '600',
+    fontSize: 14,
     color: '#6B7280',
+    fontWeight: '500',
+    marginBottom: -8,
   },
-  pricingGrid: {
+  expandButton: {
+    padding: 8,
+    backgroundColor: '#F9FAFB',
+    borderRadius: 12,
+  },
+  pricingContainer: {
     flexDirection: 'row',
-    marginBottom: 16,
-    gap: 12,
+    padding: 20,
+    gap: 16,
   },
-  pricingItem: {
+  pricingCard: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F8FAFC',
-    padding: 12,
-    borderRadius: 12,
+    backgroundColor: '#F9FAFB',
+    padding: 16,
+    borderRadius: 16,
     borderWidth: 1,
-    borderColor: '#E2E8F0',
+    borderColor: '#E5E7EB',
   },
   pricingIcon: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: '#FFFFFF',
+    width: 36,
+    height: 36,
+    backgroundColor: '#fff',
+    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 8,
   },
-  pricingDetails: {
-    flex: 1,
-  },
   pricingLabel: {
     fontSize: 12,
-    color: '#64748B',
-    fontWeight: '500',
+    color: '#6B7280',
+    fontWeight: '600',
     marginBottom: 2,
   },
   pricingValue: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#1F2937',
+  },
+  expandedContent: {
+    padding: 20,
+    paddingTop: 0,
+  },
+  detailsGrid: {
+    flexDirection: 'row',
+    gap: 16,
+    marginBottom: 20,
+  },
+  detailCard: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F9FAFB',
+    padding: 16,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+  },
+  detailIcon: {
+    width: 36,
+    height: 36,
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 8,
+  },
+  detailLabel: {
+    fontSize: 12,
+    color: '#6B7280',
+    fontWeight: '600',
+    marginBottom: 2,
+  },
+  detailValue: {
     fontSize: 14,
     fontWeight: '700',
-    color: '#1E293B',
   },
-  additionalRates: {
-    backgroundColor: '#FAFBFC',
-    borderRadius: 12,
-    padding: 12,
-    marginBottom: 12,
-    gap: 8,
-  },
-  rateRow: {
+  chargedHoursCard: {
     flexDirection: 'row',
     alignItems: 'center',
+    backgroundColor: '#EEF2FF',
+    padding: 16,
+    borderRadius: 16,
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: '#C7D2FE',
   },
-  rateLabel: {
-    fontSize: 13,
-    color: '#64748B',
-    marginLeft: 8,
-    marginRight: 8,
-    flex: 1,
-  },
-  rateAmount: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: '#1E293B',
-  },
-  chargedHours: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#EFF6FF',
-    padding: 12,
-    borderRadius: 10,
-    borderLeftWidth: 3,
-    borderLeftColor: '#3B82F6',
+  chargedHoursIcon: {
+    marginRight: 12,
   },
   chargedHoursText: {
-    fontSize: 13,
-    color: '#1E40AF',
-    fontStyle: 'italic',
-    marginLeft: 8,
-    fontWeight: '500',
+    fontSize: 14,
+    color: '',
+    fontWeight: '600',
+    flex: 1,
+    lineHeight: 20,
+    flexWrap: 'wrap',
+  },
+  selectButton: {
+    borderRadius: 16,
+    overflow: 'hidden',
+    shadowColor: '#6d62fe',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  selectButtonGradient: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 16,
+    paddingHorizontal: 24,
+    gap: 8,
+  },
+  selectButtonText: {
+    color: '#ffffff',
+    fontSize: 16,
+    fontWeight: '700',
   },
   emptyState: {
     alignItems: 'center',
-    paddingVertical: 44,
+    paddingVertical: 60,
     paddingHorizontal: 32,
   },
+  emptyStateIcon: {
+    marginBottom: 24,
+  },
   emptyStateTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#374151',
-    marginTop: 16,
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#1F2937',
     marginBottom: 8,
   },
   emptyStateText: {
-    fontSize: 14,
+    fontSize: 16,
     color: '#6B7280',
     textAlign: 'center',
-    lineHeight: 20,
-    marginBottom: 24,
-  },
-  clearSearchButton: {
-    backgroundColor: '#6366F1',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 8,
-  },
-  clearSearchButtonText: {
-    color: '#FFFFFF',
-    fontSize: 14,
-    fontWeight: '600',
+    lineHeight: 24,
+    marginBottom: 32,
   },
 });
