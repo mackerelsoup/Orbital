@@ -221,7 +221,7 @@
     "longitudeDelta": 0.01,
     "pricing": {
       "rate_per_minute": 0.0856,
-      "charged_hours": "Authorised personel only"
+      "charged_hours": "AUTHORISED PERSONNEL ONLY"
     },
     "season_parking_type": []
 
