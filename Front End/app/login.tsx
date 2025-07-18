@@ -55,7 +55,7 @@ export default function LoginForm() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [inlineError, setInlineError] = useState("");
-  const { setUser, setLoggedIn } = useContext(UserContext)!;
+  const { setUser, setLoggedIn, setUserType } = useContext(UserContext)!;
   const { from } = useLocalSearchParams();
   const nav = useNavigation();
 
@@ -124,6 +124,13 @@ export default function LoginForm() {
       if (!response.ok) throw new ConnectionError("Network response was not ok");
 
       const userdata = await response.json();
+      
+      // set user type
+      if (userdata[0].is_staff) {
+        setUserType('Staff');
+      } else {
+        setUserType('Student');
+      }
 
       const mergedData = {
         username: data.username,
