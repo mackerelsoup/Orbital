@@ -134,24 +134,28 @@ export default function CarparkTrend() {
       console.log(parsedCarpark.id);
       try {
 
+
+        const response = await fetch(`https://back-end-o2lr.onrender.com/getAvailabilityForecastDemo/${parsedCarpark.id}`, {
+          method: 'POST',
+        });
+        if (!response.ok || response.status == 500) throw new Error("Forecast not available");
+        const data = await response.json();
+
+        //console.log(data)
+
         /*
-          const response = await fetch(`https://back-end-o2lr.onrender.com/getAvailabilityForecastDemo/${parsedCarpark.id}`, {
-            method: 'POST',
-          });
-          if (!response.ok || response.status == 500) throw new Error("Forecast not available");
-          const data = await response.json();
-  
-          if (!data.forecast || !Array.isArray(data.forecast)) {
-            console.warn("Unexpected forecast format:", data);
-            throw new Error("Forecast not available");
-          }
-            */
+        if (!data.forecast || !Array.isArray(data.forecast)) {
+          console.warn("Unexpected forecast format:", data);
+          throw new Error("Forecast not available");
+        }
+        */
+
 
         //hard coded for this milestone
-        const data = forecasts
-        console.log("forecast", forecasts)
+        //const data = forecasts
+        console.log("forecast", data)
 
-        const processedData = data.forecast.map((entry: any) => ({
+        const processedData = data.map((entry: any) => ({
           time: new Date(entry.recorded_at).getTime() + (8 * 60 * 60 * 1000),
           availability: Number(entry.available)
         }));
@@ -279,7 +283,7 @@ export default function CarparkTrend() {
           yKeys={["availability"]}
           domainPadding={{ top: 10, bottom: 20, left: 10, right: 10 }}
           chartPressState={state}
-          viewport={{ x: [startTime, endTime + 15 * 60 * 1000] }}
+          viewport={{ x: [startTime, endTime + 10 * 60 * 1000] }}
           xAxis={{
             font: fonts,
             formatXLabel(label) {
