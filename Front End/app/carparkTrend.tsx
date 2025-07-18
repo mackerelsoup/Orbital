@@ -283,7 +283,7 @@ export default function CarparkTrend() {
           yKeys={["availability"]}
           domainPadding={{ top: 10, bottom: 20, left: 10, right: 10 }}
           chartPressState={state}
-          viewport={{ x: [startTime, endTime + 15 * 60 * 1000] }}
+          viewport={{ x: [startTime, endTime + 10 * 60 * 1000] }}
           xAxis={{
             font: fonts,
             formatXLabel(label) {
