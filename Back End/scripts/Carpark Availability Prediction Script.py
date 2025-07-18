@@ -11,6 +11,7 @@ data = json.loads(input_carpark_json)
 
 df = pd.DataFrame(data)
 df['time'] = pd.to_datetime(df['recorded_at'])
+df['time'] = df['time'].dt.tz_localize(None)
 df['available'] = df['available'].astype(int)
 df = df[['time', 'available']].sort_values('time')
 

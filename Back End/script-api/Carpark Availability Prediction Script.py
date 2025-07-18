@@ -10,6 +10,7 @@ async def forecast_carpark(request: Request):
 
     df = pd.DataFrame(data)
     df['time'] = pd.to_datetime(df['recorded_at'])
+    df['time'] = df['time'].dt.tz_localize(None)
     df['available'] = df['available'].astype(int)
     df = df[['time', 'available']].sort_values('time')
     df_prophet = df.rename(columns={'time': 'ds', 'available': 'y'})
@@ -37,3 +38,12 @@ async def forecast_carpark(request: Request):
 @app.get("/")
 def home():
     return {"message": "Carpark Forecast API. Use POST /forecast with JSON input."}
+
+@app.get("/mishka")
+def home():
+    return {"To my one and only Mishka, enjoy the rest of your evening"}
+
+
+@app.get("/ruixuan")
+def home(): 
+    return {"DO ORBITAL"}
