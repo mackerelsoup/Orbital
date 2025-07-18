@@ -5,6 +5,8 @@ export type UserContextType = {
   setUser: React.Dispatch<React.SetStateAction<UserData>>;
   loggedIn: boolean;
   setLoggedIn: React.Dispatch<React.SetStateAction<boolean>>;
+  userType: 'Student' | 'Staff' | null;
+  setUserType: React.Dispatch<React.SetStateAction<'Student' | 'Staff' | null>>;
   logout: () => void;
 };
 
@@ -33,12 +35,16 @@ export const UserProvider = ({ children }: UserProviderProps) => {
     });
     setLoggedIn(false);
   };
-
+  
+  const [userType, setUserType] = useState<'Student' | 'Staff' | null>(null);
+  
   const value = {
     user,
     setUser,
     loggedIn,
     setLoggedIn,
+    userType,
+    setUserType,
     logout
   };
 

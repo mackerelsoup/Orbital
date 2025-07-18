@@ -1,4 +1,5 @@
 type Carpark = {
+  available_lots: number;
   name: string;
   id: number;
   type: string;

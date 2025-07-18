@@ -15,8 +15,8 @@ interface Carpark {
     max_daily_cap?: number;
     charged_hours?: string;
   };
-  type?: string;
-  staff?: boolean;
+  type: string;
+  staff: boolean;
 }
 
 export default function PricingScreen() {
