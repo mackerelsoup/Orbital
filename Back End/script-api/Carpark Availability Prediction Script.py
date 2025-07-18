@@ -18,7 +18,7 @@ async def forecast_carpark(request: Request):
     latest_time = df_prophet['ds'].max()
     test_start_time = latest_time - pd.Timedelta(hours=24)
     df_train = df_prophet[df_prophet['ds'] <= test_start_time].copy()
-    df_test = df_prophet[df_prophet['ds'] > test_start_time].copy()
+    df_test = df_prophet[df_prophet['ds'] >= test_start_time].copy()
 
     model = Prophet(daily_seasonality=True, weekly_seasonality=True, seasonality_mode='additive')
     model.fit(df_train)
@@ -27,11 +27,14 @@ async def forecast_carpark(request: Request):
     future = model.make_future_dataframe(periods=n_periods, freq='15min')
     forecast = model.predict(future)
     forecast_result = forecast[['ds', 'yhat']].set_index('ds').loc[df_test['ds']]
+    forecast_result['yhat'] = forecast_result['yhat'].round(1)
     
     response = forecast_result.reset_index().rename(columns={
         'ds': 'recorded_at',
         'yhat': 'available'
     }).to_dict(orient='records')
+
+
 
     return response
 
@@ -39,11 +42,3 @@ async def forecast_carpark(request: Request):
 def home():
     return {"message": "Carpark Forecast API. Use POST /forecast with JSON input."}
 
-@app.get("/mishka")
-def home():
-    return {"To my one and only Mishka, enjoy the rest of your evening"}
-
-
-@app.get("/ruixuan")
-def home(): 
-    return {"DO ORBITAL"}
