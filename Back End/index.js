@@ -306,8 +306,9 @@ app.post('/getAvailabilityForecastDemo/:id', async (request, response) => {
       return response.status(404).json({ error: "No historical data available" });
     }
 
+
     // Step 2: Send to Flask prediction API
-    const predictRes = await fetch(`${process.env.PYTHON_API_URL}/run`, {
+    const predictRes = await fetch(`${process.env.PYTHON_API_URL}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(carparkAvailData),
