@@ -10,12 +10,7 @@ import { timeMinute } from 'd3-time';
 import SquareButton from '@/components/SquareButton'
 import { useLocalSearchParams } from 'expo-router';
 import { Portal } from 'react-native-portalize'
-import forecasts from '../assets/forecast.json'
 
-
-type CarparkTrendProps = {
-  carpark: Carpark
-}
 
 type CarparkAvailability = {
   available: number;
@@ -41,7 +36,7 @@ function ToolTipWithBackground({ x, y, availValue, timeValue, screenWidth = SCRE
     return `Time: ${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}`;
   }, [timeValue]);
 
-  const textWidth = 120;
+  const textWidth = 130;
   const textHeight = 16;
   const padding = 4;
 
@@ -118,7 +113,7 @@ export default function CarparkTrend() {
   useEffect(() => {
     const getCurrentTime = async () => {
       try {
-        const response = await fetch("https://back-end-o2lr.onrender.com/getCurrentTimeDemo");
+        const response = await fetch("https://back-end-o2lr.onrender.com/getCurrentTime");
         if (!response.ok) throw new Error("Current Time not Available");
         const data = await response.json();
         const latestTime = new Date(data[0].latest_time).getTime();
@@ -135,7 +130,7 @@ export default function CarparkTrend() {
       try {
 
 
-        const response = await fetch(`https://back-end-o2lr.onrender.com/getAvailabilityForecastDemo/${parsedCarpark.id}`, {
+        const response = await fetch(`https://back-end-o2lr.onrender.com/getAvailabilityForecast/${parsedCarpark.id}`, {
           method: 'POST',
         });
         if (!response.ok || response.status == 500) throw new Error("Forecast not available");
@@ -219,7 +214,7 @@ export default function CarparkTrend() {
     const getAvailabilityHistory = async () => {
       //console.log("CarparkTrend received carpark:", carpark);
       try {
-        const response = await fetch(`https://back-end-o2lr.onrender.com/fetchCarparkHistoryDemo/${parsedCarpark.id}/${startTime / 1000}/${endTime / 1000}`);
+        const response = await fetch(`https://back-end-o2lr.onrender.com/fetchCarparkHistory/${parsedCarpark.id}/${startTime / 1000}/${endTime / 1000}`);
         if (!response.ok) throw new Error("Carpark History not Available");
         const data: CarparkAvailability[] = await response.json();
         //console.log(data)

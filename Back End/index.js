@@ -177,7 +177,7 @@ app.get('/fetchCarparkHistory/:id/:startTime/:endTime', (request, response) => {
   const id = request.params.id
   const startTime = request.params.startTime
   const endTime = request.params.endTime
-  const fetch_id_query = "SELECT * FROM carpark_availability_history WHERE carpark_id = $1 AND recorded_at >= to_timestamp($2) AND recorded_at <= to_timestamp($3) ORDER BY recorded_at ASC"
+  const fetch_id_query = "SELECT available, recorded_at FROM carpark_availability_history WHERE carpark_id = $1 AND recorded_at >= to_timestamp($2) AND recorded_at <= to_timestamp($3) ORDER BY recorded_at ASC"
   connection.query(fetch_id_query, [id, startTime, endTime], (err, result) => {
     if (err) {
       response.send(err)
@@ -223,7 +223,7 @@ app.get('/fetchCarparkHistoryDemo/:id/:startTime/:endTime', (request, response) 
 
 app.get('/getCurrentTime', (request, response) => {
   console.log("fetching time")
-  const fetch_id_query = "SELECT MAX(recorded_at) AS latest_time FROM carpark_availability_history"
+  const fetch_id_query = "SELECT MAX(recorded_at) AS latest_time WHERE carpark_id = 1 FROM carpark_availability_history"
   connection.query(fetch_id_query, (err, result) => {
     if (err) {
       response.send(err)
@@ -264,6 +264,28 @@ app.get('/getCurrentTimeDemo', (request, response) => {
   })
 })
 
+app.get('/getAllHistoricalData/:id', (request, response) => {
+  console.log("fecthing time")
+  const id = request.params.id
+  const fetch_id_query = "SELECT recorded_at, available FROM carpark_availability_history WHERE carpark_id = $1 ORDER BY recorded_at ASC"
+  connection.query(fetch_id_query, [id], (err, result) => {
+    if (err) {
+      response.send(err)
+      console.error(err)
+    }
+    else {
+      if (result.rowCount === 0) {
+        response.status(404).send("No carpark avail info ")
+      }
+      else {
+        console.log("all historical data obtained")
+        response.send(result.rows)
+      }
+
+    }
+  })
+})
+
 app.get('/getAllHistoricalDataDemo/:id', (request, response) => {
   console.log("fecthing time")
   const id = request.params.id
@@ -294,6 +316,51 @@ app.post('/getAvailabilityForecastDemo/:id', async (request, response) => {
   try {
     console.log(process.env.API_BASE_URL)
     const res = await fetch(`${process.env.API_BASE_URL}/getAllHistoricalDataDemo/${id}`);
+    if (!res.ok) {
+      return response.status(res.status).json({ error: `Failed to fetch carpark data: ${res.statusText}` });
+    }
+
+    const carparkAvailData = await res.json();
+
+    console.log("Historical rows received:", carparkAvailData.length);
+
+    if (carparkAvailData.length === 0) {
+      return response.status(404).json({ error: "No historical data available" });
+    }
+
+
+    // Step 2: Send to Flask prediction API
+    const predictRes = await fetch(`${process.env.PYTHON_API_URL}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(carparkAvailData),
+    });
+
+    if (!predictRes.ok) {
+      const errorText = await predictRes.text();
+      return response.status(500).json({ error: 'Flask API error', details: errorText });
+    }
+
+    const forecast = await predictRes.json();
+    return response.json(forecast);
+
+  } catch (error) {
+    console.error('Server error:', error);
+    response.status(500).json({
+      error: 'Internal server error',
+      details: error.message || error.toString(),
+    });
+  }
+});
+
+app.post('/getAvailabilityForecast/:id', async (request, response) => {
+  console.log("predicting avail");
+  const id = request.params.id;
+  console.log("Fetching forecast for carpark_id:", id);
+
+  try {
+    console.log(process.env.API_BASE_URL)
+    const res = await fetch(`${process.env.API_BASE_URL}/getAllHistoricalData/${id}`);
     if (!res.ok) {
       return response.status(res.status).json({ error: `Failed to fetch carpark data: ${res.statusText}` });
     }
