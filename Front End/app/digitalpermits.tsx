@@ -13,8 +13,7 @@ season.tsx
 */
 
 export default function DigitalPermits() {
-  const { loggedIn } = useContext(UserContext)!;
-  const [userType, setUserType] = useState<'Student' | 'Staff' | null>(null);
+  const { loggedIn, userType, setUserType } = useContext(UserContext)!;
   const router = useRouter();
   const { logout } = useContext(UserContext)!;
 
@@ -74,7 +73,7 @@ export default function DigitalPermits() {
         <View style={styles.container}>
           {/* Page header */}
           <View style={styles.header}>
-            <FontAwesome name="id-card" size={32} color="#6366F1" style={styles.headerIcon} />
+            <FontAwesome name="id-card" size={32} color="#6d62fe" style={styles.headerIcon} />
             <Text style={styles.heading}>Digital Permits</Text>
             <Text style={styles.subheading}>Access your NUS parking services</Text>
           </View>
@@ -172,7 +171,7 @@ export default function DigitalPermits() {
             <FontAwesome 
               name={userType === 'Student' ? 'graduation-cap' : 'briefcase'} 
               size={24} 
-              color="#6366F1" 
+              color="#6d62fe" 
             />
             <View style={styles.welcomeTextContainer}>
               <Text style={styles.welcomeText}>Welcome back!</Text>
@@ -196,7 +195,7 @@ export default function DigitalPermits() {
             description="View and manage your seasonal parking permits"
             icon="calendar" 
             href="/season"
-            color="#6366F1"
+            color="#6d62fe"
           />
           
           <FeatureButton 
@@ -299,7 +298,7 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   studentButton: {
-    backgroundColor: '#6366F1',
+    backgroundColor: '#6d62fe',
   },
   staffButton: {
     backgroundColor: '#059669',
