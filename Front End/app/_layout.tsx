@@ -141,22 +141,26 @@ export default function RootLayout() {
               <Drawer.Screen
                 name="capped"
                 options={{
-                  drawerItemStyle: { display: 'none' }
+                  drawerItemStyle: { display: 'none' },
+                  headerShown: false
                 }} />
               <Drawer.Screen
                 name="season"
                 options={{
-                  drawerItemStyle: { display: 'none' }
+                  drawerItemStyle: { display: 'none' },
+                  headerShown: false
                 }} />
               <Drawer.Screen
                 name="cappedForm"
                 options={{
-                  drawerItemStyle: { display: 'none' }
+                  drawerItemStyle: { display: 'none' },
+                  headerShown: false
                 }} />
               <Drawer.Screen
                 name="seasonForm"
                 options={{
-                  drawerItemStyle: { display: 'none' }
+                  drawerItemStyle: { display: 'none' },
+                  headerShown: false
                 }} />
               <Drawer.Screen
                 name="reservation"
@@ -166,7 +170,8 @@ export default function RootLayout() {
               <Drawer.Screen
                 name="registration"
                 options={{
-                  drawerItemStyle: { display: 'none' }
+                  drawerItemStyle: { display: 'none' },
+                  headerShown: false
                 }} />
               <Drawer.Screen
                 name="carparkTrend"

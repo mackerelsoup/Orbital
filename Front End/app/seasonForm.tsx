@@ -1,7 +1,7 @@
-import { FontAwesome } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
-import { Alert, KeyboardAvoidingView, Modal, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { FontAwesome, Ionicons } from '@expo/vector-icons';
+import { useRouter, Stack } from 'expo-router';
+import React, { useState, useRef } from 'react';
+import { Animated, Alert, KeyboardAvoidingView, Modal, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { RadioButton } from 'react-native-paper';
 
 /*
@@ -29,6 +29,20 @@ const SeasonParkingApplicationForm = () => {
   const [parkingType, setParkingType] = useState('');
   const [showModal, setShowModal] = useState(false);
   const router = useRouter();
+
+  const scrollY = useRef(new Animated.Value(0)).current;
+
+  const titleOpacity = scrollY.interpolate({
+    inputRange: [50, 100],
+    outputRange: [0, 1],
+    extrapolate: 'clamp',
+  });
+
+  const titleTranslateY = scrollY.interpolate({
+    inputRange: [50, 100],
+    outputRange: [10, 0],
+    extrapolate: 'clamp',
+  });
 
   const handleChange = (field: keyof FormData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -98,26 +112,115 @@ const SeasonParkingApplicationForm = () => {
     }
   };
 
+  // checkbox
+  const CheckBox = ({ selected, onPress, label }: { selected: boolean; onPress: () => void; label: string }) => (
+    <TouchableOpacity style={styles.checkboxItem} onPress={onPress}>
+      <View style={[styles.checkboxCircle, selected && styles.checkboxCircleSelected]}>
+        {selected && <View style={styles.checkboxDot} />}
+      </View>
+      <Text style={styles.checkboxLabel}>{label}</Text>
+    </TouchableOpacity>
+  );
 
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}
       keyboardVerticalOffset={90}
     >
-      <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
-        <View style={styles.container}>
-          {/* main header */}
-          <View style={styles.header}>
-            <FontAwesome name="file-text" size={36} color="#6366F1" style={styles.headerIcon} />
-            <Text style={styles.heading}>Season Parking Application</Text>
+      <View
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          height: 100,
+          paddingHorizontal: 16,
+          flexDirection: 'row',
+          alignItems: 'center',
+          backgroundColor: '#FFFFFF',
+          zIndex: 10,
+          justifyContent: 'center',
+        }}
+      >
+        {/* back arrow */}
+        <TouchableOpacity
+          onPress={() => router.push('/season')}
+          style={{
+            position: 'absolute',
+            left: 16,
+            marginRight: 12,
+            marginTop: 46,
+          }}
+        >
+          <View
+            style={{
+              width: 38,
+              height: 38,
+              borderRadius: 20,
+              borderWidth: 1,
+              borderColor: '#d1d5db',
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}
+          >
+            <Ionicons name='arrow-back' size={20} color='#6d62fe' />
           </View>
+        </TouchableOpacity>
+
+
+        {/* title */}
+        <View style={{ alignItems: 'center', justifyContent: 'center'}}>
+          <Animated.Text
+            style={{
+              position: 'absolute',
+              alignSelf: 'center',
+              justifyContent: 'center',
+              fontSize: 16,
+              fontWeight: '600',
+              color: '#1F2937',
+              opacity: titleOpacity,
+              transform: [{ translateY: titleTranslateY }],
+              marginTop: 46,
+            }}
+          >
+          Season Application
+          </Animated.Text>
+        </View>
+
+        {/* line that appears alongside title */}
+        <Animated.View
+          style={{
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: 1,
+            backgroundColor: '#E5E7EB',
+            opacity: titleOpacity,
+          }}
+        />
+      </View>
+
+      {/* main content */}
+      <Animated.ScrollView
+        contentContainerStyle={styles.scrollContainer}
+        keyboardShouldPersistTaps="handled"
+        onScroll={Animated.event(
+          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+          { useNativeDriver: true }
+        )}
+        scrollEventThrottle={16}
+      >
+        <View style={styles.container}>
 
           {/* card for the form itself */}
           <View style={styles.card}>
+          {/* main header */}
+            <Text style={styles.heading}>Season Application</Text>
             {/* personal information section */}
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>
-                <FontAwesome name="user" size={18} color="#6366F1" />  Personal Information
+                <FontAwesome name="user" size={18} color="#6d62fe" />  Personal Information
               </Text>
               
               <View style={styles.inputGroup}>
@@ -179,7 +282,7 @@ const SeasonParkingApplicationForm = () => {
             {/* academic info section*/}
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>
-                <FontAwesome name="graduation-cap" size={18} color="#6366F1" />  Academic Information
+                <FontAwesome name="graduation-cap" size={18} color="#6d62fe" />  Academic Information
               </Text>
               
               <View style={styles.inputGroup}>
@@ -206,7 +309,7 @@ const SeasonParkingApplicationForm = () => {
             {/* vehicle info section */}
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>
-                <FontAwesome name="car" size={18} color="#6366F1" />  Vehicle Information
+                <FontAwesome name="car" size={18} color="#6d62fe" />  Vehicle Information
               </Text>
               
               <View style={styles.inputGroup}>
@@ -254,40 +357,27 @@ const SeasonParkingApplicationForm = () => {
 
               <View style={styles.inputGroup}>
                 <Text style={styles.label}>Vehicle Engine Capacity <Text style={styles.required}>*</Text></Text>
-                <View style={styles.radioContainer}>
-                  <RadioButton.Group onValueChange={value => setEngineCapacity(value)} value={engineCapacity}>
-                    <TouchableOpacity 
-                      style={styles.radioItem}
-                      onPress={() => setEngineCapacity('<1.4')}
-                    >
-                      <RadioButton value="<1.4" color="#6366F1" />
-                      <Text style={styles.radioLabel}>&lt; 1.4 L</Text>
-                    </TouchableOpacity>
-                    
-                    <TouchableOpacity 
-                      style={styles.radioItem}
-                      onPress={() => setEngineCapacity('1.4-2.0')}
-                    >
-                      <RadioButton value="1.4-2.0" color="#6366F1" />
-                      <Text style={styles.radioLabel}>1.4 - 2.0 L</Text>
-                    </TouchableOpacity>
-                    
-                    <TouchableOpacity 
-                      style={styles.radioItem}
-                      onPress={() => setEngineCapacity('>2.0')}
-                    >
-                      <RadioButton value=">2.0" color="#6366F1" />
-                      <Text style={styles.radioLabel}>&gt; 2.0 L</Text>
-                    </TouchableOpacity>
-                    
-                    <TouchableOpacity 
-                      style={styles.radioItem}
-                      onPress={() => setEngineCapacity('EV')}
-                    >
-                      <RadioButton value="EV" color="#6366F1" />
-                      <Text style={styles.radioLabel}>Electric Vehicle</Text>
-                    </TouchableOpacity>
-                  </RadioButton.Group>
+                <View style={styles.checkboxContainer}>
+                  <CheckBox
+                    selected={engineCapacity === '<1.4'}
+                    onPress={() => setEngineCapacity('<1.4')}
+                    label="< 1.4 L"
+                  />
+                  <CheckBox
+                    selected={engineCapacity === '1.4-2.0'}
+                    onPress={() => setEngineCapacity('1.4-2.0')}
+                    label="1.4 - 2.0 L"
+                  />
+                  <CheckBox
+                    selected={engineCapacity === '>2.0'}
+                    onPress={() => setEngineCapacity('>2.0')}
+                    label="> 2.0 L"
+                  />
+                  <CheckBox
+                    selected={engineCapacity === 'EV'}
+                    onPress={() => setEngineCapacity('EV')}
+                    label="Electric Vehicle"
+                  />
                 </View>
               </View>
             </View>
@@ -295,7 +385,7 @@ const SeasonParkingApplicationForm = () => {
             {/* parking type selection section */}
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>
-                <FontAwesome name="map-marker" size={18} color="#6366F1" />  Parking Type Selection
+                <FontAwesome name="map-marker" size={18} color="#6d62fe" />  Parking Type Selection
               </Text>
               
               <View style={styles.pricingInfo}>
@@ -311,30 +401,17 @@ const SeasonParkingApplicationForm = () => {
 
               <View style={styles.inputGroup}>
                 <Text style={styles.label}>Choose Parking Type <Text style={styles.required}>*</Text></Text>
-                <View style={styles.radioContainer}>
-                  <TouchableOpacity 
-                    style={styles.radioItem}
+                <View style={styles.checkboxContainer}>
+                  <CheckBox
+                    selected={parkingType === 'Open'}
                     onPress={() => setParkingType('Open')}
-                  >
-                    <RadioButton 
-                      value="Open" 
-                      status={parkingType === 'Open' ? 'checked' : 'unchecked'}
-                      color="#6366F1"
-                    />
-                    <Text style={styles.radioLabel}>Unsheltered</Text>
-                  </TouchableOpacity>
-                  
-                  <TouchableOpacity 
-                    style={styles.radioItem}
+                    label="Unsheltered"
+                  />
+                  <CheckBox
+                    selected={parkingType === 'Covered'}
                     onPress={() => setParkingType('Covered')}
-                  >
-                    <RadioButton 
-                      value="Covered" 
-                      status={parkingType === 'Covered' ? 'checked' : 'unchecked'}
-                      color="#6366F1"
-                    />
-                    <Text style={styles.radioLabel}>Sheltered</Text>
-                  </TouchableOpacity>
+                    label="Sheltered"
+                  />
                 </View>
               </View>
             </View>
@@ -360,7 +437,7 @@ const SeasonParkingApplicationForm = () => {
             </View>
           </View>
         </Modal>
-      </ScrollView>
+      </Animated.ScrollView>
     </KeyboardAvoidingView>
   );
 };
@@ -373,21 +450,13 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    padding: 20,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 24,
-    paddingTop: 10,
-  },
-  headerIcon: {
-    marginRight: 12,
   },
   heading: {
-    fontSize: 24,
-    fontWeight: '700',
+    fontSize: 34,
+    fontWeight: 500,
     color: '#1F2937',
+    marginBottom: 36,
+    marginTop: 84,
   },
   card: {
     backgroundColor: '#FFFFFF',
@@ -416,7 +485,7 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: '400',
     color: '#374151',
     marginBottom: 8,
   },
@@ -479,14 +548,14 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   submitButton: {
-    backgroundColor: '#6366F1',
+    backgroundColor: '#6d62fe',
     borderRadius: 12,
     paddingVertical: 18,
     paddingHorizontal: 24,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#6366F1',
+    shadowColor: '#6d62fe',
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
@@ -534,6 +603,41 @@ const styles = StyleSheet.create({
     color: '#6B7280',
     textAlign: 'center',
     lineHeight: 20,
+  },
+  checkboxContainer: {
+    marginTop: -8,
+    marginBottom: -24,
+  },
+  checkboxItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+  },
+  checkboxCircle: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 2,
+    borderColor: '#D1D5DB',
+    backgroundColor: '#FFFFFF',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+  checkboxCircleSelected: {
+    borderColor: '#6d62fe',
+    backgroundColor: '#6d62fe',
+  },
+  checkboxDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#FFFFFF',
+  },
+  checkboxLabel: {
+    fontSize: 16,
+    color: '#374151',
+    flex: 1,
   },
 });
 
