@@ -1,7 +1,7 @@
-import { FontAwesome } from "@expo/vector-icons"
+import { FontAwesome, Ionicons } from "@expo/vector-icons"
 import { useLocalSearchParams, useRouter } from "expo-router"
-import { useEffect, useState } from "react"
-import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native"
+import { useEffect, useRef, useState } from "react"
+import { Alert, Animated, KeyboardAvoidingView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native"
 
 /*
 Parent file of:
@@ -12,9 +12,22 @@ digitalpermits.tsx
 */
 
 const SeasonParkingStatus = () => {
-  const router = useRouter()
-  const { signedUp } = useLocalSearchParams()
-  const [hasSeasonParking, setHasSeasonParking] = useState(false)
+  const router = useRouter();
+  const { signedUp } = useLocalSearchParams();
+  const [hasSeasonParking, setHasSeasonParking] = useState(false);
+  const scrollY = useRef(new Animated.Value(0)).current;
+
+  const titleOpacity = scrollY.interpolate({
+    inputRange: [50, 100],
+    outputRange: [0, 1],
+    extrapolate: 'clamp',
+  });
+
+  const titleTranslateY = scrollY.interpolate({
+    inputRange: [50, 100],
+    outputRange: [10, 0],
+    extrapolate: 'clamp',
+  });
 
   useEffect(() => {
     if (signedUp === "true") {
@@ -40,21 +53,94 @@ const SeasonParkingStatus = () => {
         }
       ]
     )
-  } 
+  }; 
 
   // if user has successfully applied for season parking
   if (hasSeasonParking) {
     return (
-      <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
-        <View style={styles.container}>
-          {/* header */}
-          <View style={styles.header}>
-            <FontAwesome name="calendar" size={44} color="#10B981" style={styles.headerIcon} />
-            <Text style={styles.heading}>Season Parking</Text>
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      keyboardVerticalOffset={90}
+    >
+      <View
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          height: 100,
+          paddingHorizontal: 16,
+          flexDirection: 'row',
+          alignItems: 'center',
+          backgroundColor: '#FFFFFF',
+          zIndex: 10,
+          justifyContent: 'center',
+        }}
+      >
+        {/* back arrow */}
+        <TouchableOpacity
+          onPress={() => router.push('/digitalpermits')}
+          style={{
+            position: 'absolute',
+            left: 16,
+            marginRight: 12,
+            marginTop: 46,
+          }}
+        >
+          <View
+            style={{
+              width: 38,
+              height: 38,
+              borderRadius: 20,
+              borderWidth: 1,
+              borderColor: '#d1d5db',
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}
+          >
+            <Ionicons name='arrow-back' size={20} color='#6d62fe' />
           </View>
+        </TouchableOpacity>
 
+
+        {/* title */}
+        <View style={{ alignItems: 'center', justifyContent: 'center'}}>
+          <Animated.Text
+            style={{
+              position: 'absolute',
+              alignSelf: 'center',
+              justifyContent: 'center',
+              fontSize: 16,
+              fontWeight: '600',
+              color: '#1F2937',
+              opacity: titleOpacity,
+              transform: [{ translateY: titleTranslateY }],
+              marginTop: 46,
+            }}
+          >
+          Season Parking
+          </Animated.Text>
+        </View>
+
+        {/* line that appears alongside title */}
+        <Animated.View
+          style={{
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: 1,
+            backgroundColor: '#E5E7EB',
+            opacity: titleOpacity,
+          }}
+        />
+      </View>
+      
+      <Animated.ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
+        <View style={styles.container}>
           {/* status card */}
           <View style={styles.card}>
+            <Text style={styles.heading}>Season Parking</Text>
             <View style={styles.statusHeader}>
               <FontAwesome name="check-circle" size={24} color="#10B981" />
               <Text style={styles.statusTitle}>Active Season Parking</Text>
@@ -92,19 +178,6 @@ const SeasonParkingStatus = () => {
               <Text style={styles.primaryButtonText}> View Full Details</Text>
             </TouchableOpacity>
 
-            {/* additional (non-working yet) actions */}
-            <View style={styles.actionRow}>
-              <TouchableOpacity style={styles.secondaryButton}>
-                <FontAwesome name="refresh" size={16} color="#6366F1" />
-                <Text style={styles.secondaryButtonText}>Renew</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity style={styles.secondaryButton}>
-                <FontAwesome name="edit" size={16} color="#6366F1" />
-                <Text style={styles.secondaryButtonText}>Modify</Text>
-              </TouchableOpacity>
-            </View>
-
             {/* end season parking button */}
             <TouchableOpacity
               style={styles.dangerButton}
@@ -116,73 +189,152 @@ const SeasonParkingStatus = () => {
 
           </View>
         </View>
-      </ScrollView>
+      </Animated.ScrollView>
+      </KeyboardAvoidingView>
     )
   }
 
   // default view for no season parking
   return (
-    <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
-      <View style={styles.container}>
-        {/* header icon + text */}
-        <View style={styles.header}>
-          <FontAwesome name="calendar" size={44} color="#6366F1" style={styles.headerIcon} />
-          <Text style={styles.heading}>Season Parking</Text>
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      keyboardVerticalOffset={90}
+    >
+      <View
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          height: 100,
+          paddingHorizontal: 16,
+          flexDirection: 'row',
+          alignItems: 'center',
+          backgroundColor: '#FFFFFF',
+          zIndex: 10,
+          justifyContent: 'center',
+        }}
+      >
+        {/* back arrow */}
+        <TouchableOpacity
+          onPress={() => router.push('/digitalpermits')}
+          style={{
+            position: 'absolute',
+            left: 16,
+            marginRight: 12,
+            marginTop: 46,
+          }}
+        >
+          <View
+            style={{
+              width: 38,
+              height: 38,
+              borderRadius: 20,
+              borderWidth: 1,
+              borderColor: '#d1d5db',
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}
+          >
+            <Ionicons name='arrow-back' size={20} color='#6d62fe' />
+          </View>
+        </TouchableOpacity>
+
+
+        {/* title */}
+        <View style={{ alignItems: 'center', justifyContent: 'center'}}>
+          <Animated.Text
+            style={{
+              position: 'absolute',
+              alignSelf: 'center',
+              justifyContent: 'center',
+              fontSize: 16,
+              fontWeight: '600',
+              color: '#1F2937',
+              opacity: titleOpacity,
+              transform: [{ translateY: titleTranslateY }],
+              marginTop: 46,
+            }}
+          >
+          Season Parking
+          </Animated.Text>
         </View>
 
+        {/* line that appears alongside title */}
+        <Animated.View
+          style={{
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: 1,
+            backgroundColor: '#E5E7EB',
+            opacity: titleOpacity,
+          }}
+        />
+      </View>
+
+      <Animated.ScrollView
+        contentContainerStyle={styles.scrollContainer}
+        keyboardShouldPersistTaps="handled"
+        onScroll={Animated.event(
+          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+          { useNativeDriver: true }
+        )}
+        scrollEventThrottle={16}
+      >
+      <View style={styles.container}>
         {/* no season parking card */}
         <View style={styles.card}>
+          <Text style={styles.heading}>Season Parking</Text>
           <View style={styles.statusHeader}>
             <FontAwesome name="exclamation-circle" size={24} color="#F59E0B" />
             <Text style={styles.statusTitle}>No Active Season Parking</Text>
           </View>
 
           <Text style={styles.statusDescription}>
-            You currently do not have an active season parking subscription. Apply now to enjoy free campus parking!
+            You currently do not have an active season parking subscription.
           </Text>
 
           {/* season benefits */}
           <View style={styles.inputGroup}>
             <Text style={styles.label}>
-              <FontAwesome name="star" size={16} color="#6B7280" /> Season Parking Benefits
+               Season Parking Benefits
             </Text>
-            <View style={styles.benefitsContainer}>
               <View style={styles.benefitItem}>
                 <FontAwesome name="check" size={14} color="#10B981" />
                 <Text style={styles.benefitText}>Free parking at selected car parks</Text>
               </View>
-
-              <View style={styles.benefitItem}>
+              <View style={styles.benefitItem2}>
                 <FontAwesome name="check" size={14} color="#10B981" />
                 <Text style={styles.benefitText}>Choose between sheltered and non-sheltered car park plans</Text>
               </View>
-            </View>
           </View>
 
           {/* pricing options */}
           <View style={styles.inputGroup}>
             <Text style={styles.label}>
-              <FontAwesome name="dollar" size={16} color="#6B7280" /> Pricing Options
+              Pricing Options
             </Text>
             <View style={styles.pricingContainer}>
               <View style={styles.pricingOption}>
-                <Text style={styles.pricingLabel}>Unsheltered Lot</Text>
+                <Text style={styles.pricingLabel}>Unsheltered</Text>
                 <Text style={styles.pricingValue}>$35/month</Text>
               </View>
               <View style={styles.pricingOption}>
-                <Text style={styles.pricingLabel}>Sheltered Lot</Text>
+                <Text style={styles.pricingLabel}>Sheltered</Text>
                 <Text style={styles.pricingValue}>$65/month</Text>
               </View>
             </View>
           </View>
 
           <TouchableOpacity style={styles.primaryButton} onPress={() => router.push("/seasonForm")}>
-            <FontAwesome name="plus" size={17} color="#FFFFFF" style={styles.buttonIcon} />
-            <Text style={styles.primaryButtonText}>Sign Up for Season Parking</Text>
+            <Text style={styles.primaryButtonText}>Sign Up</Text>
           </TouchableOpacity>
         </View>
       </View>
-    </ScrollView>
+    </Animated.ScrollView>
+    </KeyboardAvoidingView>
   )
 }
 
@@ -190,34 +342,21 @@ const styles = StyleSheet.create({
   scrollContainer: {
     flexGrow: 1,
     paddingBottom: 40,
-    backgroundColor: "#F9FAFB",
+    backgroundColor: "#FFFFFF",
   },
   container: {
     flex: 1,
-    padding: 20,
-  },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 24,
-    paddingTop: 10,
-  },
-  headerIcon: {
-    marginRight: 12,
   },
   heading: {
-    fontSize: 24,
-    fontWeight: "700",
-    color: "#1F2937",
+    fontSize: 34,
+    fontWeight: 500,
+    marginBottom: 36,
+    marginTop: 84,
   },
   card: {
     backgroundColor: "#FFFFFF",
     borderRadius: 16,
     padding: 24,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
     elevation: 4,
   },
   inputGroup: {
@@ -225,26 +364,24 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 16,
-    fontWeight: "600",
-    color: "#374151",
+    fontWeight: "700",
     marginBottom: 8,
   },
   statusHeader: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 16,
+    marginBottom: 8,
   },
   statusTitle: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: "700",
-    color: "#1F2937",
-    marginLeft: 12,
+    marginLeft: 8,
   },
   statusDescription: {
     fontSize: 16,
     color: "#6B7280",
     lineHeight: 24,
-    marginBottom: 24,
+    marginBottom: 40,
   },
   detailValue: {
     backgroundColor: "#F9FAFB",
@@ -257,17 +394,16 @@ const styles = StyleSheet.create({
   detailText: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#1F2937",
   },
   primaryButton: {
-    backgroundColor: "#6366F1",
+    backgroundColor: "#6d62fe",
     borderRadius: 12,
     paddingVertical: 16,
     paddingHorizontal: 24,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: "#6366F1",
+    shadowColor: "#6d62fe",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
@@ -311,7 +447,7 @@ const styles = StyleSheet.create({
   secondaryButton: {
     flex: 1,
     backgroundColor: "#F9FAFB",
-    borderColor: "#6366F1",
+    borderColor: "#6d62fe",
     borderWidth: 1,
     borderRadius: 12,
     paddingVertical: 12,
@@ -321,7 +457,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   secondaryButtonText: {
-    color: "#6366F1",
+    color: "#6d62fe",
     fontSize: 14,
     fontWeight: "600",
     marginLeft: 6,
@@ -336,9 +472,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 8,
   },
+  benefitItem2: {
+    flexDirection: "row",
+    marginTop: 4,
+    marginBottom: 16,
+    alignSelf: 'flex-start'
+  },
   benefitText: {
     fontSize: 14,
-    color: "#374151",
     marginLeft: 8,
   },
   pricingContainer: {
@@ -360,7 +501,6 @@ const styles = StyleSheet.create({
   },
   pricingValue: {
     fontSize: 18,
-    color: "#1F2937",
     fontWeight: "700",
     marginTop: 4,
   },
