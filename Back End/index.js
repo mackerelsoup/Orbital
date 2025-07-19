@@ -398,13 +398,21 @@ app.post('/getAvailabilityForecast/:id', async (request, response) => {
 });
 
 app.post('/register', (request, response) => {
-  console.log("trying register")
+  console.log("calling local regist")
   const { username, email, password, is_staff, season_pass, season_pass_type } = request.body;
   const login_update_query = "INSERT INTO login VALUES($1, $2, $3)";
   const user_info_update_query = "INSERT INTO user_info VALUES($1, $2, $3, $4)"
 
   connection.query(login_update_query, [username, email, password], (err, result) => {
     if (err) {
+      if (err.code == '23505') {
+        if (err.detail[5] == 'u') {
+          return response.status(409).send("Username already exists")
+        }
+        else {
+          return response.status(409).send("Email already exists")
+        }
+      }
       console.error("log info update failed", err)
       response.status(500).send("Login info update failed")
     }
