@@ -368,7 +368,6 @@ app.post('/getAvailabilityForecast/:id', async (request, response) => {
     const carparkAvailData = await res.json();
 
     console.log("Historical rows received:", carparkAvailData.length);
-
     if (carparkAvailData.length === 0) {
       return response.status(404).json({ error: "No historical data available" });
     }
@@ -399,6 +398,7 @@ app.post('/getAvailabilityForecast/:id', async (request, response) => {
 });
 
 app.post('/register', (request, response) => {
+  console.log("trying register")
   const { username, email, password, is_staff, season_pass, season_pass_type } = request.body;
   const login_update_query = "INSERT INTO login VALUES($1, $2, $3)";
   const user_info_update_query = "INSERT INTO user_info VALUES($1, $2, $3, $4)"
