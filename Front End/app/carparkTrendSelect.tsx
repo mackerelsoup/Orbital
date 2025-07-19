@@ -5,15 +5,7 @@ import carparks from '../assets/carparks.json';
 
 export default function CarparkTrendSelect() {
   const handleSelect = (carpark: Carpark) => {
-    router.push({
-      pathname: '/carparkTrend',
-      params: {
-        carpark: JSON.stringify({
-            ...carpark,
-            id: 1,
-        }),
-      },
-    });
+     router.push(`./carparkTrend/${carpark.id}`);
   };
 
   return (
