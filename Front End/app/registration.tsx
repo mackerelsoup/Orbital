@@ -20,6 +20,15 @@ import { useNavigation } from "@react-navigation/native";
 import RNPickerSelect from "react-native-picker-select";
 
 export default function RegisterForm() {
+
+  class DuplicateError extends Error {
+    constructor(message: string) {
+      super(message)
+      this.name = 'Duplicate Error'
+      Object.setPrototypeOf(this, DuplicateError.prototype);
+    }
+  }
+  
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -31,6 +40,7 @@ export default function RegisterForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [inlineError, setInlineError] = useState("");
+
 
   const validate = () => {
     if (!username || !email || !password || !confirmPassword) {
@@ -83,14 +93,27 @@ export default function RegisterForm() {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to register.");
+        const message = await response.text()
+        if (response.status === 409) {
+          if (message[0] === 'U') {
+            setUsername("")
+          }
+          else {
+            setEmail("")
+          }
+          console.log(message)
+          Alert.alert("Registration failed" , message)
+          throw new DuplicateError("Duplicate info")
+        }
+        else 
+          throw new Error("Failed to register.");
       }
 
       resetForm()
       router.replace("/registrationSuccess");
     } catch (err) {
-      console.log(err);
-      Alert.alert("Registration failed. Please try again later.");
+      if (!(err instanceof DuplicateError))
+        Alert.alert("Registration failed. Please try again later.");
     }
   };
 
