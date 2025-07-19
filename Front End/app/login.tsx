@@ -94,8 +94,9 @@ export default function LoginForm() {
       if (!response.ok) throw new ConnectionError("Network response was not ok");
 
       const data = await response.json();
+      console.log("data:", data[0].username)
 
-      if (data[0].password !== password) {
+     if (data[0].password !== password) {
         setInlineError("Email or password incorrect. Please try again.");
         setPassword("");
         return;
@@ -119,8 +120,12 @@ export default function LoginForm() {
 
   const setUserData = async (data: userDataIncomplete) => {
     try {
-      let response = await fetch(`https://back-end-o2lr.onrender.com/fetchUserData/${username}`);
-      if (response.status === 404) throw new userDataNotFoundError("User not found");
+      let response = await fetch(`https://back-end-o2lr.onrender.com/fetchUserData/${data.username}`);
+      if (response.status === 404) {
+        console.log("user not found")
+        throw new userDataNotFoundError("User not found");
+      }
+      
       if (!response.ok) throw new ConnectionError("Network response was not ok");
 
       const userdata = await response.json();
