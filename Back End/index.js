@@ -223,7 +223,7 @@ app.get('/fetchCarparkHistoryDemo/:id/:startTime/:endTime', (request, response) 
 
 app.get('/getCurrentTime', (request, response) => {
   console.log("fetching time")
-  const fetch_id_query = "SELECT MAX(recorded_at) AS latest_time WHERE carpark_id = 1 FROM carpark_availability_history"
+  const fetch_id_query = "SELECT MAX(recorded_at) AS latest_time FROM carpark_availability_history WHERE carpark_id = 1"
   connection.query(fetch_id_query, (err, result) => {
     if (err) {
       response.send(err)
