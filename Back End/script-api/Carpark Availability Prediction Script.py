@@ -2,6 +2,7 @@ from fastapi import FastAPI, Request
 from prophet import Prophet
 import pandas as pd
 
+
 app = FastAPI()
 
 @app.post("/forecast")
@@ -9,7 +10,7 @@ async def forecast_carpark(request: Request):
     data = await request.json()
 
     df = pd.DataFrame(data)
-    df['time'] = pd.to_datetime(df['recorded_at'])
+    df['time'] = pd.to_datetime(df['timestamp'])
     df['time'] = df['time'].dt.tz_localize(None)
     df['available'] = df['available'].astype(int)
     df = df[['time', 'available']].sort_values('time')
