@@ -177,7 +177,7 @@ app.get('/fetchCarparkHistory/:id/:startTime/:endTime', (request, response) => {
   const id = request.params.id
   const startTime = request.params.startTime
   const endTime = request.params.endTime
-  const fetch_id_query = "SELECT available, recorded_at FROM carpark_availability_history WHERE carpark_id = $1 AND recorded_at >= to_timestamp($2) AND recorded_at <= to_timestamp($3) ORDER BY recorded_at ASC"
+  const fetch_id_query = "SELECT available, timestamp FROM carpark_availability_history WHERE carpark_id = $1 AND timestamp >= to_timestamp($2) AND timestamp <= to_timestamp($3) ORDER BY timestamp ASC"
   connection.query(fetch_id_query, [id, startTime, endTime], (err, result) => {
     if (err) {
       response.send(err)
@@ -223,7 +223,7 @@ app.get('/fetchCarparkHistoryDemo/:id/:startTime/:endTime', (request, response) 
 
 app.get('/getCurrentTime', (request, response) => {
   console.log("fetching time")
-  const fetch_id_query = "SELECT MAX(recorded_at) AS latest_time FROM carpark_availability_history WHERE carpark_id = 1"
+  const fetch_id_query = "SELECT MAX(timestamp) AS latest_time FROM carpark_availability_history WHERE carpark_id = 1"
   connection.query(fetch_id_query, (err, result) => {
     if (err) {
       response.send(err)
@@ -267,7 +267,7 @@ app.get('/getCurrentTimeDemo', (request, response) => {
 app.get('/getAllHistoricalData/:id', (request, response) => {
   console.log("fecthing time")
   const id = request.params.id
-  const fetch_id_query = "SELECT recorded_at, available FROM carpark_availability_history WHERE carpark_id = $1 ORDER BY recorded_at ASC"
+  const fetch_id_query = "SELECT timestamp, available FROM carpark_availability_history WHERE carpark_id = $1 ORDER BY timestamp ASC"
   connection.query(fetch_id_query, [id], (err, result) => {
     if (err) {
       response.send(err)
