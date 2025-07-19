@@ -12,9 +12,11 @@ import { useLocalSearchParams } from 'expo-router';
 import { Portal } from 'react-native-portalize'
 
 
+
+
 type CarparkAvailability = {
   available: number;
-  recorded_at: string;
+  timestamp: string;
 };
 
 type TooltipProps = {
@@ -26,7 +28,7 @@ type TooltipProps = {
 };
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
-const SpaceMono = require("../assets/fonts/SpaceMono-Regular.ttf");
+const SpaceMono = require("../../assets/fonts/SpaceMono-Regular.ttf");
 
 function ToolTipWithBackground({ x, y, availValue, timeValue, screenWidth = SCREEN_WIDTH }: TooltipProps) {
   const font = useFont(SpaceMono, 10);
@@ -94,8 +96,7 @@ function ToolTipWithBackground({ x, y, availValue, timeValue, screenWidth = SCRE
 }
 
 export default function CarparkTrend() {
-  const { carpark } = useLocalSearchParams();
-  const parsedCarpark: Carpark = JSON.parse(carpark as string);
+  const { carparkId } = useLocalSearchParams();
   const [graphData, setGraphData] = useState<{ time: number, availability: number }[]>([]);
   const [forecastData, setForecastData] = useState<{ time: number, availability: number }[]>([]);
   const [showForecastModal, setShowForecastModal] = useState(false);
@@ -110,6 +111,7 @@ export default function CarparkTrend() {
     y: { availability: 0 }   // Note: This should match the yKeys in CartesianChart
   });
 
+
   useEffect(() => {
     const getCurrentTime = async () => {
       try {
@@ -117,8 +119,8 @@ export default function CarparkTrend() {
         if (!response.ok) throw new Error("Current Time not Available");
         const data = await response.json();
         const latestTime = new Date(data[0].latest_time).getTime();
-        console.log("latest", latestTime)
-        console.log(new Date(latestTime).toLocaleString("en-US", { timeZone: "Asia/Singapore" }))
+        //console.log("latest", latestTime)
+        //console.log(new Date(latestTime).toLocaleString("en-US", { timeZone: "Asia/Singapore" }))
         setCurrentTime(latestTime);
       } catch (error) {
         console.log("Failed to fetch current time", error);
@@ -126,11 +128,12 @@ export default function CarparkTrend() {
     };
 
     const getForecast = async () => {
-      console.log(parsedCarpark.id);
+      console.log("running forcecast:", carparkId);
+      setForecastData([])
       try {
 
 
-        const response = await fetch(`https://back-end-o2lr.onrender.com/getAvailabilityForecast/${parsedCarpark.id}`, {
+        const response = await fetch(`https://back-end-o2lr.onrender.com/getAvailabilityForecast/${carparkId}`, {
           method: 'POST',
         });
         if (!response.ok || response.status == 500) throw new Error("Forecast not available");
@@ -151,11 +154,11 @@ export default function CarparkTrend() {
         console.log("forecast", data)
 
         const processedData = data.map((entry: any) => ({
-          time: new Date(entry.recorded_at).getTime() + (8 * 60 * 60 * 1000),
+          time: new Date(entry.timestamp).getTime() + (8 * 60 * 60 * 1000),
           availability: Number(entry.available)
         }));
 
-        console.log("processed", processedData)
+        //console.log("processed", processedData)
 
         setForecastData(processedData)
         console.log("forecast done")
@@ -170,7 +173,7 @@ export default function CarparkTrend() {
 
     getCurrentTime();
     getForecast();
-  }, []);
+  }, [carparkId]);
 
   useEffect(() => {
     if (currentTime === 0) return;
@@ -202,7 +205,7 @@ export default function CarparkTrend() {
 
     //console.log(rangeStart)
     setStartTime(rangeStart);
-  }, [selectedRange, currentTime]);
+  }, [selectedRange, currentTime, carparkId]);
 
   useEffect(() => {
     if (startTime === 0 || endTime === 0 || isForecastMode) {
@@ -213,16 +216,17 @@ export default function CarparkTrend() {
 
     const getAvailabilityHistory = async () => {
       //console.log("CarparkTrend received carpark:", carpark);
+      setGraphData([]);
       try {
-        const response = await fetch(`https://back-end-o2lr.onrender.com/fetchCarparkHistory/${parsedCarpark.id}/${startTime / 1000}/${endTime / 1000}`);
+        const response = await fetch(`https://back-end-o2lr.onrender.com/fetchCarparkHistory/${carparkId}/${startTime / 1000}/${endTime / 1000}`);
         if (!response.ok) throw new Error("Carpark History not Available");
         const data: CarparkAvailability[] = await response.json();
         //console.log(data)
         const processedData = data.map(entry => ({
-          time: new Date(entry.recorded_at).getTime(),
+          time: new Date(entry.timestamp).getTime(),
           availability: Number(entry.available)
         }));
-        console.log(processedData)
+        //console.log(processedData)
         setGraphData(processedData);
       } catch (error) {
         console.log("Error fetching history:", error);
@@ -230,7 +234,7 @@ export default function CarparkTrend() {
     };
 
     getAvailabilityHistory();
-  }, [startTime, endTime]);
+  }, [startTime, endTime, carparkId]);
 
   const tickValues = useMemo(() => {
     if (!startTime || !endTime) return [];

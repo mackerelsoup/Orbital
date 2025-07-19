@@ -31,7 +31,7 @@ async def forecast_carpark(request: Request):
     forecast_result['yhat'] = forecast_result['yhat'].round(1)
     
     response = forecast_result.reset_index().rename(columns={
-        'ds': 'recorded_at',
+        'ds': 'timestamp',
         'yhat': 'available'
     }).to_dict(orient='records')
 
