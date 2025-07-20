@@ -164,7 +164,7 @@ export default function LoginForm() {
       options={{
         headerLeft: () => (
           <TouchableOpacity
-            onPress={() => nav.goBack()}
+            onPress={() => { setInlineError(""); nav.goBack()} }
             style={{ marginLeft: 16 }}
           >
             <Ionicons name="arrow-back" size={24} color="#6d62fe" />
@@ -235,7 +235,7 @@ export default function LoginForm() {
             <Text style={styles.loginButtonText}>Log in</Text>
           </TouchableOpacity>
         
-          <TouchableOpacity onPress={() => router.push("/registration")}>
+          <TouchableOpacity onPress={() => { setInlineError(""); router.push("/registration")} }>
             <Text style = {styles.createPre}>
               Dont have an account?{" "}
               <Text style={styles.create}>Create an Account</Text>
