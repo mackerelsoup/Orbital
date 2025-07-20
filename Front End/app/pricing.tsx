@@ -5,6 +5,7 @@ import React, { useMemo, useState, useRef } from 'react';
 import { Animated, Dimensions, FlatList, Image, SafeAreaView, StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import carparks from '../assets/carparks.json';
 
+
 const { width } = Dimensions.get("window");
 
 interface Carpark {

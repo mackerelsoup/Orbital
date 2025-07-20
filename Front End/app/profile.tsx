@@ -9,6 +9,7 @@ import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
 import * as ImagePicker from 'expo-image-picker'
+import { setup } from '@testing-library/react-native/build/user-event/setup';
 
 type InfoCardProps = {
   icon: keyof typeof MaterialIcons.glyphMap; // restrict to MaterialIcons icon names
@@ -20,7 +21,8 @@ type InfoCardProps = {
 
 export default function Profile() {
   const { logout, user, setUser } = useContext(UserContext)!;
-  const [image, setImage] = useState<string>("https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png?20150327203541")
+  const [updateImage, setUpdateImage] = useState(false)
+  const [image, setImage] = useState<string>(user.profile_uri)
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false)
 
   const handleLogout = () => {
@@ -40,6 +42,7 @@ export default function Profile() {
       setImage(result.assets[0].uri)
     }
     setIsModalVisible(false)
+    setUpdateImage(true)
   }
 
   const onTakePhoto = async () => {
@@ -54,11 +57,13 @@ export default function Profile() {
       setImage(result.assets[0].uri)
     }
     setIsModalVisible(false)
+    setUpdateImage(true)
   }
 
   const onRemovePhoto = () => {
     setImage("https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png?20150327203541")
     setIsModalVisible(false)
+    setUpdateImage(true)
   }
 
   const toggleModal = () => {
@@ -66,13 +71,22 @@ export default function Profile() {
   }
 
   useEffect(() => {
-    const updateImage = async () => {
+    if (updateImage){
+      const updateImage = async () => {
       try {
         const response = await fetch(`https://back-end-o2lr.onrender.com/updateProfile/${user.username}`, {
           method: 'PUT',
-          body: image,
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            imageURI: image
+          }),
         })
-        if (!response.ok) throw new Error("Unable to update profile picture")
+        if (!response.ok) {
+          console.log(response)
+          throw new Error("Unable to update profile picture")
+        } 
 
       } catch (error) {
         Alert.alert("Unable to update profile picture")
@@ -84,7 +98,7 @@ export default function Profile() {
       ...prev,
       profile_uri: image
     }))
-
+    }
   }, [image])
 
   const InfoCard = ({ icon, label, value, iconColor = '#6d62fe' } : InfoCardProps) => (

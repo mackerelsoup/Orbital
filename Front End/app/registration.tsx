@@ -98,6 +98,8 @@ export default function RegisterForm() {
       season_pass_type: hasSeasonPass ? seasonPassType : null,
     };
 
+    console.log(payload.season_pass_type)
+
     try {
       const response = await fetch("https://back-end-o2lr.onrender.com/register", {
         method: "POST",
@@ -399,12 +401,14 @@ export default function RegisterForm() {
                       [
                         { label: "Staff (Closed)", value: "staff_closed" },
                         { label: "Staff (Open)", value: "staff_open" },
-                        { label: "Student (Closed)", value: "student_closed" },
-                        { label: "Student (Open)", value: "student_open" },
                       ] : 
                       [
                         { label: "Student (Closed)", value: "student_closed" },
                         { label: "Student (Open)", value: "student_open" },
+                        { label: "Student (Open 2A)", value: "student_open_2A" },
+                        { label: "Student (Open 10)", value: "student_open_10" },
+                        { label: "Student (Open 11)", value: "student_open_11" },
+ 
                       ]
                     }
                     style={{
