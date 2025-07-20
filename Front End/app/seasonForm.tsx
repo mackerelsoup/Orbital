@@ -3,6 +3,8 @@ import { useRouter, Stack } from 'expo-router';
 import React, { useState, useRef } from 'react';
 import { Animated, Alert, KeyboardAvoidingView, Modal, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { RadioButton } from 'react-native-paper';
+import { Dropdown } from 'react-native-element-dropdown'
+import CustomDropdown from '@/components/CustomDropdown';
 
 /*
 Parent file:
@@ -28,6 +30,7 @@ const SeasonParkingApplicationForm = () => {
   const [engineCapacity, setEngineCapacity] = useState('');
   const [parkingType, setParkingType] = useState('');
   const [showModal, setShowModal] = useState(false);
+  const [isFocus, setIsFocus] = useState(false)
   const router = useRouter();
 
   const scrollY = useRef(new Animated.Value(0)).current;
@@ -51,10 +54,10 @@ const SeasonParkingApplicationForm = () => {
   const validateForm = () => {
     // fields that are required for the form to be valid
     const requiredFields: (keyof FormData)[] = [
-      'salutation', 'name', 'address', 'studentNo', 
+      'salutation', 'name', 'address', 'studentNo',
       'faculty', 'email', 'tel', 'vehicleRegNo', 'iuNo', 'vehicleOwner'
     ];
-    
+
 
     // checks for valid form
     for (const field of requiredFields) {
@@ -63,12 +66,12 @@ const SeasonParkingApplicationForm = () => {
         return false;
       }
     }
-    
+
     if (!engineCapacity) {
       Alert.alert('Missing Information', 'Select vehicle engine capacity');
       return false;
     }
-    
+
     if (!parkingType) {
       Alert.alert('Missing Information', 'Select parking type');
       return false;
@@ -122,6 +125,17 @@ const SeasonParkingApplicationForm = () => {
     </TouchableOpacity>
   );
 
+  //dropdown logic
+  const salutationDate = [
+    { label: 'Mr.', value: 'Mr' },
+    { label: 'Ms.', value: 'Ms' },
+    { label: 'Mrs.', value: 'Mrs' },
+    { label: 'Mdm.', value: 'Mdm' },
+    { label: 'Dr.', value: 'Dr' }
+  ]
+
+
+
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}
@@ -169,7 +183,7 @@ const SeasonParkingApplicationForm = () => {
 
 
         {/* title */}
-        <View style={{ alignItems: 'center', justifyContent: 'center'}}>
+        <View style={{ alignItems: 'center', justifyContent: 'center' }}>
           <Animated.Text
             style={{
               position: 'absolute',
@@ -183,7 +197,7 @@ const SeasonParkingApplicationForm = () => {
               marginTop: 46,
             }}
           >
-          Season Application
+            Season Application
           </Animated.Text>
         </View>
 
@@ -215,27 +229,25 @@ const SeasonParkingApplicationForm = () => {
 
           {/* card for the form itself */}
           <View style={styles.card}>
-          {/* main header */}
+            {/* main header */}
             <Text style={styles.heading}>Season Application</Text>
             {/* personal information section */}
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>
                 <FontAwesome name="user" size={18} color="#6d62fe" />  Personal Information
               </Text>
-              
+
               <View style={styles.inputGroup}>
                 <Text style={styles.label}>Salutation <Text style={styles.required}>*</Text></Text>
-                <TextInput 
-                  style={styles.input}
-                  onChangeText={text => handleChange('salutation', text)}
-                  placeholder="Mr./Ms./Mrs./Mdm./Dr."
-                  placeholderTextColor="#9CA3AF"
-                />
+                <CustomDropdown data={salutationDate} handleChange={(item) => handleChange('salutation', item.value)}>
+                  
+                </CustomDropdown>
               </View>
+
 
               <View style={styles.inputGroup}>
                 <Text style={styles.label}>Name (as in NRIC) <Text style={styles.required}>*</Text></Text>
-                <TextInput 
+                <TextInput
                   style={styles.input}
                   onChangeText={text => handleChange('name', text)}
                   placeholder="Enter your full name"
@@ -245,7 +257,7 @@ const SeasonParkingApplicationForm = () => {
 
               <View style={styles.inputGroup}>
                 <Text style={styles.label}>Address <Text style={styles.required}>*</Text></Text>
-                <TextInput 
+                <TextInput
                   style={[styles.input, styles.textArea]}
                   onChangeText={text => handleChange('address', text)}
                   placeholder="Enter your address"
@@ -257,7 +269,7 @@ const SeasonParkingApplicationForm = () => {
 
               <View style={styles.inputGroup}>
                 <Text style={styles.label}>Email <Text style={styles.required}>*</Text></Text>
-                <TextInput 
+                <TextInput
                   style={styles.input}
                   onChangeText={text => handleChange('email', text)}
                   placeholder="your.email@example.com"
@@ -269,7 +281,7 @@ const SeasonParkingApplicationForm = () => {
 
               <View style={styles.inputGroup}>
                 <Text style={styles.label}>Tel No. / Mobile <Text style={styles.required}>*</Text></Text>
-                <TextInput 
+                <TextInput
                   style={styles.input}
                   onChangeText={text => handleChange('tel', text)}
                   placeholder=""
@@ -284,10 +296,10 @@ const SeasonParkingApplicationForm = () => {
               <Text style={styles.sectionTitle}>
                 <FontAwesome name="graduation-cap" size={18} color="#6d62fe" />  Academic Information
               </Text>
-              
+
               <View style={styles.inputGroup}>
                 <Text style={styles.label}>Student No. <Text style={styles.required}>*</Text></Text>
-                <TextInput 
+                <TextInput
                   style={styles.input}
                   onChangeText={text => handleChange('studentNo', text)}
                   placeholder="A0XXXXXXX"
@@ -297,7 +309,7 @@ const SeasonParkingApplicationForm = () => {
 
               <View style={styles.inputGroup}>
                 <Text style={styles.label}>Faculty/School <Text style={styles.required}>*</Text></Text>
-                <TextInput 
+                <TextInput
                   style={styles.input}
                   onChangeText={text => handleChange('faculty', text)}
                   placeholder="e.g., School of Computing"
@@ -311,10 +323,10 @@ const SeasonParkingApplicationForm = () => {
               <Text style={styles.sectionTitle}>
                 <FontAwesome name="car" size={18} color="#6d62fe" />  Vehicle Information
               </Text>
-              
+
               <View style={styles.inputGroup}>
                 <Text style={styles.label}>Vehicle Registration No. <Text style={styles.required}>*</Text></Text>
-                <TextInput 
+                <TextInput
                   style={styles.input}
                   onChangeText={text => handleChange('vehicleRegNo', text)}
                   placeholder="SXX1234X"
@@ -326,7 +338,7 @@ const SeasonParkingApplicationForm = () => {
               <View style={styles.inputGroup}>
                 <Text style={styles.label}>In-Vehicle Unit (IU) No. <Text style={styles.required}>*</Text></Text>
                 <Text style={styles.helperText}>10 nos. below barcode, left hand side of unit</Text>
-                <TextInput 
+                <TextInput
                   style={styles.input}
                   onChangeText={text => handleChange('iuNo', text)}
                   placeholder="XXXXXXXXXX"
@@ -337,7 +349,7 @@ const SeasonParkingApplicationForm = () => {
 
               <View style={styles.inputGroup}>
                 <Text style={styles.label}>Registered Vehicle Owner <Text style={styles.required}>*</Text></Text>
-                <TextInput 
+                <TextInput
                   style={styles.input}
                   onChangeText={text => handleChange('vehicleOwner', text)}
                   placeholder="Vehicle owner's full name"
@@ -347,7 +359,7 @@ const SeasonParkingApplicationForm = () => {
 
               <View style={styles.inputGroup}>
                 <Text style={styles.label}>Relationship with Owner of Vehicle</Text>
-                <TextInput 
+                <TextInput
                   style={styles.input}
                   onChangeText={text => handleChange('relationship', text)}
                   placeholder="e.g., Self, Parent, etc."
@@ -387,7 +399,7 @@ const SeasonParkingApplicationForm = () => {
               <Text style={styles.sectionTitle}>
                 <FontAwesome name="map-marker" size={18} color="#6d62fe" />  Parking Type Selection
               </Text>
-              
+
               <View style={styles.pricingInfo}>
                 <View style={styles.pricingRow}>
                   <Text style={styles.pricingLabel}>Unsheltered parking</Text>
@@ -431,7 +443,7 @@ const SeasonParkingApplicationForm = () => {
               <FontAwesome name="check-circle" size={48} color="#10B981" style={styles.modalIcon} />
               <Text style={styles.modalTitle}>Application Successful!</Text>
               <Text style={styles.modalText}>
-                Your season parking application has been submitted successfully. 
+                Your season parking application has been submitted successfully.
                 You will receive a confirmation email shortly.
               </Text>
             </View>
@@ -639,6 +651,38 @@ const styles = StyleSheet.create({
     color: '#374151',
     flex: 1,
   },
+  labelT: {
+    position: 'absolute',
+    backgroundColor: 'white',
+    left: 10,
+    top: -10,
+    zIndex: 999,
+    paddingHorizontal: 8,
+    fontSize: 14,
+  },
+  dropdown: {
+      height: 50,
+      borderColor: 'gray',
+      borderWidth: 0.5,
+      borderRadius: 8,
+      paddingHorizontal: 8,
+      backgroundColor: '#F9FAFB'
+    },
+  placeholderStyle: {
+      fontSize: 16,
+      color: '#9CA3AF'
+    },
+    selectedTextStyle: {
+      fontSize: 16,
+    },
+    iconStyle: {
+      width: 20,
+      height: 20,
+    },
+    inputSearchStyle: {
+      height: 40,
+      fontSize: 16,
+    },
 });
 
 export default SeasonParkingApplicationForm;
