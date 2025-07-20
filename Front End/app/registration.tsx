@@ -50,7 +50,7 @@ export default function RegisterForm() {
   });
 
   const titleTranslateY = scrollY.interpolate({
-    inputRange: [50, 100],
+    inputRange: [300, 350],
     outputRange: [10, 0],
     extrapolate: 'clamp',
   });
@@ -136,7 +136,6 @@ export default function RegisterForm() {
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : undefined}
       style={styles.container}
-      keyboardVerticalOffset={90}
     >
       <View
         style={{

@@ -311,7 +311,7 @@ export default function CalculatorScreen() {
             {/* Carpark Selection */}
             <View style={styles.inputGroup}>
               <Text style={styles.label}>
-                <FontAwesome name="map-marker" size={16} color="#6d62fe" />  Carpark Location
+                Carpark Location
               </Text>
               <ModalSelector
                 ref={selectorRef}
@@ -349,7 +349,7 @@ export default function CalculatorScreen() {
               <View style={styles.switchRow}>
                 <View style={styles.switchLabelContainer}>
                   <Text style={styles.label}>
-                    <FontAwesome name="id-card" size={16} color="#6d62fe" />  Registered Vehicle?
+                    Registered Vehicle?
                   </Text>
                 </View>
                 <Switch 
@@ -365,7 +365,7 @@ export default function CalculatorScreen() {
             {/* Start Time */}
             <View style={styles.inputGroup}>
               <Text style={styles.label}>
-                <FontAwesome name="clock-o" size={16} color="#6d62fe" />  Start Time
+                Start Time
               </Text>
               <TouchableOpacity 
                 style={styles.timeButton} 
@@ -416,7 +416,7 @@ export default function CalculatorScreen() {
             {/* Duration */}
             <View style={styles.inputGroup}>
               <Text style={styles.label}>
-                <FontAwesome name="hourglass-half" size={16} color="#6d62fe" />  Duration (minutes)
+                Duration (minutes)
               </Text>
               <TextInput
                 style={styles.input}
@@ -548,9 +548,6 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#F1F5F9',
   },
-  headerIcon: {
-    marginRight: 12,
-  },
   heading: {
     fontSize: 32,
     fontWeight: '700',
@@ -572,8 +569,8 @@ const styles = StyleSheet.create({
     marginBottom: 28,
   },
   label: {
-    fontSize: 17,
-    fontWeight: '700',
+    fontSize: 18,
+    fontWeight: '600',
     color: '#374151',
     marginBottom: 12,
     letterSpacing: 0.5,
@@ -600,15 +597,14 @@ const styles = StyleSheet.create({
   },
   selectorText: {
     fontSize: 16,
-    fontWeight: '600',
     lineHeight: 20,
     flex: 1,
   },
   modalOption: {
-    fontSize: 16,
-    paddingVertical: 12,
-    color: '#374151',
-    fontWeight: '500',
+    fontSize: 18,
+    paddingVertical: 14,
+    color: '#000000',
+    fontWeight: '400',
   },
   cancelButton: {
     backgroundColor: '#F3F4F6',
@@ -616,7 +612,7 @@ const styles = StyleSheet.create({
   },
   cancelText: {
     color: '#6B7280',
-    fontSize: 16,
+    fontSize: 20,
     fontWeight: '600',
   },
   switchRow: {
@@ -649,7 +645,6 @@ const styles = StyleSheet.create({
   timeButtonText: {
     fontSize: 16,
     color: '#374151',
-    fontWeight: '600',
   },
   datePickerContainer: {
     marginTop: 16,
@@ -715,7 +710,6 @@ const styles = StyleSheet.create({
     paddingVertical: 18,
     fontSize: 16,
     color: '#374151',
-    fontWeight: '600',
     shadowColor: '#6d62fe',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
@@ -739,9 +733,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  buttonIcon: {
-    marginRight: 12,
   },
   calculateButtonText: {
     color: '#FFFFFF',
