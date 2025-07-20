@@ -8,7 +8,6 @@ import { Platform, View, StyleSheet } from 'react-native';
 import 'react-native-gesture-handler'
 import { GestureHandlerRootView, Pressable } from 'react-native-gesture-handler';
 import { Host } from 'react-native-portalize';
-import { Feather, Ionicons } from '@expo/vector-icons';
 
 export default function RootLayout() {
   return (
@@ -136,6 +135,8 @@ export default function RootLayout() {
               <Drawer.Screen
                 name="profile"
                 options={{
+                  headerStyle: {height: 96},
+                  title: "Profile",
                   drawerItemStyle: { display: 'none' }
                 }} />
               <Drawer.Screen
@@ -167,12 +168,6 @@ export default function RootLayout() {
                 name="registration"
                 options={{
                   drawerItemStyle: { display: 'none' }
-                }} />
-              <Drawer.Screen
-                name="carparkTrend"
-                options={{
-                  drawerItemStyle: { display: 'none' },
-                  title: "Carpark Trend"
                 }} />
               <Drawer.Screen
                 name="registrationSuccess"

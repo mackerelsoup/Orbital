@@ -1,16 +1,19 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleProp, StyleSheet, Text, TextStyle, View, ViewStyle } from 'react-native';
 
 type Props = {
     label: string;
     onPress?: () => void;
     children?: React.ReactElement
+    style?: StyleProp<ViewStyle>
+    labelStyle?: StyleProp<TextStyle>
 };
 
-export default function Button({ label, onPress, children }: Props) {
+export default function Button({ label, onPress, children, style, labelStyle }: Props) {
 
     return (
         <View style={[
-            styles.buttonContainer
+            styles.buttonContainer,
+            style
         ]}>
             <Pressable
                 style={({ pressed }) => [
@@ -20,7 +23,7 @@ export default function Button({ label, onPress, children }: Props) {
                 onTouchEnd={onPress}
                 >
                 <View style = {{flexDirection: 'column', justifyContent: 'center', alignItems: 'center'}}>
-                    <Text style={styles.buttonLabel}>{label}</Text>
+                    <Text style={[styles.buttonLabel, labelStyle]}>{label}</Text>
                     {children}
                 </View>
 
@@ -41,7 +44,6 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         borderRadius: 5,
-        backgroundColor: "black"
 
     },
     buttonLabel: {
