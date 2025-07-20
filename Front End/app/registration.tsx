@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import {
+  Animated,
   View,
   Text,
   TextInput,
@@ -40,7 +41,19 @@ export default function RegisterForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [inlineError, setInlineError] = useState("");
+  const scrollY = useRef(new Animated.Value(0)).current;
 
+  const titleOpacity = scrollY.interpolate({
+    inputRange: [300, 350],
+    outputRange: [0, 1],
+    extrapolate: 'clamp',
+  });
+
+  const titleTranslateY = scrollY.interpolate({
+    inputRange: [50, 100],
+    outputRange: [10, 0],
+    extrapolate: 'clamp',
+  });
 
   const validate = () => {
     if (!username || !email || !password || !confirmPassword) {
@@ -118,31 +131,94 @@ export default function RegisterForm() {
   };
 
   return (
-    <>
-      <Stack.Screen
-        options={{
-          headerLeft: () => (
-            <TouchableOpacity onPress={() => router.push("/login")} style={{ marginLeft: 16 }}>
-              <Ionicons name="arrow-back" size={24} color="#6d62fe" />
-            </TouchableOpacity>
-          ),
-          headerShown: true,
-          title: "",
-          headerShadowVisible: false,
-          animation: "slide_from_right",
-          animationDuration: 500,
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+      style={styles.container}
+      keyboardVerticalOffset={90}
+    >
+      <View
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          height: 100,
+          paddingHorizontal: 16,
+          flexDirection: 'row',
+          alignItems: 'center',
+          backgroundColor: '#FFFFFF',
+          zIndex: 10,
+          justifyContent: 'center',
         }}
-      />
-
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
-        style={styles.container}
-        keyboardVerticalOffset={90}
       >
-        <ScrollView
-          contentContainerStyle={{ flexGrow: 1, justifyContent: "center", paddingBottom: 60, paddingTop: 60 }}
+        {/* back arrow */}
+        <TouchableOpacity
+          onPress={() => router.push('/login')}
+          style={{
+            position: 'absolute',
+            left: 16,
+            marginRight: 12,
+            marginTop: 46,
+          }}
+        >
+          <View
+            style={{
+              width: 38,
+              height: 38,
+              borderRadius: 20,
+              borderWidth: 1,
+              borderColor: '#d1d5db',
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}
+          >
+            <Ionicons name='arrow-back' size={20} color='#6d62fe' />
+          </View>
+        </TouchableOpacity>
+
+
+        {/* title */}
+        <View style={{ alignItems: 'center', justifyContent: 'center'}}>
+          <Animated.Text
+            style={{
+              position: 'absolute',
+              alignSelf: 'center',
+              justifyContent: 'center',
+              fontSize: 16,
+              fontWeight: '600',
+              color: '#1F2937',
+              opacity: titleOpacity,
+              transform: [{ translateY: titleTranslateY }],
+              marginTop: 46,
+            }}
+          >
+          Create your account
+          </Animated.Text>
+        </View>
+
+        {/* line that appears alongside title */}
+        <Animated.View
+          style={{
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: 1,
+            backgroundColor: '#E5E7EB',
+            opacity: titleOpacity,
+          }}
+        />
+      </View>
+
+        <Animated.ScrollView
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
+                  contentContainerStyle={styles.scrollContainer}
+                  onScroll={Animated.event(
+                    [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+                    { useNativeDriver: true }
+                  )}
+                  scrollEventThrottle={16}
         >
           <Image
             source={require("../assets/images/undraw_sign-up_z2ku.png")}
@@ -354,7 +430,7 @@ export default function RegisterForm() {
               <Text style={styles.registerButtonText}>Create Account</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity onPress={() => router.push("/login")}>
+            <TouchableOpacity onPress={() => { setInlineError(""); router.push("/login")} }>
               <Text style={styles.loginLink}>Already have an account? <Text style={styles.loginLinkBold}>Log in</Text></Text>
             </TouchableOpacity>
 
@@ -364,13 +440,19 @@ export default function RegisterForm() {
               <Text style={styles.link}>Privacy Policy</Text>.
             </Text>
           </View>
-        </ScrollView>
+        </Animated.ScrollView>
       </KeyboardAvoidingView>
-    </>
   );
 }
 
 const styles = StyleSheet.create({
+  scrollContainer: {
+    flexGrow: 1,
+    backgroundColor: '#fff',
+    justifyContent: "center", 
+    paddingBottom: 60, 
+    paddingTop: 120,
+  },
   container: {
     flex: 1,
     backgroundColor: "#fff",
