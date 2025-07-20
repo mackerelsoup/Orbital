@@ -463,7 +463,7 @@ app.put('/updateProfile/:username', (request, response) => {
   const username = request.params.username
   const imageUri = request.body.imageURI
 
-  const update_query = "UPDATE user_profile SET profileURI = $2 WHERE username = $1"
+  const update_query = "UPDATE user_profile SET profileuri = $2 WHERE username = $1"
   connection.query(update_query, [username, imageUri], (err, result) => {
     if (err) {
       response.status(500).send(err)
