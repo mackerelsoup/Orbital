@@ -186,7 +186,6 @@ export default function DigitalPermits() {
         {/* Features Cards */}
         <View style={styles.card}>
           <View style={styles.cardHeader}>
-            <FontAwesome name="list" size={18} color="#374151" />
             <Text style={styles.cardTitle}>Available Services</Text>
           </View>
 
@@ -286,7 +285,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '700',
     color: '#1F2937',
-    marginLeft: 10,
+    marginLeft: 4,
   },
   loginButton: {
     borderRadius: 12,

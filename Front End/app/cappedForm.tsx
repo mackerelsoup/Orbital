@@ -2,6 +2,7 @@ import { FontAwesome, Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useRef, useState } from 'react';
 import { Alert, Animated, KeyboardAvoidingView, Modal, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import CustomDropdown from '@/components/CustomDropdown';
 
 /*
 Parent file:
@@ -39,6 +40,15 @@ const CappedParkingApplicationForm = () => {
     extrapolate: 'clamp',
   });
 
+  const clearField = (field: keyof FormData) => {
+    setFormData(prev => ({ ...prev, [field]: '' }));
+  };
+
+  const resetForm = () => {
+    setFormData({});
+    setEngineCapacity('');
+  };
+
   const handleChange = (field: keyof FormData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
@@ -49,7 +59,6 @@ const CappedParkingApplicationForm = () => {
       'salutation', 'name', 'address',
       'email', 'tel', 'vehicleRegNo', 'iuNo', 'vehicleOwner'
     ];
-    
 
     // checks for valid form
     for (const field of requiredFields) {
@@ -58,7 +67,40 @@ const CappedParkingApplicationForm = () => {
         return false;
       }
     }
+
+    // email format check
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email!)) {
+      Alert.alert('Invalid Email', 'Please enter a valid email address.');
+      clearField('email');
+      return false;
+    }
+
+    // phone number format check
+    const phoneRegex = /^[689]\d{7}$/;
+    if (!phoneRegex.test(formData.tel!)) {
+      Alert.alert('Invalid Phone Number', 'Enter a valid 8-digit phone number.');
+      clearField('tel');
+      return false;
+    }
+
+    // IU no. check 10 digits
+    const iuRegex = /^\d{10}$/;
+    if (!iuRegex.test(formData.iuNo!)) {
+      Alert.alert('Invalid IU Number', 'In-Vehicle Unit (IU) No. must be exactly 10 digits.');
+      clearField('iuNo');
+      return false;
+    }
+
+    // vehicle registration number (common format)
+    const vehRegRegex = /^[SFTG][A-Z]{2}\d{1,4}[A-Z]$/;
+    if (!vehRegRegex.test(formData.vehicleRegNo!)) {
+      Alert.alert('Invalid Vehicle Registration No.', 'Please enter a valid format, e.g., SXX1234X.');
+      clearField('vehicleRegNo');
+      return false;
+    }
     
+    // engine capacity check
     if (!engineCapacity) {
       Alert.alert('Missing Information', 'Select vehicle engine capacity');
       return false;
@@ -116,6 +158,15 @@ const CappedParkingApplicationForm = () => {
     </TouchableOpacity>
   );
 
+  // dropdown logic
+  const salutationDate = [
+    { label: 'Mr.', value: 'Mr' },
+    { label: 'Ms.', value: 'Ms' },
+    { label: 'Mrs.', value: 'Mrs' },
+    { label: 'Mdm.', value: 'Mdm' },
+    { label: 'Dr.', value: 'Dr' }
+  ]
+
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}
@@ -138,7 +189,7 @@ const CappedParkingApplicationForm = () => {
       >
         {/* back arrow */}
         <TouchableOpacity
-          onPress={() => router.push('/capped')}
+          onPress={() => {resetForm(); router.push('/capped')}}
           style={{
             position: 'absolute',
             left: 16,
@@ -217,18 +268,15 @@ const CappedParkingApplicationForm = () => {
               
               <View style={styles.inputGroup}>
                 <Text style={styles.label}>Salutation <Text style={styles.required}>*</Text></Text>
-                <TextInput 
-                  style={styles.input}
-                  onChangeText={text => handleChange('salutation', text)}
-                  placeholder="Mr./Ms./Mrs./Mdm./Dr."
-                  placeholderTextColor="#9CA3AF"
-                />
+                <CustomDropdown data={salutationDate} handleChange={(item) => handleChange('salutation', item.value)}>
+                </CustomDropdown>
               </View>
 
               <View style={styles.inputGroup}>
-                <Text style={styles.label}>Name (as in NRIC) <Text style={styles.required}>*</Text></Text>
+                <Text style={styles.label}>Full Name (as in NRIC) <Text style={styles.required}>*</Text></Text>
                 <TextInput 
                   style={styles.input}
+                  value={formData.name || ''}
                   onChangeText={text => handleChange('name', text)}
                   placeholder="Enter your full name"
                   placeholderTextColor="#9CA3AF"
@@ -239,6 +287,7 @@ const CappedParkingApplicationForm = () => {
                 <Text style={styles.label}>Address <Text style={styles.required}>*</Text></Text>
                 <TextInput 
                   style={[styles.input, styles.textArea]}
+                  value={formData.address || ''}
                   onChangeText={text => handleChange('address', text)}
                   placeholder="Enter your address"
                   placeholderTextColor="#9CA3AF"
@@ -251,6 +300,7 @@ const CappedParkingApplicationForm = () => {
                 <Text style={styles.label}>Email <Text style={styles.required}>*</Text></Text>
                 <TextInput 
                   style={styles.input}
+                  value={formData.email || ''}
                   onChangeText={text => handleChange('email', text)}
                   placeholder="your.email@example.com"
                   placeholderTextColor="#9CA3AF"
@@ -263,6 +313,7 @@ const CappedParkingApplicationForm = () => {
                 <Text style={styles.label}>Tel No. / Mobile <Text style={styles.required}>*</Text></Text>
                 <TextInput 
                   style={styles.input}
+                  value={formData.tel || ''}
                   onChangeText={text => handleChange('tel', text)}
                   placeholder=""
                   placeholderTextColor="#9CA3AF"
@@ -281,6 +332,7 @@ const CappedParkingApplicationForm = () => {
                 <Text style={styles.label}>Vehicle Registration No. <Text style={styles.required}>*</Text></Text>
                 <TextInput 
                   style={styles.input}
+                  value={formData.vehicleRegNo || ''}
                   onChangeText={text => handleChange('vehicleRegNo', text)}
                   placeholder="SXX1234X"
                   placeholderTextColor="#9CA3AF"
@@ -293,6 +345,7 @@ const CappedParkingApplicationForm = () => {
                 <Text style={styles.helperText}>10 nos. below barcode, left hand side of unit</Text>
                 <TextInput 
                   style={styles.input}
+                  value={formData.iuNo || ''}
                   onChangeText={text => handleChange('iuNo', text)}
                   placeholder="XXXXXXXXXX"
                   placeholderTextColor="#9CA3AF"
@@ -304,6 +357,7 @@ const CappedParkingApplicationForm = () => {
                 <Text style={styles.label}>Registered Vehicle Owner <Text style={styles.required}>*</Text></Text>
                 <TextInput 
                   style={styles.input}
+                  value={formData.vehicleOwner || ''}
                   onChangeText={text => handleChange('vehicleOwner', text)}
                   placeholder="Vehicle owner's full name"
                   placeholderTextColor="#9CA3AF"
@@ -314,6 +368,7 @@ const CappedParkingApplicationForm = () => {
                 <Text style={styles.label}>Relationship with Owner of Vehicle</Text>
                 <TextInput 
                   style={styles.input}
+                  value={formData.relationship || ''}
                   onChangeText={text => handleChange('relationship', text)}
                   placeholder="e.g., Self, Parent, etc."
                   placeholderTextColor="#9CA3AF"

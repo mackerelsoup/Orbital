@@ -47,6 +47,15 @@ const SeasonParkingApplicationForm = () => {
     extrapolate: 'clamp',
   });
 
+  const clearField = (field: keyof FormData) => {
+    setFormData(prev => ({ ...prev, [field]: '' }));
+  };
+
+  const resetForm = () => {
+    setFormData({});
+    setEngineCapacity('');
+  };
+
   const handleChange = (field: keyof FormData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
@@ -67,6 +76,47 @@ const SeasonParkingApplicationForm = () => {
       }
     }
 
+    // email format check
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email!)) {
+      Alert.alert('Invalid Email', 'Please enter a valid email address.');
+      clearField('email');  
+      return false;
+    }
+
+    // phone number format check
+    const phoneRegex = /^[689]\d{7}$/;
+    if (!phoneRegex.test(formData.tel!)) {
+      Alert.alert('Invalid Phone Number', 'Enter a valid 8-digit phone number.');
+      clearField('tel');
+      return false;
+    }
+
+    // student number format check
+    const studentNoRegex = /^[689]\d{7}$/;
+    if (!studentNoRegex.test(formData.studentNo!)) {
+      Alert.alert('Invalid Student Number', 'Enter a valid NUS matriculation number.');
+      clearField('studentNo');
+      return false;
+    }
+
+    // IU no. check 10 digits
+    const iuRegex = /^\d{10}$/;
+    if (!iuRegex.test(formData.iuNo!)) {
+      Alert.alert('Invalid IU Number', 'In-Vehicle Unit (IU) No. must be exactly 10 digits.');
+      clearField('iuNo');
+      return false;
+    }
+
+    // vehicle registration number (common format)
+    const vehRegRegex = /^[SFTG][A-Z]{2}\d{1,4}[A-Z]$/;
+    if (!vehRegRegex.test(formData.vehicleRegNo!)) {
+      Alert.alert('Invalid Vehicle Registration No.', 'Please enter a valid format, e.g., SXX1234X.');
+      clearField('vehicleRegNo');
+      return false;
+    }
+    
+    // engine capacity check
     if (!engineCapacity) {
       Alert.alert('Missing Information', 'Select vehicle engine capacity');
       return false;
@@ -125,7 +175,7 @@ const SeasonParkingApplicationForm = () => {
     </TouchableOpacity>
   );
 
-  //dropdown logic
+  // dropdown logic
   const salutationDate = [
     { label: 'Mr.', value: 'Mr' },
     { label: 'Ms.', value: 'Ms' },
@@ -133,8 +183,6 @@ const SeasonParkingApplicationForm = () => {
     { label: 'Mdm.', value: 'Mdm' },
     { label: 'Dr.', value: 'Dr' }
   ]
-
-
 
   return (
     <KeyboardAvoidingView
@@ -158,7 +206,7 @@ const SeasonParkingApplicationForm = () => {
       >
         {/* back arrow */}
         <TouchableOpacity
-          onPress={() => router.push('/season')}
+          onPress={() => {resetForm(); router.push('/season')}}
           style={{
             position: 'absolute',
             left: 16,
@@ -240,15 +288,15 @@ const SeasonParkingApplicationForm = () => {
               <View style={styles.inputGroup}>
                 <Text style={styles.label}>Salutation <Text style={styles.required}>*</Text></Text>
                 <CustomDropdown data={salutationDate} handleChange={(item) => handleChange('salutation', item.value)}>
-                  
                 </CustomDropdown>
               </View>
 
 
               <View style={styles.inputGroup}>
-                <Text style={styles.label}>Name (as in NRIC) <Text style={styles.required}>*</Text></Text>
+                <Text style={styles.label}>Full Name (as in NRIC) <Text style={styles.required}>*</Text></Text>
                 <TextInput
                   style={styles.input}
+                  value={formData.name || ''}
                   onChangeText={text => handleChange('name', text)}
                   placeholder="Enter your full name"
                   placeholderTextColor="#9CA3AF"
@@ -259,6 +307,7 @@ const SeasonParkingApplicationForm = () => {
                 <Text style={styles.label}>Address <Text style={styles.required}>*</Text></Text>
                 <TextInput
                   style={[styles.input, styles.textArea]}
+                  value={formData.address || ''}
                   onChangeText={text => handleChange('address', text)}
                   placeholder="Enter your address"
                   placeholderTextColor="#9CA3AF"
@@ -271,6 +320,7 @@ const SeasonParkingApplicationForm = () => {
                 <Text style={styles.label}>Email <Text style={styles.required}>*</Text></Text>
                 <TextInput
                   style={styles.input}
+                  value={formData.email || ''}
                   onChangeText={text => handleChange('email', text)}
                   placeholder="your.email@example.com"
                   placeholderTextColor="#9CA3AF"
@@ -283,6 +333,7 @@ const SeasonParkingApplicationForm = () => {
                 <Text style={styles.label}>Tel No. / Mobile <Text style={styles.required}>*</Text></Text>
                 <TextInput
                   style={styles.input}
+                  value={formData.tel || ''}
                   onChangeText={text => handleChange('tel', text)}
                   placeholder=""
                   placeholderTextColor="#9CA3AF"
@@ -301,6 +352,7 @@ const SeasonParkingApplicationForm = () => {
                 <Text style={styles.label}>Student No. <Text style={styles.required}>*</Text></Text>
                 <TextInput
                   style={styles.input}
+                  value={formData.studentNo || ''}
                   onChangeText={text => handleChange('studentNo', text)}
                   placeholder="A0XXXXXXX"
                   placeholderTextColor="#9CA3AF"
@@ -311,6 +363,7 @@ const SeasonParkingApplicationForm = () => {
                 <Text style={styles.label}>Faculty/School <Text style={styles.required}>*</Text></Text>
                 <TextInput
                   style={styles.input}
+                  value={formData.faculty || ''}
                   onChangeText={text => handleChange('faculty', text)}
                   placeholder="e.g., School of Computing"
                   placeholderTextColor="#9CA3AF"
@@ -328,6 +381,7 @@ const SeasonParkingApplicationForm = () => {
                 <Text style={styles.label}>Vehicle Registration No. <Text style={styles.required}>*</Text></Text>
                 <TextInput
                   style={styles.input}
+                  value={formData.vehicleRegNo || ''}
                   onChangeText={text => handleChange('vehicleRegNo', text)}
                   placeholder="SXX1234X"
                   placeholderTextColor="#9CA3AF"
@@ -340,6 +394,7 @@ const SeasonParkingApplicationForm = () => {
                 <Text style={styles.helperText}>10 nos. below barcode, left hand side of unit</Text>
                 <TextInput
                   style={styles.input}
+                  value={formData.iuNo || ''}
                   onChangeText={text => handleChange('iuNo', text)}
                   placeholder="XXXXXXXXXX"
                   placeholderTextColor="#9CA3AF"
@@ -351,6 +406,7 @@ const SeasonParkingApplicationForm = () => {
                 <Text style={styles.label}>Registered Vehicle Owner <Text style={styles.required}>*</Text></Text>
                 <TextInput
                   style={styles.input}
+                  value={formData.vehicleOwner || ''}
                   onChangeText={text => handleChange('vehicleOwner', text)}
                   placeholder="Vehicle owner's full name"
                   placeholderTextColor="#9CA3AF"
@@ -361,6 +417,7 @@ const SeasonParkingApplicationForm = () => {
                 <Text style={styles.label}>Relationship with Owner of Vehicle</Text>
                 <TextInput
                   style={styles.input}
+                  value={formData.relationship || ''}
                   onChangeText={text => handleChange('relationship', text)}
                   placeholder="e.g., Self, Parent, etc."
                   placeholderTextColor="#9CA3AF"
@@ -397,7 +454,7 @@ const SeasonParkingApplicationForm = () => {
             {/* parking type selection section */}
             <View style={styles.section}>
               <Text style={styles.sectionTitle}>
-                <FontAwesome name="map-marker" size={18} color="#6d62fe" />  Parking Type Selection
+                <FontAwesome name="map-marker" size={18} color="#6d62fe" />  Parking Type
               </Text>
 
               <View style={styles.pricingInfo}>
