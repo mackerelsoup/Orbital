@@ -19,7 +19,7 @@ type InfoCardProps = {
 
 
 export default function Profile() {
-  const { logout, user } = useContext(UserContext)!;
+  const { logout, user, setUser } = useContext(UserContext)!;
   const [image, setImage] = useState<string>("https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png?20150327203541")
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false)
 
@@ -79,6 +79,12 @@ export default function Profile() {
       }
     }
     updateImage()
+
+    setUser(prev => ({
+      ...prev,
+      profile_uri: image
+    }))
+
   }, [image])
 
   const InfoCard = ({ icon, label, value, iconColor = '#6d62fe' } : InfoCardProps) => (

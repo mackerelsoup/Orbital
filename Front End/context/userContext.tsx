@@ -22,7 +22,8 @@ export const UserProvider = ({ children }: UserProviderProps) => {
   const [user, setUser] = useState<UserData>({
     staff: false,
     season_parking: false,
-    season_parking_type: 'nil'
+    season_parking_type: 'nil',
+    profile_uri: 'https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png?20150327203541',
   });
 
   const [loggedIn, setLoggedIn] = useState(false);
@@ -31,7 +32,8 @@ export const UserProvider = ({ children }: UserProviderProps) => {
     setUser({
       staff: false,
       season_parking: false,
-      season_parking_type: 'nil'
+      season_parking_type: 'nil',
+      profile_uri: 'https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png?20150327203541'
     });
     setLoggedIn(false);
   };
