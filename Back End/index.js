@@ -402,6 +402,7 @@ app.post('/register', (request, response) => {
   const { username, email, password, is_staff, season_pass, season_pass_type } = request.body;
   const login_update_query = "INSERT INTO login VALUES($1, $2, $3)";
   const user_info_update_query = "INSERT INTO user_info VALUES($1, $2, $3, $4)"
+  const user_profilepic_update_query = "INSERT INTO user_profile VALUES($1, $2)"
 
   connection.query(login_update_query, [username, email, password], (err, result) => {
     if (err) {
@@ -423,12 +424,35 @@ app.post('/register', (request, response) => {
           response.status(500).send("User info update failed");
         }
       })
+      connection.query(user_profilepic_update_query, [username, "https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png?20150327203541"], (err, result) => {
+        if (err){
+          console.error("user profile pic update failed", err)
+          response.status(500).send("user profile update failed");
+        }
+      })
       response.status(200).send("User registered successfully");
     }
   })
 
 })
 
+
+app.put('/updateProfile/:username', (request, response) => {
+  const username = request.params.username
+  const imageUri = request.body.imageURI
+
+  const update_query = "UPDATE user_profile SET profileURI = $2 WHERE username = $1"
+  connection.query(update_query, [username, imageUri], (err, result) => {
+    if (err) {
+      response.status(500).send(err)
+      console.error(err)
+    } 
+    else {
+      response.send("image updated")
+    }
+  })
+}
+)
 
 
 app.put('/update/:id', (request, response) => {
