@@ -96,7 +96,7 @@ export default function LoginForm() {
       const data = await response.json();
       console.log("data:", data[0].username)
 
-     if (data[0].password !== password) {
+      if (data[0].password !== password) {
         setInlineError("Email or password incorrect. Please try again.");
         setPassword("");
         return;
@@ -125,11 +125,10 @@ export default function LoginForm() {
         console.log("user not found")
         throw new userDataNotFoundError("User not found");
       }
-      
+
       if (!response.ok) throw new ConnectionError("Network response was not ok");
 
       const userdata = await response.json();
-      
       // set user type
       if (userdata[0].is_staff) {
         setUserType('Staff');
@@ -137,12 +136,23 @@ export default function LoginForm() {
         setUserType('Student');
       }
 
+      response = await fetch(`https://back-end-o2lr.onrender.com/getUserProfilePic/${data.username}`)
+      if (response.status === 404) {
+        console.log("user not found")
+        throw new userDataNotFoundError("User not found");
+      }
+
+      if (!response.ok) throw new ConnectionError("Network response was not ok");
+
+      const userProfilePic = await response.json()
+
       const mergedData = {
         username: data.username,
         email: data.email,
         staff: userdata[0].is_staff,
         season_parking: userdata[0].season_pass,
         season_parking_type: userdata[0].season_pass_type,
+        profile_uri: userProfilePic[0].profileuri,
       };
 
       setUser(mergedData);
@@ -160,95 +170,95 @@ export default function LoginForm() {
 
   return (
     <>
-    <Stack.Screen
-      options={{
-        headerLeft: () => (
-          <TouchableOpacity
-            onPress={() => { setInlineError(""); nav.goBack()} }
-            style={{ marginLeft: 16 }}
-          >
-            <Ionicons name="arrow-back" size={24} color="#6d62fe" />
-          </TouchableOpacity>
-        ),
-        headerShown: true,
-        title: "",
-        headerShadowVisible: false,
-      }}
-    />
-    
-    <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-      style={styles.container}
-      keyboardVerticalOffset={90}
-    >
-      <ScrollView
-        contentContainerStyle={{ flexGrow: 1, justifyContent: "center" }}
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
+      <Stack.Screen
+        options={{
+          headerLeft: () => (
+            <TouchableOpacity
+              onPress={() => { setInlineError(""); nav.goBack() }}
+              style={{ marginLeft: 16 }}
+            >
+              <Ionicons name="arrow-back" size={24} color="#6d62fe" />
+            </TouchableOpacity>
+          ),
+          headerShown: true,
+          title: "",
+          headerShadowVisible: false,
+        }}
+      />
+
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        style={styles.container}
+        keyboardVerticalOffset={90}
       >
-        <Image
-          source={require("../assets/images/undraw_login_weas.png")}
-          style={styles.image}
-        />
-        <View style={styles.innerContainer}>
-          <Text style={styles.title}>Log into account</Text>
-
-          <Text style={styles.label}>Email</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="example@example.com"
-            placeholderTextColor="#A0A0A0"
-            value={username}
-            onChangeText={setUsername}
-            keyboardType="email-address"
-            autoCapitalize="none"
+        <ScrollView
+          contentContainerStyle={{ flexGrow: 1, justifyContent: "center" }}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          <Image
+            source={require("../assets/images/undraw_login_weas.png")}
+            style={styles.image}
           />
+          <View style={styles.innerContainer}>
+            <Text style={styles.title}>Log into account</Text>
 
-          <Text style={styles.label}>Password</Text>
-          <View style={styles.passwordContainer}>
+            <Text style={styles.label}>Email</Text>
             <TextInput
-              style={styles.passwordInput}
-              placeholder="Enter password"
+              style={styles.input}
+              placeholder="example@example.com"
               placeholderTextColor="#A0A0A0"
-              secureTextEntry={!showPassword}
-              value={password}
-              onChangeText={setPassword}
+              value={username}
+              onChangeText={setUsername}
+              keyboardType="email-address"
+              autoCapitalize="none"
             />
-            <Pressable onPress={() => setShowPassword(!showPassword)}>
-              <Ionicons
-                name={showPassword ? "eye" : "eye-off"}
-                size={20}
-                color="#777"
-                style={{ marginRight: 10 }}
+
+            <Text style={styles.label}>Password</Text>
+            <View style={styles.passwordContainer}>
+              <TextInput
+                style={styles.passwordInput}
+                placeholder="Enter password"
+                placeholderTextColor="#A0A0A0"
+                secureTextEntry={!showPassword}
+                value={password}
+                onChangeText={setPassword}
               />
-            </Pressable>
+              <Pressable onPress={() => setShowPassword(!showPassword)}>
+                <Ionicons
+                  name={showPassword ? "eye" : "eye-off"}
+                  size={20}
+                  color="#777"
+                  style={{ marginRight: 10 }}
+                />
+              </Pressable>
+            </View>
+
+            {inlineError !== "" && (
+              <Text style={styles.inlineError}>
+                <Text style={{ fontWeight: "bold" }}>Oops! </Text>
+                <Text>{inlineError}</Text>
+              </Text>
+            )}
+
+            <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
+              <Text style={styles.loginButtonText}>Log in</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity onPress={() => { setInlineError(""); router.push("/registration") }}>
+              <Text style={styles.createPre}>
+                Dont have an account?{" "}
+                <Text style={styles.create}>Create an Account</Text>
+              </Text>
+            </TouchableOpacity>
+
+            <Text style={styles.footer}>
+              By logging in, you agree to the{" "}
+              <Text style={styles.link}>Terms and Conditions</Text>.
+            </Text>
           </View>
-
-          {inlineError !== "" && (
-            <Text style={styles.inlineError}>
-              <Text style={{ fontWeight: "bold" }}>Oops! </Text>
-              <Text>{inlineError}</Text>
-            </Text>
-          )}
-
-          <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
-            <Text style={styles.loginButtonText}>Log in</Text>
-          </TouchableOpacity>
-        
-          <TouchableOpacity onPress={() => { setInlineError(""); router.push("/registration")} }>
-            <Text style = {styles.createPre}>
-              Dont have an account?{" "}
-              <Text style={styles.create}>Create an Account</Text>
-            </Text>
-          </TouchableOpacity>
-
-          <Text style={styles.footer}>
-            By logging in, you agree to the{" "}
-            <Text style={styles.link}>Terms and Conditions</Text>.
-          </Text>
-        </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+        </ScrollView>
+      </KeyboardAvoidingView>
 
     </>
   );

@@ -425,7 +425,7 @@ app.post('/register', (request, response) => {
         }
       })
       connection.query(user_profilepic_update_query, [username, "https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png?20150327203541"], (err, result) => {
-        if (err){
+        if (err) {
           console.error("user profile pic update failed", err)
           response.status(500).send("user profile update failed");
         }
@@ -434,6 +434,28 @@ app.post('/register', (request, response) => {
     }
   })
 
+})
+
+app.get('/getUserProfilePic/:username', (request, response) => {
+  const username = request.params.username
+
+  const pic_query = "SELECT profileuri FROM user_profile WHERE username = $1"
+  connection.query(pic_query, [username], (err, result) => {
+    if (err) {
+      response.status(500).send(err)
+      console.error(error)
+    }
+    else {
+      if (result.rowCount === 0) {
+        response.status(404).send("User not found")
+        console.error("User not found")
+      }
+      else {
+        response.send(result.rows)
+      }
+
+    }
+  })
 })
 
 
@@ -446,13 +468,12 @@ app.put('/updateProfile/:username', (request, response) => {
     if (err) {
       response.status(500).send(err)
       console.error(err)
-    } 
+    }
     else {
       response.send("image updated")
     }
   })
-}
-)
+})
 
 
 app.put('/update/:id', (request, response) => {
@@ -481,7 +502,7 @@ app.delete('/delete/:id', (request, response) => {
       console.error(err)
     }
     else {
-      response.send(result)
+      response.send(result.rows)
     }
   })
 })

@@ -28,5 +28,6 @@ type UserData = {
   email? : string;
   staff: boolean;
   season_parking: boolean;
-  season_parking_type?: string
+  season_parking_type?: string;
+  profile_uri:string;
 }
