@@ -13,9 +13,10 @@ season.tsx
 */
 
 export default function DigitalPermits() {
-  const { loggedIn, userType, setUserType } = useContext(UserContext)!;
+  const { loggedIn, userType, setUserType, user } = useContext(UserContext)!;
   const router = useRouter();
   const { logout } = useContext(UserContext)!;
+
 
   // redirects to log in page and ensures it redirects back upon success
   const handleLogin = (selectedUserType: 'Student' | 'Staff') => {

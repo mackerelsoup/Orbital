@@ -63,7 +63,7 @@ export default function approvalSelector() {
     if (activeTab === 'Season') {
       const getSeasonParking = async () => {
         try {
-          const response = await fetch('http://192.168.68.60:3000/getSeasonApplication')
+          const response = await fetch('https://back-end-o2lr.onrender.com/getSeasonApplication')
           if (!response.ok) {
             if (response.status === 500) {
               Alert.alert("Failed to retrieve parking information")
@@ -94,7 +94,7 @@ export default function approvalSelector() {
     else {
       const getCappedParking = async () => {
         try {
-          const response = await fetch('http://192.168.68.60:3000/getCappedApplication')
+          const response = await fetch('https://back-end-o2lr.onrender.com/getCappedApplication')
           if (!response.ok) {
             if (response.status === 500) {
               Alert.alert("Failed to retrieve parking information")

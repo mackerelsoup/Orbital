@@ -151,6 +151,28 @@ app.get('/fetchUserData/:username', (request, response) => {
   })
 })
 
+app.get('/fetchUserDataEmail/:email', (request, response) => {
+  const email = request.params.email
+  console.log(email)
+  const fetch_id_query = "SELECT * FROM user_info WHERE email = $1"
+  connection.query(fetch_id_query, [email], (err, result) => {
+    if (err) {
+      response.send(err)
+      console.error(err)
+    }
+    else {
+      if (result.rowCount === 0) {
+        response.status(404).send("User info not found")
+      }
+      else {
+        console.log("User info extracted")
+        response.send(result.rows)
+      }
+
+    }
+  })
+})
+
 app.get('/fetchCarparkData/:id', (request, response) => {
   const id = request.params.id
   const fetch_id_query = "SELECT * FROM carpark_info WHERE id = $1"
@@ -436,6 +458,7 @@ app.post('/register', (request, response) => {
 
 })
 
+
 app.get('/getUserProfilePic/:username', (request, response) => {
   const username = request.params.username
 
@@ -478,7 +501,7 @@ app.put('/updateProfile/:username', (request, response) => {
 app.get('/getSeasonApplication', (request, response) => {
   const application_query = "SELECT * FROM season_parking_applications"
 
-  connection.query(application_query, (err,result) => {
+  connection.query(application_query, (err, result) => {
     if (err) {
       console.error('Database error in /getSeasonApplication:', err); // internal logging
 
@@ -497,7 +520,7 @@ app.get('/getSeasonApplication', (request, response) => {
 app.get('/getCappedApplication', (request, response) => {
   const application_query = "SELECT * FROM capped_parking_applications"
 
-  connection.query(application_query, (err,result) => {
+  connection.query(application_query, (err, result) => {
     if (err) {
       console.error('Database error in /getCappedApplication:', err); // internal logging
 
@@ -540,9 +563,71 @@ app.post('/approveSeasonApplication', (request, response) => {
 });
 
 
-app.post('/rejectSeasonApplication', (request, response)=> {
+app.post('/rejectSeasonApplication', (request, response) => {
+  const { email } = request.body;
 
-})
+  const update_query = "UPDATE season_parking_applications SET status = 'rejected' WHERE email = $1";
+
+  connection.query(update_query, [email], (err, result) => {
+    if (err) {
+      console.error('Error updating season_parking_applications:', err);
+      return response.status(500).json({ error: 'Failed to reject application' });
+    }
+
+    // Check if a row was actually updated
+    if (result.rowCount === 0) {
+      return response.status(404).json({ error: 'No application found for this email' });
+    }
+
+    return response.status(200).json({ message: 'Season application rejected successfully.' });
+  });
+});
+
+
+app.post('/getSeasonApplicationStatus', (request, response) => {
+  const { email } = request.body;
+
+  const status_query = "SELECT status FROM season_parking_applications WHERE email = $1";
+
+  connection.query(status_query, [email], (err, result) => {
+    if (err) {
+      console.error('Error querying season application status:', err);
+      return response.status(500).json({ error: 'Internal server error' });
+    }
+
+    if (result.rows.length === 0) {
+      return response.status(404).json({ error: 'No application found for this email' });
+    }
+
+    const status = result.rows[0].status;
+    return response.status(200).json({ status });
+  });
+});
+
+app.post('/deleteSeasonApplication', (request, response) => {
+  const { email } = request.body;
+
+  if (!email) {
+    return response.status(400).json({ error: 'Email is required' });
+  }
+
+  const deletion_query = "DELETE FROM season_parking_applications WHERE email = $1";
+
+  connection.query(deletion_query, [email], (err, result) => {
+    if (err) {
+      console.error('Error deleting season application:', err);
+      return response.status(500).json({ error: 'Failed to delete season application' });
+    }
+
+    if (result.rowCount === 0) {
+      return response.status(404).json({ error: 'No application found for this email' });
+    }
+
+    return response.status(200).json({ message: 'Application deleted successfully' });
+  });
+});
+
+
 
 app.post('/approveCappedApplication', (request, response) => {
   const { email, season_pass_type } = request.body;
@@ -570,9 +655,72 @@ app.post('/approveCappedApplication', (request, response) => {
   });
 })
 
-app.post('/rejectCappedApplication', (request, response)=> {
-  
-})
+app.post('/rejectCappedApplication', (request, response) => {
+  const { email } = request.body;
+
+  const update_query = "UPDATE capped_parking_applications SET status = 'rejected' WHERE email = $1";
+
+  connection.query(update_query, [email], (err, result) => {
+    if (err) {
+      console.error('Error updating capped_parking_applications:', err);
+      return response.status(500).json({ error: 'Failed to reject application' });
+    }
+
+    // Check if a row was actually updated
+    if (result.rowCount === 0) {
+      return response.status(404).json({ error: 'No application found for this email' });
+    }
+
+    return response.status(200).json({ message: 'Capped application rejected successfully.' });
+  });
+});
+
+app.post('/getCappedApplicationStatus', (request, response) => {
+  const { email } = request.body;
+
+  const status_query = "SELECT status FROM capped_parking_applications WHERE email = $1";
+
+  connection.query(status_query, [email], (err, result) => {
+    if (err) {
+      console.error('Error querying capped application status:', err);
+      return response.status(500).json({ error: 'Internal server error' });
+    }
+
+    if (result.rows.length === 0) {
+      return response.status(404).json({ error: 'No application found for this email' });
+    }
+
+    const status = result.rows[0].status;
+    return response.status(200).json({ status });
+  });
+});
+
+
+app.post('/deleteCappedApplication', (request, response) => {
+  const { email } = request.body;
+
+  if (!email) {
+    return response.status(400).json({ error: 'Email is required' });
+  }
+
+  const deletion_query = "DELETE FROM capped_parking_applications WHERE email = $1";
+
+  connection.query(deletion_query, [email], (err, result) => {
+    if (err) {
+      console.error('Error deleting capped application:', err);
+      return response.status(500).json({ error: 'Failed to delete capped application' });
+    }
+
+    if (result.rowCount === 0) {
+      return response.status(404).json({ error: 'No application found for this email' });
+    }
+
+    return response.status(200).json({ message: 'Application deleted successfully' });
+  });
+});
+
+
+
 
 
 app.put('/update/:id', (request, response) => {
