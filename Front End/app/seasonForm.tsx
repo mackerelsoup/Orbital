@@ -1,7 +1,7 @@
 import { FontAwesome, Ionicons } from '@expo/vector-icons';
 import { useRouter, Stack } from 'expo-router';
 import React, { useState, useRef } from 'react';
-import { Animated, Alert, KeyboardAvoidingView, Modal, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Animated, Alert, KeyboardAvoidingView, Modal, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View, Button } from 'react-native';
 import { RadioButton } from 'react-native-paper';
 import { Dropdown } from 'react-native-element-dropdown'
 import CustomDropdown from '@/components/CustomDropdown';
@@ -10,6 +10,7 @@ import CustomDropdown from '@/components/CustomDropdown';
 Parent file:
 digitalpermits.tsx
 */
+
 
 interface FormData {
   salutation?: string;
@@ -58,6 +59,28 @@ const SeasonParkingApplicationForm = () => {
 
   const handleChange = (field: keyof FormData, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleLeavePress = () => {
+    Alert.alert(
+      "Leave Page",
+      "Are you sure you want to leave? All details will be lost.",
+      [
+        {
+          text: "Stay",
+          style: "cancel"
+        },
+        {
+          text: "Leave",
+          onPress: () => {
+            resetForm(); 
+            router.push('/season')
+          },
+          style: "destructive"
+        }
+      ],
+      { cancelable: false }
+    );
   };
 
   const validateForm = () => {
@@ -206,7 +229,7 @@ const SeasonParkingApplicationForm = () => {
       >
         {/* back arrow */}
         <TouchableOpacity
-          onPress={() => {resetForm(); router.push('/season')}}
+          onPress={() => {handleLeavePress()}}
           style={{
             position: 'absolute',
             left: 16,

@@ -26,8 +26,19 @@ export default function Profile() {
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false)
 
   const handleLogout = () => {
-    logout();
-    router.replace('/');
+    Alert.alert(
+      'Logout',
+      'Are you sure you want to logout?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Logout',
+          style: 'destructive',
+          onPress: () => { logout(); router.replace('/'); }
+        },
+      ],
+      { cancelable: true }
+    );
   };
 
   const onChoosePhoto = async () => {

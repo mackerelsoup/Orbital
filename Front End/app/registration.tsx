@@ -214,12 +214,12 @@ export default function RegisterForm() {
         <Animated.ScrollView
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
-                  contentContainerStyle={styles.scrollContainer}
-                  onScroll={Animated.event(
-                    [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-                    { useNativeDriver: true }
-                  )}
-                  scrollEventThrottle={16}
+          contentContainerStyle={styles.scrollContainer}
+          onScroll={Animated.event(
+            [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+            { useNativeDriver: true }
+          )}
+          scrollEventThrottle={16}
         >
           <Image
             source={require("../assets/images/undraw_sign-up_z2ku.png")}
