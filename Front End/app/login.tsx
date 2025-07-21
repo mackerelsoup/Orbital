@@ -175,9 +175,21 @@ export default function LoginForm() {
           headerLeft: () => (
             <TouchableOpacity
               onPress={() => { setInlineError(""); nav.goBack() }}
-              style={{ marginLeft: 16 }}
+              style={{ marginLeft: 16, marginTop: 8 }}
             >
-              <Ionicons name="arrow-back" size={24} color="#6d62fe" />
+            <View
+              style={{
+                width: 38,
+                height: 38,
+                borderRadius: 20,
+                borderWidth: 1,
+                borderColor: '#d1d5db',
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}
+            >
+              <Ionicons name="arrow-back" size={20} color="#6d62fe" />
+            </View>
             </TouchableOpacity>
           ),
           headerShown: true,

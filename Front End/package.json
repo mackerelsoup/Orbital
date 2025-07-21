@@ -14,7 +14,11 @@
   "dependencies": {
     "@expo-google-fonts/poppins": "^0.4.0",
     "@expo/vector-icons": "^14.1.0",
+    "@gluestack-ui/alert-dialog": "^0.1.38",
+    "@gluestack-ui/nativewind-utils": "^1.0.26",
     "@gorhom/bottom-sheet": "^5.1.6",
+    "@legendapp/motion": "^2.4.0",
+    "@radix-ui/react-alert-dialog": "^1.1.14",
     "@react-native-community/datetimepicker": "^8.4.1",
     "@react-native-picker/picker": "^2.11.0",
     "@react-navigation/bottom-tabs": "^7.3.10",

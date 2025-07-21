@@ -53,6 +53,28 @@ const CappedParkingApplicationForm = () => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
+  const handleLeavePress = () => {
+    Alert.alert(
+      "Leave Page",
+      "Are you sure you want to leave? All details will be lost.",
+      [
+        {
+          text: "Stay",
+          style: "cancel"
+        },
+        {
+          text: "Leave",
+          onPress: () => {
+            resetForm(); 
+            router.push('/capped')
+          },
+          style: "destructive"
+        }
+      ],
+      { cancelable: false }
+    );
+  };
+
   const validateForm = () => {
     // fields that are required for the form to be valid
     const requiredFields: (keyof FormData)[] = [
@@ -189,7 +211,7 @@ const CappedParkingApplicationForm = () => {
       >
         {/* back arrow */}
         <TouchableOpacity
-          onPress={() => {resetForm(); router.push('/capped')}}
+          onPress={() => {handleLeavePress()}}
           style={{
             position: 'absolute',
             left: 16,

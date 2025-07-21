@@ -131,7 +131,8 @@ export default function RootLayout() {
               <Drawer.Screen
                 name="login"
                 options={{
-                  drawerItemStyle: { display: 'none' }
+                  drawerItemStyle: { display: 'none' },
+                  headerShown: false
                 }} />
               <Drawer.Screen
                 name="profile"
