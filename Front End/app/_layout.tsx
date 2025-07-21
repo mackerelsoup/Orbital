@@ -186,6 +186,12 @@ export default function RootLayout() {
                 options={{
                   drawerItemStyle: { display: 'none' }
                 }} />
+              <Drawer.Screen
+                name="approvalInfo"
+                options={{
+                  drawerItemStyle: { display: 'none' },
+                  headerShown: false 
+                }} />
 
             </Drawer>
           </BottomSheetModalProvider>

@@ -401,7 +401,7 @@ app.post('/register', (request, response) => {
   console.log("calling local regist")
   const { username, email, password, is_staff, season_pass, season_pass_type } = request.body;
   const login_update_query = "INSERT INTO login VALUES($1, $2, $3)";
-  const user_info_update_query = "INSERT INTO user_info VALUES($1, $2, $3, $4)"
+  const user_info_update_query = "INSERT INTO user_info VALUES($1, $2, $3, $4, $5)"
   const user_profilepic_update_query = "INSERT INTO user_profile VALUES($1, $2)"
 
   connection.query(login_update_query, [username, email, password], (err, result) => {
@@ -418,7 +418,7 @@ app.post('/register', (request, response) => {
       response.status(500).send("Login info update failed")
     }
     else {
-      connection.query(user_info_update_query, [username, is_staff, season_pass, season_pass_type], (err, result) => {
+      connection.query(user_info_update_query, [username, is_staff, season_pass, season_pass_type, email], (err, result) => {
         if (err) {
           console.error("user info update failed", err)
           response.status(500).send("User info update failed");
@@ -473,6 +473,105 @@ app.put('/updateProfile/:username', (request, response) => {
       response.send("image updated")
     }
   })
+})
+
+app.get('/getSeasonApplication', (request, response) => {
+  const application_query = "SELECT * FROM season_parking_applications"
+
+  connection.query(application_query, (err,result) => {
+    if (err) {
+      console.error('Database error in /getSeasonApplication:', err); // internal logging
+
+      response.status(500).json({
+        success: false,
+        message: 'Failed to retrieve season parking applications.',
+        error: process.env.NODE_ENV === 'development' ? err.message : undefined, // show error only in dev
+      });
+    }
+    else {
+      response.send(result.rows)
+    }
+  })
+})
+
+app.get('/getCappedApplication', (request, response) => {
+  const application_query = "SELECT * FROM capped_parking_applications"
+
+  connection.query(application_query, (err,result) => {
+    if (err) {
+      console.error('Database error in /getCappedApplication:', err); // internal logging
+
+      response.status(500).json({
+        success: false,
+        message: 'Failed to retrieve season parking applications.',
+        error: process.env.NODE_ENV === 'development' ? err.message : undefined, // show error only in dev
+      });
+    }
+    else {
+      response.send(result.rows)
+    }
+  })
+})
+
+app.post('/approveSeasonApplication', (request, response) => {
+  const { email, season_pass_type } = request.body;
+
+  const deletion_query = "DELETE FROM season_parking_applications WHERE email = $1";
+  const update_query = "UPDATE user_info SET season_pass = true, season_pass_type = $1 WHERE email = $2";
+
+  // First: Update user_info
+  connection.query(update_query, [season_pass_type, email], (updateErr, updateResult) => {
+    if (updateErr) {
+      console.error('Error updating user_info:', updateErr);
+      return response.status(500).json({ error: 'Failed to update user info' });
+    }
+
+    // Then: Delete application
+    connection.query(deletion_query, [email], (deleteErr, deleteResult) => {
+      if (deleteErr) {
+        console.error('Error deleting from season_parking_application:', deleteErr);
+        return response.status(500).json({ error: 'Failed to delete season parking application' });
+      }
+
+      // Success
+      return response.status(200).json({ message: 'Season pass approved and application deleted.' });
+    });
+  });
+});
+
+
+app.post('/rejectSeasonApplication', (request, response)=> {
+
+})
+
+app.post('/approveCappedApplication', (request, response) => {
+  const { email, season_pass_type } = request.body;
+
+  const deletion_query = "DELETE FROM capped_parking_applications WHERE email = $1";
+  const update_query = "UPDATE user_info SET capped_pass = true WHERE email = $1";
+
+  // First: Update user_info
+  connection.query(update_query, [email], (updateErr, updateResult) => {
+    if (updateErr) {
+      console.error('Error updating user_info:', updateErr);
+      return response.status(500).json({ error: 'Failed to update user info' });
+    }
+
+    // Then: Delete application
+    connection.query(deletion_query, [email], (deleteErr, deleteResult) => {
+      if (deleteErr) {
+        console.error('Error deleting from capped_parking_application:', deleteErr);
+        return response.status(500).json({ error: 'Failed to delete season parking application' });
+      }
+
+      // Success
+      return response.status(200).json({ message: 'Capped pass approved and application deleted.' });
+    });
+  });
+})
+
+app.post('/rejectCappedApplication', (request, response)=> {
+  
 })
 
 
