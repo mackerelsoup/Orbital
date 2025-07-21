@@ -110,11 +110,11 @@ export default function CalculatorScreen() {
         freeMinutes: duration,
         chargedMinutes: 0
       });
+      return;
+    }
 
-      if (duration > 9999999999) {
-        Alert.alert("Please enter a smaller number");
-        return;
-      }
+    if (duration > 99999999) {
+      Alert.alert("Duration too large", "Please enter a smaller number");
       return;
     }
 
