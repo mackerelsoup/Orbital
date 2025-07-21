@@ -17,7 +17,7 @@ export default function approvalInfo() {
   const parsed = JSON.parse(formData);
 
   const onApprove = async () => {
-    const URL = type === 'season'? "http://192.168.68.60:3000/approveSeasonApplication" : "http://192.168.68.60:3000/approveCappedApplication" 
+    const URL = type === 'season'? "https://back-end-o2lr.onrender.com/approveSeasonApplication" : "https://back-end-o2lr.onrender.com/approveCappedApplication" 
     try {
       const response = await fetch(URL, {
         method: 'POST',
@@ -39,7 +39,7 @@ export default function approvalInfo() {
 
   const onReject = async () => {
     /*
-    const URL = type === 'season'? "http://192.168.68.60:3000/rejectSeasonApplication" : "http://192.168.68.60:3000/rejectCappedApplication" 
+    const URL = type === 'season'? "https://back-end-o2lr.onrender.com/rejectSeasonApplication" : "https://back-end-o2lr.onrender.com/rejectCappedApplication" 
     try {
       const response = await fetch(URL, {
         method: 'POST',
