@@ -116,7 +116,7 @@ const SeasonParkingApplicationForm = () => {
     }
 
     // student number format check
-    const studentNoRegex = /^[689]\d{7}$/;
+    const studentNoRegex = /^A\d{7}[a-zA-Z]$/;
     if (!studentNoRegex.test(formData.studentNo!)) {
       Alert.alert('Invalid Student Number', 'Enter a valid NUS matriculation number.');
       clearField('studentNo');
