@@ -5,6 +5,7 @@ import { Animated, Alert, KeyboardAvoidingView, Modal, Platform, ScrollView, Sty
 import { RadioButton } from 'react-native-paper';
 import { Dropdown } from 'react-native-element-dropdown'
 import CustomDropdown from '@/components/CustomDropdown';
+import { UserContext } from "@/context/userContext";
 
 /*
 Parent file:
@@ -33,6 +34,12 @@ const SeasonParkingApplicationForm = () => {
   const [showModal, setShowModal] = useState(false);
   const [isFocus, setIsFocus] = useState(false)
   const router = useRouter();
+  
+  const userContext = useContext(UserContext);
+  if (!userContext) {
+    throw new Error("UserContext not available");
+  }
+  const { user } = userContext;
 
   const scrollY = useRef(new Animated.Value(0)).current;
 
@@ -99,10 +106,9 @@ const SeasonParkingApplicationForm = () => {
       }
     }
 
-    // email format check
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(formData.email!)) {
-      Alert.alert('Invalid Email', 'Please enter a valid email address.');
+    // same email check
+    if (user.email != formData.email) {
+      Alert.alert('Wrong or Invalid Email', 'Please enter your account\'s email address.');
       clearField('email');  
       return false;
     }
