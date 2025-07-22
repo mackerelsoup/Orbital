@@ -17,6 +17,14 @@ const SeasonParkingStatus = () => {
   const { signedUp } = useLocalSearchParams();
   const [hasSeasonParking, setHasSeasonParking] = useState(false);
   const scrollY = useRef(new Animated.Value(0)).current;
+  console.log('wewewe')
+  const userContext = useContext(UserContext);
+  console.log('wewewewe')
+  if (!userContext) {
+    throw new Error("UserContext not available");
+  }
+  const { user } = userContext;
+  console.log('wewe')
 
   const titleOpacity = scrollY.interpolate({
     inputRange: [50, 100],
@@ -48,19 +56,12 @@ const SeasonParkingStatus = () => {
         {
           text: "End Subscription", style: "destructive",
           onPress: async () => {
-            console.log('wewewe')
-            const userContext = useContext(UserContext);
-            console.log('wewewewe')
-            if (!userContext) {
-              throw new Error("UserContext not available");
-            }
-            const { user } = userContext;
-            console.log('wewe')
             try {
-              const response = await fetch('https://back-end-o2lr.onrender.com/deleteSeasonApplication', {
+              console.log(user.email)
+              const response = await fetch('https://back-end-o2lr.onrender.com/endSeason', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: user.email,
+                body: JSON.stringify({ email: user.email }),
               });
         
               // get response and decode whether it is successful or not
@@ -76,6 +77,7 @@ const SeasonParkingStatus = () => {
             } catch (err) {
               // if no response, likely network error
               Alert.alert('Network error', 'Unable to connect to server');
+              throw new Error("failed to end subscription");
             }
             setHasSeasonParking(false)
             Alert.alert("Subscription Ended", "Your season parking subscription has been successfully ended.")
