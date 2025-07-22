@@ -147,7 +147,7 @@ const CappedParkingApplicationForm = () => {
     };
 
     try {
-      const response = await fetch('http://192.168.68.60:3000/applyCappedParking', {
+      const response = await fetch('https://back-end-o2lr.onrender.com/applyCappedParking', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
@@ -156,7 +156,7 @@ const CappedParkingApplicationForm = () => {
       // get response and decode whether it is successful or not
       const result = await response.json();
       if (result.success) {
-        await fetch("http://192.168.68.60:3000/sendConfirmationEmail", {
+        await fetch("https://back-end-o2lr.onrender.com/sendConfirmationEmail", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email: formData.email, username: formData.name }),
