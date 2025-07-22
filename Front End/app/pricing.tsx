@@ -2,9 +2,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import React, { useMemo, useState, useRef } from 'react';
-import { Animated, Dimensions, FlatList, Image, SafeAreaView, StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Animated, Dimensions, FlatList, Image, Platform, SafeAreaView, StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import carparks from '../assets/carparks.json';
-
 
 const { width } = Dimensions.get("window");
 
@@ -101,8 +100,7 @@ export default function PricingScreen() {
               </View>
             </View>
           </View>
-
-          {/* card expanded */}
+{/* card expanded */}
           {isExpanded && (
             <View style={styles.expandedContent}>
               
@@ -179,13 +177,17 @@ export default function PricingScreen() {
   const scrollY = useRef(new Animated.Value(0)).current;
 
   const headerHeight = scrollY.interpolate({
-    inputRange: [0, 100],
-    outputRange: [172, 0],
+    inputRange: [0, 180],
+    outputRange: Platform.select({
+      ios: [172, 0],
+      android: [198, 100],
+      default: [172, 0],
+    }),
     extrapolate: 'clamp',
   });
 
   const headerOpacity = scrollY.interpolate({
-    inputRange: [0, 100],
+    inputRange: [0, 180],
     outputRange: [1, 0],
     extrapolate: 'clamp',
   });
@@ -200,7 +202,6 @@ export default function PricingScreen() {
 
         <View style={styles.headerContent}>
         </View>
-
         {/* search bar */}
         <View style={styles.searchContainer}>
           <View style={styles.searchBar}>
@@ -235,7 +236,7 @@ export default function PricingScreen() {
           </View>
         </View>
       </LinearGradient>
-    </Animated.View>
+      </Animated.View>
 
       <View style={styles.content}>
         <Animated.FlatList
@@ -243,7 +244,10 @@ export default function PricingScreen() {
             [{ nativeEvent: { contentOffset: { y: scrollY } } }],
             { useNativeDriver: false }
           )}
-
+          scrollEventThrottle={16}
+          decelerationRate="fast"
+          overScrollMode="never"
+          nestedScrollEnabled={Platform.OS === 'android'}
           data={filteredCarparks}
           keyExtractor={(item) => item.id.toString()}
           renderItem={renderCarparkCard}
