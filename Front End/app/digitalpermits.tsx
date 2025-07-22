@@ -1,7 +1,7 @@
 import { FontAwesome } from '@expo/vector-icons';
 import * as WebBrowser from 'expo-web-browser';
-import { useRouter } from 'expo-router';
-import React, { useState, useContext } from 'react';
+import { Href, useRouter } from 'expo-router';
+import React, { useState, useContext, useEffect } from 'react';
 import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { UserContext } from "@/context/userContext";
 
@@ -13,9 +13,57 @@ season.tsx
 */
 
 export default function DigitalPermits() {
-  const { loggedIn, userType, setUserType, user } = useContext(UserContext)!;
+  const { loggedIn, userType, setUserType, user, setUser } = useContext(UserContext)!;
   const router = useRouter();
   const { logout } = useContext(UserContext)!;
+  const [seasonRedirect, setSeasonRedirect] = useState<Href>('/')
+  const [cappedRedirect, setCappedRedirect] = useState<Href>('/')
+
+  useEffect(() => {
+    if (user.season_parking) {
+      setSeasonRedirect('/season?signedUp=true')
+    }
+    else {
+      if (user.season_application_status) {
+        if (user.season_application_status === 'pending') {
+          setSeasonRedirect('/seasonPending')
+        }
+        else if (user.season_application_status === 'rejected') {
+          Alert.alert("Application rejected", "Apply again or contact support")
+          setUser({
+            ...user,
+            season_application_status:undefined
+          })
+        }
+      }
+      else {
+        setSeasonRedirect('/season')
+      }
+    }
+
+    if (user.capped_pass) {
+      setSeasonRedirect('/capped?signedUp=true')
+    }
+    else {
+      if (user.capped_application_status) {
+        if (user.capped_application_status === 'pending') {
+          setSeasonRedirect('/cappedPending')
+        }
+        else if (user.capped_application_status === 'rejected') {
+          Alert.alert("Application rejected", "Apply again or contact support")
+          setUser({
+            ...user,
+            capped_application_status: undefined
+          }
+          )
+        }
+      }
+      else {
+        setCappedRedirect('/capped')
+      }
+    }
+
+  }, [user.capped_application_status, user.season_application_status, user.capped_pass, user.season_parking])
 
 
   // redirects to log in page and ensures it redirects back upon success
@@ -66,7 +114,7 @@ export default function DigitalPermits() {
     );
   };
 
-  
+
   // state of page if user is not logged in
   if (!loggedIn) {
     return (
@@ -85,9 +133,9 @@ export default function DigitalPermits() {
               <FontAwesome name="sign-in" size={20} color="#374151" />
               <Text style={styles.cardTitle}>Choose Login Type</Text>
             </View>
-            
-            <TouchableOpacity 
-              style={[styles.loginButton, styles.studentButton]} 
+
+            <TouchableOpacity
+              style={[styles.loginButton, styles.studentButton]}
               onPress={() => handleLogin('Student')}
             >
               <View style={styles.buttonContent}>
@@ -100,8 +148,8 @@ export default function DigitalPermits() {
               </View>
             </TouchableOpacity>
 
-            <TouchableOpacity 
-              style={[styles.loginButton, styles.staffButton]} 
+            <TouchableOpacity
+              style={[styles.loginButton, styles.staffButton]}
               onPress={() => handleLogin('Staff')}
             >
               <View style={styles.buttonContent}>
@@ -129,24 +177,22 @@ export default function DigitalPermits() {
 
 
   // if user is logged in
-  // rmb to define valid routes later so no need to cast
-  type validRoutes = "/season" | "/capped" | "/reservation";
-  const FeatureButton = ({ 
-    title, 
-    description, 
-    icon, 
-    href, 
+  const FeatureButton = ({
+    title,
+    description,
+    icon,
+    href,
     color = '#10B981',
-    iconColor = '#FFFFFF' 
-  }: { 
-    title: string; 
+    iconColor = '#FFFFFF'
+  }: {
+    title: string;
     description: string;
-    icon: any; 
-    href: validRoutes;
+    icon: any;
+    href: Href;
     color?: string;
     iconColor?: string;
-  }) => ( 
-    <TouchableOpacity 
+  }) => (
+    <TouchableOpacity
       style={[styles.featureButton, { backgroundColor: color }]}
       onPress={() => router.push(href)}
     >
@@ -169,10 +215,10 @@ export default function DigitalPermits() {
         {/* Header with Logout */}
         <View style={styles.welcomeHeader}>
           <View style={styles.welcomeContent}>
-            <FontAwesome 
-              name={userType === 'Student' ? 'graduation-cap' : 'briefcase'} 
-              size={24} 
-              color="#6d62fe" 
+            <FontAwesome
+              name={userType === 'Student' ? 'graduation-cap' : 'briefcase'}
+              size={24}
+              color="#6d62fe"
             />
             <View style={styles.welcomeTextContainer}>
               <Text style={styles.welcomeText}>Welcome back!</Text>
@@ -190,30 +236,30 @@ export default function DigitalPermits() {
             <Text style={styles.cardTitle}>Available Services</Text>
           </View>
 
-          <FeatureButton 
-            title="Manage Season Parking" 
+          <FeatureButton
+            title="Manage Season Parking"
             description="View and manage your seasonal parking permits"
-            icon="calendar" 
-            href="/season"
+            icon="calendar"
+            href={seasonRedirect}
             color="#6d62fe"
           />
-          
-          <FeatureButton 
-            title="Register Vehicle" 
+
+          <FeatureButton
+            title="Register Vehicle"
             description="Register for capped parking at selected locations"
-            icon="car" 
-            href="/capped"
+            icon="car"
+            href={cappedRedirect}
             color="#10B981"
           />
-          
-          <FeatureButton 
-            title="Car Park Reservations" 
+
+          <FeatureButton
+            title="Car Park Reservations"
             description="Book parking spaces in advance"
-            icon="ticket" 
+            icon="ticket"
             href="/reservation"
             color="#F59E0B"
           />
-    
+
         </View>
 
         {/* Help Card */}

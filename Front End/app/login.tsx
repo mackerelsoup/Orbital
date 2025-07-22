@@ -152,7 +152,9 @@ export default function LoginForm() {
         staff: userdata[0].is_staff,
         season_parking: userdata[0].season_pass,
         season_parking_type: userdata[0].season_pass_type,
+        season_application_status: userdata[0].season_application_status,
         capped_pass: userdata[0].capped_pass,
+        capped_application_status: userdata[0].capped_application_status,
         profile_uri: userProfilePic[0].profileuri,
       };
 

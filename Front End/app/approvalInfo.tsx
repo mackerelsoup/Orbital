@@ -38,7 +38,7 @@ export default function approvalInfo() {
   }
 
   const onReject = async () => {
-    /*
+    
     const URL = type === 'season'? "https://back-end-o2lr.onrender.com/rejectSeasonApplication" : "https://back-end-o2lr.onrender.com/rejectCappedApplication" 
     try {
       const response = await fetch(URL, {
@@ -54,8 +54,8 @@ export default function approvalInfo() {
     } catch(error) {
       console.log("Rejection failed: ", error)
     }
-    */
-    Alert.alert("WIP")
+    
+
   }
 
   
