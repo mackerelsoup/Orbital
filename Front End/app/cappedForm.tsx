@@ -436,7 +436,7 @@ const CappedParkingApplicationForm = () => {
         <Modal visible={showModal} transparent animationType="fade">
           <View style={styles.modalOverlay}>
             <View style={styles.modalContainer}>
-              <FontAwesome name="check-circle" size={48} color="#6d62fe" style={styles.modalIcon} />
+              <FontAwesome name="check-circle" size={48} color="#10B981" style={styles.modalIcon} />
               <Text style={styles.modalTitle}>Application Successful!</Text>
               <Text style={styles.modalText}>
                 Your vehicle registration application has been submitted successfully. 

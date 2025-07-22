@@ -1,7 +1,8 @@
 import { FontAwesome, Ionicons } from "@expo/vector-icons"
 import { useLocalSearchParams, useRouter } from "expo-router"
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useRef, useState, useContext } from "react"
 import { Alert, Animated, KeyboardAvoidingView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native"
+import { UserContext } from "@/context/userContext";
 
 /*
 Parent file of:
@@ -46,7 +47,36 @@ const SeasonParkingStatus = () => {
         },
         {
           text: "End Subscription", style: "destructive",
-          onPress: () => {
+          onPress: async () => {
+            console.log('wewewe')
+            const userContext = useContext(UserContext);
+            console.log('wewewewe')
+            if (!userContext) {
+              throw new Error("UserContext not available");
+            }
+            const { user } = userContext;
+            console.log('wewe')
+            try {
+              const response = await fetch('https://back-end-o2lr.onrender.com/deleteSeasonApplication', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: user.email,
+              });
+        
+              // get response and decode whether it is successful or not
+              const result = await response.json();
+              if (result.success) {
+                console.log("season parking deleted from user_info")
+                setTimeout(() => {
+                  router.replace('/season');
+                }, 2000);
+              } else {
+                Alert.alert('Failed to end season parking', result.error);
+              }
+            } catch (err) {
+              // if no response, likely network error
+              Alert.alert('Network error', 'Unable to connect to server');
+            }
             setHasSeasonParking(false)
             Alert.alert("Subscription Ended", "Your season parking subscription has been successfully ended.")
           }
