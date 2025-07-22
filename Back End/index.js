@@ -616,6 +616,29 @@ app.post('/resetSeasonStatus', (request, response) => {
   });
 });
 
+app.post('/endSeason', (request, response) => {
+  const { email } = request.body;
+
+  if (!email) {
+    return response.status(400).json({ error: 'Email is required' });
+  }
+
+  const update_query = "DELETE FROM user_info WHERE email = $1";
+
+  connection.query(update_query, [email], (err, result) => {
+    if (err) {
+      console.error('Error resetting season status:', err);
+      return response.status(500).json({ error: 'Failed to reset season status' });
+    }
+
+    if (result.rowCount === 0) {
+      return response.status(404).json({ error: 'No user found with that email' });
+    }
+
+    return response.status(200).json({ message: 'Season status reset successfully' });
+  });
+});
+
 /*
 app.post('/getSeasonApplicationStatus', (request, response) => {
   const { email } = request.body;
