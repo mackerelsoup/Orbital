@@ -1,7 +1,9 @@
 import { FontAwesome, Ionicons } from "@expo/vector-icons"
 import { useLocalSearchParams, useRouter } from "expo-router"
-import { useEffect, useRef, useState } from "react"
+import { useCallback, useContext, useEffect, useRef, useState } from "react"
 import { Alert, Animated, KeyboardAvoidingView, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native"
+import { UserContext } from "@/context/userContext"
+import { useFocusEffect } from "@react-navigation/native"
 
 /*
 Parent file of:
@@ -18,6 +20,44 @@ const CappedParkingStatus = () => {
   const [hasCappedParking, setHasCappedParking] = useState(false);
   const scrollY = useRef(new Animated.Value(0)).current;
 
+  const userContext = useContext(UserContext);
+  if (!userContext) {
+    throw new Error("UserContext not available");
+  }
+  const { user } = userContext;
+
+  useFocusEffect(
+    useCallback(() => {
+      console.log("Screen focused - checking capped status");
+      const checkCappedStatus = async () => {
+        try {
+          console.log(user.email)
+          const response = await fetch("https://back-end-o2lr.onrender.com/checkCappedStatus", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email: user.email }),
+          });
+          console.log("checking capped status");
+          const result = await response.json();
+          console.log(result.capped)
+          if (result.capped === true) {
+            setHasCappedParking(true);
+            console.log('set to true')
+          } else {
+            setHasCappedParking(false);
+            console.log('set to false')
+          }
+        } catch (err) {
+          console.error("Error checking capped parking:", err);
+        } finally {
+          // Can add a loading useState in the future
+        }
+      };
+
+      checkCappedStatus();
+    }, [user.email])
+  );  
+
   const titleOpacity = scrollY.interpolate({
     inputRange: [50, 100],
     outputRange: [0, 1],
@@ -30,13 +70,7 @@ const CappedParkingStatus = () => {
     extrapolate: 'clamp',
   });
 
-  useEffect(() => {
-    if (signedUp === "true") {
-      setHasCappedParking(true)
-    }
-  }, [signedUp])
-
-  // if user wishes to end current season parking period
+  // if user wishes to end current capped parking period
   const handleEndCappedParking = () => {
     Alert.alert(
       "Remove Vehicle Registraion",
@@ -47,16 +81,42 @@ const CappedParkingStatus = () => {
         },
         {
           text: "Remove", style: "destructive",
-          onPress: () => {
+          onPress: async () => {
+            try {
+              console.log(user.email)
+              const response = await fetch('https://back-end-o2lr.onrender.com/endCapped', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: user.email }),
+              });
+        
+              // get response and decode whether it is successful or not
+              const result = await response.json();
+              console.log(result);
+              if (result.message === "Capped parking ended successfully") {
+                console.log("Capped parking deleted from user_info")
+                setTimeout(() => {
+                  router.replace('/capped');
+                }, 2000);
+              } else {
+                Alert.alert('Failed to end capped parking', result.error);
+                throw new Error("failed to end subscription");
+              }
+            } catch (err) {
+              // if no response, likely network error
+              Alert.alert('Network error', 'Unable to connect to server');
+              throw new Error("network error, failed to end subscription");
+            }
             setHasCappedParking(false)
-            Alert.alert("Vehicle Registration Removed", "Your vehicle registration has been successfully removed.")
+            Alert.alert("Subscription Ended", "Your capped parking subscription has been successfully ended.")
+            router.replace('/capped');
           }
         }
       ]
     )
   }; 
 
-  // if user has successfully applied for season parking
+  // if user has successfully applied for capped parking
   if (hasCappedParking) {
     return (
       <KeyboardAvoidingView
@@ -181,7 +241,7 @@ const CappedParkingStatus = () => {
               <Text style={styles.primaryButtonText}> View Full Details</Text>
             </TouchableOpacity>
 
-            {/* end season parking button */}
+            {/* end capped parking button */}
             <TouchableOpacity
               style={styles.dangerButton}
               onPress={handleEndCappedParking}
@@ -198,7 +258,7 @@ const CappedParkingStatus = () => {
   }
 
   
-  // default view for no season parking
+  // default view for no capped parking
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}
@@ -287,7 +347,7 @@ const CappedParkingStatus = () => {
       )}
       scrollEventThrottle={16}>
       <View style={styles.container}>
-        {/* no season parking card */}
+        {/* no capped parking card */}
         <View style={styles.card}>
           <Text style={styles.heading}>Register Vehicle</Text>
           <View style={styles.statusHeader}>

@@ -1,8 +1,9 @@
 import { FontAwesome, Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import React, { useRef, useState } from 'react';
+import React, { useContext, useRef, useState } from 'react';
 import { Alert, Animated, KeyboardAvoidingView, Modal, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import CustomDropdown from '@/components/CustomDropdown';
+import { UserContext } from "@/context/userContext";
 
 /*
 Parent file:
@@ -28,6 +29,12 @@ const CappedParkingApplicationForm = () => {
   const router = useRouter();
   const scrollY = useRef(new Animated.Value(0)).current;
 
+  const userContext = useContext(UserContext);
+  if (!userContext) {
+    throw new Error("UserContext not available");
+  }
+  const { user } = userContext;
+  
   const titleOpacity = scrollY.interpolate({
     inputRange: [50, 100],
     outputRange: [0, 1],
@@ -90,11 +97,10 @@ const CappedParkingApplicationForm = () => {
       }
     }
 
-    // email format check
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(formData.email!)) {
-      Alert.alert('Invalid Email', 'Please enter a valid email address.');
-      clearField('email');
+    // same email check
+    if (user.email != formData.email) {
+      Alert.alert('Wrong or Invalid Email', 'Please enter your account\'s email address.');
+      clearField('email');  
       return false;
     }
 

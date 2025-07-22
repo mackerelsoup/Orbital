@@ -791,6 +791,55 @@ app.post('/resetCappedStatus', (request, response) => {
   });
 });
 
+app.post('/endCapped', (request, response) => {
+  const { email } = request.body;
+
+  if (!email) {
+    return response.status(400).json({ error: 'Email is required' });
+  }
+
+  const update_query = "UPDATE user_info SET capped_pass = false WHERE email = $1";
+
+  connection.query(update_query, [email], (err, result) => {
+    if (err) {
+      console.error('Error ending capped parking:', err);
+      return response.status(500).json({ error: 'Failed to end capped parking' });
+    }
+
+    if (result.rowCount === 0) {
+      return response.status(404).json({ error: 'No user found with that email' });
+    }
+
+    return response.status(200).json({ message: 'Capped parking ended successfully' });
+  });
+});
+
+app.post('/checkCappedStatus', (request, response) => {
+  const { email } = request.body;
+
+  if (!email) {
+    return response.status(400).json({ error: 'Email is required' });
+  }
+
+  const check_query = "SELECT capped_pass FROM user_info WHERE email = $1";
+
+  connection.query(check_query, [email], (err, result) => {
+    if (err) {
+      console.error('Error ending capped parking:', err);
+      return response.status(500).json({ error: 'Failed to end capped parking' });
+    }
+
+    console.log(result.rows[0].capped_pass);
+    if (result.rowCount === 0) {
+      return response.status(404).json({ error: 'No user found with that email' });
+    } else if (result.rows[0].capped_pass === false) {
+      return response.status(201).json({ capped: false });
+    }
+    
+    return response.status(200).json({ capped: true });
+  });
+});
+
 
 /*
 app.post('/getCappedApplicationStatus', (request, response) => {
