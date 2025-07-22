@@ -190,7 +190,23 @@ export default function RootLayout() {
                 name="approvalInfo"
                 options={{
                   drawerItemStyle: { display: 'none' },
-                  headerShown: false 
+                  headerShown: false
+                }} />
+              <Drawer.Screen
+                name="approvalSelector"
+                options={{
+                  title: "Approval",
+                  headerShown: false
+                }} />
+              <Drawer.Screen
+                name="seasonPending"
+                options={{
+                  drawerItemStyle: { display: 'none' }
+                }} />
+              <Drawer.Screen
+                name="cappedPending"
+                options={{
+                  drawerItemStyle: { display: 'none' }
                 }} />
 
             </Drawer>

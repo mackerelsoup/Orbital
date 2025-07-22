@@ -159,7 +159,7 @@ const CappedParkingApplicationForm = () => {
         setShowModal(true);
         setTimeout(() => {
           setShowModal(false);
-          router.replace('/capped?signedUp=true');
+          router.replace('/cappedPending');
         }, 2000);
       } else {
         Alert.alert('Submission failed', result.error);
