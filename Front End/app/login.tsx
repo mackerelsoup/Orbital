@@ -87,8 +87,8 @@ export default function LoginForm() {
     try {
       let response;
       if (isEmail())
-        response = await fetch(`https://back-end-o2lr.onrender.com/fetchbyEmail/${username}`);
-      else response = await fetch(`https://back-end-o2lr.onrender.com/fetchbyUsername/${username}`);
+        response = await fetch(`http://192.168.68.60:3000/fetchbyEmail/${username}`);
+      else response = await fetch(`http://192.168.68.60:3000/fetchbyUsername/${username}`);
 
       if (response.status === 404) throw new UserNotFoundError("User not found");
       if (!response.ok) throw new ConnectionError("Network response was not ok");
@@ -120,7 +120,7 @@ export default function LoginForm() {
 
   const setUserData = async (data: userDataIncomplete) => {
     try {
-      let response = await fetch(`https://back-end-o2lr.onrender.com/fetchUserData/${data.username}`);
+      let response = await fetch(`http://192.168.68.60:3000/fetchUserData/${data.username}`);
       if (response.status === 404) {
         console.log("user not found")
         throw new userDataNotFoundError("User not found");
@@ -136,7 +136,7 @@ export default function LoginForm() {
         setUserType('Student');
       }
 
-      response = await fetch(`https://back-end-o2lr.onrender.com/getUserProfilePic/${data.username}`)
+      response = await fetch(`http://192.168.68.60:3000/getUserProfilePic/${data.username}`)
       if (response.status === 404) {
         console.log("user not found")
         throw new userDataNotFoundError("User not found");
