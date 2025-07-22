@@ -627,15 +627,38 @@ app.post('/endSeason', (request, response) => {
 
   connection.query(update_query, [email], (err, result) => {
     if (err) {
-      console.error('Error resetting season status:', err);
-      return response.status(500).json({ error: 'Failed to reset season status' });
+      console.error('Error ending season parking:', err);
+      return response.status(500).json({ error: 'Failed to end season parking' });
     }
 
     if (result.rowCount === 0) {
       return response.status(404).json({ error: 'No user found with that email' });
     }
 
-    return response.status(200).json({ message: 'Season status reset successfully' });
+    return response.status(200).json({ message: 'Season parking ended successfully' });
+  });
+});
+
+app.post('/checkSeasonStatus', (request, response) => {
+  const { email } = request.body;
+
+  if (!email) {
+    return response.status(400).json({ error: 'Email is required' });
+  }
+
+  const check_query = "SELECT season_pass_type FROM user_info WHERE email = $1";
+
+  connection.query(check_query, [email], (err, result) => {
+    if (err) {
+      console.error('Error ending season parking:', err);
+      return response.status(500).json({ error: 'Failed to end season parking' });
+    }
+
+    if (result.rowCount === 0) {
+      return false;
+    }
+
+    return true;
   });
 });
 
