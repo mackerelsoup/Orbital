@@ -646,7 +646,7 @@ app.post('/checkSeasonStatus', (request, response) => {
     return response.status(400).json({ error: 'Email is required' });
   }
 
-  const check_query = "SELECT season_pass_type FROM user_info WHERE email = $1";
+  const check_query = "SELECT season_pass FROM user_info WHERE email = $1";
 
   connection.query(check_query, [email], (err, result) => {
     if (err) {
@@ -655,10 +655,12 @@ app.post('/checkSeasonStatus', (request, response) => {
     }
 
     if (result.rowCount === 0) {
-      return false;
+      return response.status(404).json({ error: 'No user found with that email' });
+    } else if (result.rows[0] === false) {
+      return response.status(201).json({ season: false });
     }
 
-    return true;
+    return response.status(200).json({ season: true });
   });
 });
 
