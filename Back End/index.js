@@ -623,7 +623,7 @@ app.post('/endSeason', (request, response) => {
     return response.status(400).json({ error: 'Email is required' });
   }
 
-  const update_query = "DELETE FROM user_info WHERE email = $1";
+  const update_query = "UPDATE user_info SET season_pass = false, season_pass_type = NULL WHERE email = $1";
 
   connection.query(update_query, [email], (err, result) => {
     if (err) {
