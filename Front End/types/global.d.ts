@@ -29,6 +29,8 @@ type UserData = {
   staff: boolean;
   season_parking: boolean;
   season_parking_type?: string;
+  season_application_status?: string;
   capped_pass:boolean;
+  capped_application_status?: string;
   profile_uri:string;
 }

@@ -540,7 +540,7 @@ app.post('/approveSeasonApplication', (request, response) => {
   const { email, season_pass_type } = request.body;
 
   const deletion_query = "DELETE FROM season_parking_applications WHERE email = $1";
-  const update_query = "UPDATE user_info SET season_pass = true, season_pass_type = $1 WHERE email = $2";
+  const update_query = "UPDATE user_info SET season_pass = true, season_pass_type = $1, season_application_status = null WHERE email = $2";
 
   // First: Update user_info
   connection.query(update_query, [season_pass_type, email], (updateErr, updateResult) => {
@@ -566,11 +566,12 @@ app.post('/approveSeasonApplication', (request, response) => {
 app.post('/rejectSeasonApplication', (request, response) => {
   const { email } = request.body;
 
-  const update_query = "UPDATE season_parking_applications SET status = 'rejected' WHERE email = $1";
+  const deletion_query = "DELETE FROM season_parking_applications WHERE email = $1";
+  const update_query = "UPDATE user_info SET season_application_status = 'rejected' WHERE email = $1";
 
   connection.query(update_query, [email], (err, result) => {
     if (err) {
-      console.error('Error updating season_parking_applications:', err);
+      console.error('Error updating seasonwe s_parking_applications:', err);
       return response.status(500).json({ error: 'Failed to reject application' });
     }
 
@@ -578,12 +579,44 @@ app.post('/rejectSeasonApplication', (request, response) => {
     if (result.rowCount === 0) {
       return response.status(404).json({ error: 'No application found for this email' });
     }
+    
+    connection.query(deletion_query, [email], (deleteErr, deleteResult) => {
+      if (deleteErr) {
+        console.error('Error deleting from capped_parking_application:', deleteErr);
+        return response.status(500).json({ error: 'Failed to delete season parking application' });
+      }
 
-    return response.status(200).json({ message: 'Season application rejected successfully.' });
+      // Success
+      return response.status(200).json({ message: 'Capped pass rejected and application deleted.' });
+    });
+    
   });
 });
 
+app.post('/resetSeasonStatus', (request, response) => {
+  const { email } = request.body;
 
+  if (!email) {
+    return response.status(400).json({ error: 'Email is required' });
+  }
+
+  const update_query = "UPDATE user_info SET season_application_status = NULL WHERE email = $1";
+
+  connection.query(update_query, [email], (err, result) => {
+    if (err) {
+      console.error('Error resetting season status:', err);
+      return response.status(500).json({ error: 'Failed to reset season status' });
+    }
+
+    if (result.rowCount === 0) {
+      return response.status(404).json({ error: 'No user found with that email' });
+    }
+
+    return response.status(200).json({ message: 'Season status reset successfully' });
+  });
+});
+
+/*
 app.post('/getSeasonApplicationStatus', (request, response) => {
   const { email } = request.body;
 
@@ -603,6 +636,7 @@ app.post('/getSeasonApplicationStatus', (request, response) => {
     return response.status(200).json({ status });
   });
 });
+*/
 
 app.post('/deleteSeasonApplication', (request, response) => {
   const { email } = request.body;
@@ -633,7 +667,7 @@ app.post('/approveCappedApplication', (request, response) => {
   const { email, season_pass_type } = request.body;
 
   const deletion_query = "DELETE FROM capped_parking_applications WHERE email = $1";
-  const update_query = "UPDATE user_info SET capped_pass = true WHERE email = $1";
+  const update_query = "UPDATE user_info SET capped_pass = true, capped_application_status = null WHERE email = $1";
 
   // First: Update user_info
   connection.query(update_query, [email], (updateErr, updateResult) => {
@@ -658,7 +692,8 @@ app.post('/approveCappedApplication', (request, response) => {
 app.post('/rejectCappedApplication', (request, response) => {
   const { email } = request.body;
 
-  const update_query = "UPDATE capped_parking_applications SET status = 'rejected' WHERE email = $1";
+  const deletion_query = "DELETE FROM capped_parking_applications WHERE email = $1";
+  const update_query = "UPDATE user_info SET capped_application_status = 'rejected' WHERE email = $1";
 
   connection.query(update_query, [email], (err, result) => {
     if (err) {
@@ -670,11 +705,45 @@ app.post('/rejectCappedApplication', (request, response) => {
     if (result.rowCount === 0) {
       return response.status(404).json({ error: 'No application found for this email' });
     }
+    
+    connection.query(deletion_query, [email], (deleteErr, deleteResult) => {
+      if (deleteErr) {
+        console.error('Error deleting from capped_parking_application:', deleteErr);
+        return response.status(500).json({ error: 'Failed to delete season parking application' });
+      }
 
-    return response.status(200).json({ message: 'Capped application rejected successfully.' });
+      // Success
+      return response.status(200).json({ message: 'Capped pass rejected and application deleted.' });
+    });
+    
   });
 });
 
+app.post('/resetCappedStatus', (request, response) => {
+  const { email } = request.body;
+
+  if (!email) {
+    return response.status(400).json({ error: 'Email is required' });
+  }
+
+  const update_query = "UPDATE user_info SET capped_application_status = NULL WHERE email = $1";
+
+  connection.query(update_query, [email], (err, result) => {
+    if (err) {
+      console.error('Error resetting capped status:', err);
+      return response.status(500).json({ error: 'Failed to reset capped status' });
+    }
+
+    if (result.rowCount === 0) {
+      return response.status(404).json({ error: 'No user found with that email' });
+    }
+
+    return response.status(200).json({ message: 'Capped status reset successfully' });
+  });
+});
+
+
+/*
 app.post('/getCappedApplicationStatus', (request, response) => {
   const { email } = request.body;
 
@@ -694,6 +763,7 @@ app.post('/getCappedApplicationStatus', (request, response) => {
     return response.status(200).json({ status });
   });
 });
+*/
 
 
 app.post('/deleteCappedApplication', (request, response) => {
@@ -757,56 +827,129 @@ app.delete('/delete/:id', (request, response) => {
 // for storing season parking form data
 app.post('/applySeasonParking', (request, response) => {
   const {
-    salutation, name, address, studentNo, faculty, email, tel, vehicleRegNo, iuNo, vehicleOwner, relationship, engineCapacity, parkingType
+    salutation, name, address, studentNo, faculty, email, tel,
+    vehicleRegNo, iuNo, vehicleOwner, relationship, engineCapacity, parkingType
   } = request.body;
 
-  const query = `
+  const insert_query = `
     INSERT INTO season_parking_applications (
-      salutation, name, address, student_no, faculty, email, tel, vehicle_reg_no, iu_no, vehicle_owner, relationship, engine_capacity, parking_type
+      salutation, name, address, student_no, faculty, email, tel,
+      vehicle_reg_no, iu_no, vehicle_owner, relationship, engine_capacity, parking_type
     ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
     RETURNING *
   `;
 
+  const update_query = `
+    UPDATE user_info SET season_application_status = 'pending' WHERE email = $1
+  `;
+
   const values = [
-    salutation, name, address, studentNo, faculty, email, tel, vehicleRegNo, iuNo, vehicleOwner, relationship, engineCapacity, parkingType
+    salutation, name, address, studentNo, faculty, email, tel,
+    vehicleRegNo, iuNo, vehicleOwner, relationship, engineCapacity, parkingType
   ];
 
-  connection.query(query, values, (err, result) => {
+  connection.query('BEGIN', err => {
     if (err) {
-      console.log("error in season parking");
-      console.error(err);
-      return response.status(500).json({ success: false, error: 'Database error' });
+      console.error('Error starting transaction', err);
+      return response.status(500).json({ success: false, error: 'Transaction error' });
     }
-    response.status(201).json({ success: true, data: result.rows[0] });
+
+    connection.query(insert_query, values, (insertErr, insertResult) => {
+      if (insertErr) {
+        console.error('Error inserting season application:', insertErr);
+        return connection.query('ROLLBACK', () => {
+          response.status(500).json({ success: false, error: 'Insert failed' });
+        });
+      }
+
+      connection.query(update_query, [email], (updateErr, updateResult) => {
+        if (updateErr) {
+          console.error('Error updating user_info:', updateErr);
+          return connection.query('ROLLBACK', () => {
+            response.status(500).json({ success: false, error: 'Update failed' });
+          });
+        }
+
+        connection.query('COMMIT', commitErr => {
+          if (commitErr) {
+            console.error('Error committing transaction', commitErr);
+            return response.status(500).json({ success: false, error: 'Commit failed' });
+          }
+
+          return response.status(201).json({
+            success: true,
+            data: insertResult.rows[0],
+            message: 'Season application submitted and status updated'
+          });
+        });
+      });
+    });
   });
 });
 
 // for storing capped parking
 app.post('/applyCappedParking', (request, response) => {
   const {
-    salutation, name, address, email, tel, vehicleRegNo, iuNo, vehicleOwner, relationship, engineCapacity
+    salutation, name, address, email, tel, vehicleRegNo,
+    iuNo, vehicleOwner, relationship, engineCapacity
   } = request.body;
 
-  const query = `
+  const insert_query = `
     INSERT INTO capped_parking_applications (
-      salutation, name, address, email, tel, vehicle_reg_no, iu_no, vehicle_owner, relationship, engine_capacity
+      salutation, name, address, email, tel, vehicle_reg_no, iu_no,
+      vehicle_owner, relationship, engine_capacity
     ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
     RETURNING *
   `;
 
+  const update_query = `
+    UPDATE user_info SET capped_application_status = 'pending' WHERE email = $1
+  `;
+
   const values = [
-    salutation, name, address, email, tel, vehicleRegNo, iuNo, vehicleOwner, relationship, engineCapacity
+    salutation, name, address, email, tel,
+    vehicleRegNo, iuNo, vehicleOwner, relationship, engineCapacity
   ];
 
-  connection.query(query, values, (err, result) => {
+  connection.query('BEGIN', err => {
     if (err) {
-      console.log("error in capped parking");
-      console.error(err);
-      return response.status(500).json({ success: false, error: 'Database error' });
+      console.error('Error starting transaction:', err);
+      return response.status(500).json({ success: false, error: 'Transaction error' });
     }
-    response.status(201).json({ success: true, data: result.rows[0] });
+
+    connection.query(insert_query, values, (insertErr, insertResult) => {
+      if (insertErr) {
+        console.error('Error inserting capped application:', insertErr);
+        return connection.query('ROLLBACK', () => {
+          response.status(500).json({ success: false, error: 'Insert failed' });
+        });
+      }
+
+      connection.query(update_query, [email], (updateErr, updateResult) => {
+        if (updateErr) {
+          console.error('Error updating user_info:', updateErr);
+          return connection.query('ROLLBACK', () => {
+            response.status(500).json({ success: false, error: 'Update failed' });
+          });
+        }
+
+        connection.query('COMMIT', commitErr => {
+          if (commitErr) {
+            console.error('Error committing transaction:', commitErr);
+            return response.status(500).json({ success: false, error: 'Commit failed' });
+          }
+
+          return response.status(201).json({
+            success: true,
+            data: insertResult.rows[0],
+            message: 'Capped application submitted and status updated'
+          });
+        });
+      });
+    });
   });
 });
+
 
 // confirmation email
 app.post('/sendConfirmationEmail', async (req, res) => {

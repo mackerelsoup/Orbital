@@ -1,15 +1,14 @@
-import { StyleSheet, Text, View, Pressable, Alert } from 'react-native'
-import React, { useContext, useState } from 'react'
-import { UserContext, UserProvider } from '@/context/userContext'
-import { router } from 'expo-router'
+import { StyleSheet, Text, View, Pressable, Alert } from 'react-native';
+import React, { useContext, useState } from 'react';
+import { UserContext } from '@/context/userContext';
+import { router } from 'expo-router';
 
-export default function seasonPending() {
-  const { user } = useContext(UserContext)!
-  const [status, setStatus] = useState<string>('pending')
+export default function SeasonPending() {
+  const { user } = useContext(UserContext)!;
 
   const cleanupUser = async () => {
     try {
-      const response = await fetch("https://back-end-o2lr.onrender.com/deleteSeasonApplication", {
+      const response = await fetch("https://back-end-o2lr.onrender.com/resetSeasonStatus", {
         method: 'POST',
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: user.email }),
@@ -17,117 +16,108 @@ export default function seasonPending() {
 
       const data = await response.json();
 
-      if (response.ok) {
-        //Alert.alert("Success", data.message || "Application deleted successfully");
-        // Optional: update local UI state to reflect deletion
-      } else {
+      if (!response.ok) {
         Alert.alert("Error", data.error || "Something went wrong");
       }
-
     } catch (error) {
       console.error("Network error:", error);
       Alert.alert("Error", "Unable to connect to the server. Please try again later.");
     }
   };
 
-  const checkStatus = async () => {
-    console.log("here")
-    console.log(user.email)
-    try {
-      const response = await fetch(`https://back-end-o2lr.onrender.com/fetchUserDataEmail/${user.email}`)
-      if (!response.ok) {
-        if (response.status === 404) {
-          throw new Error("User info not found")
-        }
-      }
+  const handlePendingStatus = () => {
+    Alert.alert("Application Still Pending");
+  };
 
-      const userData = await response.json()
-      if (userData[0].season_pass) {
-        console.log("here")
-        Alert.alert("Season Parking Application Approved, congratulations!", "", [
-          {
-            onPress: () => router.replace("/season?signedUp=true")
-          }
-        ])
-      }
+  const handleRejectedStatus = async () => {
+    await cleanupUser();
+    Alert.alert("Application Rejected", "Apply again or contact support", [
+      { onPress: () => router.replace('/') }
+    ]);
+  };
 
-    } catch (error) {
-      console.log("User not found")
-      Alert.alert("User submission does not exist, resubmit", "", [
-        {
-          onPress: () => {
-            router.push("/seasonForm")
-          }
-        }
-      ])
+  const handleApprovedStatus = () => {
+    Alert.alert("Season Parking Application Approved, congratulations!", "", [
+      { onPress: () => router.replace("/season?signedUp=true") }
+    ]);
+  };
 
-    }
-  }
+  const handleNoStatus = () => {
+    Alert.alert("User submission does not exist, resubmit", "", [
+      { onPress: () => router.push("/seasonForm") }
+    ]);
+  };
+
 
   const handleRefresh = async () => {
+    console.log("called")
     try {
-      const response = await fetch('https://back-end-o2lr.onrender.com/getSeasonApplicationStatus', {
-        method: 'POST',
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: user.email
-        }),
-      })
+      const response = await fetch(`https://back-end-o2lr.onrender.com/fetchUserDataEmail/${user.email}`);
 
       if (!response.ok) {
-        if (response.status === 500) {
-          throw new Error("Network error")
+        if (response.status === 404) {
+          throw new Error("User info not found");
         }
-        else if (response.status === 404) {
-          checkStatus()
-        }
+        throw new Error("Something went wrong");
       }
 
-      const status = await response.json()
-      console.log(status)
-      const parsedStatus = status.status
+      const userData = await response.json();
+      console.log(userData)
 
-      if (parsedStatus === 'pending') {
-        Alert.alert("Application Still pending")
+      if (userData[0]?.season_pass) {
+        handleApprovedStatus();
       }
-      else if (parsedStatus === 'rejected') {
-        cleanupUser()
-        Alert.alert("Application Rejected", "Apply again or contact support", [
-          {
-            onPress: () => router.replace('/')
+      else {
+        if (userData[0].season_application_status) {
+          switch (userData[0].season_application_status) {
+            case 'pending':
+              handlePendingStatus();
+              break;
+            case 'rejected':
+              handleRejectedStatus();
+              break;
           }
-        ])
+        }
+        else {
+          handleNoStatus()
+        }
       }
-
 
     } catch (error) {
-      if (error instanceof Error) Alert.alert("Error", error.message || "?")
+      console.error("Error:", error);
+      Alert.alert("Error", error instanceof Error ? error.message : "Unknown error");
     }
-  }
+  };
 
   return (
-    <View>
-      <Text>seasonPending</Text>
+    <View style={styles.container}>
+      <Text style={styles.title}>Your Season Parking Application is Pending</Text>
       <Pressable style={styles.button} onPress={handleRefresh}>
         <Text style={styles.buttonText}>Refresh</Text>
       </Pressable>
     </View>
-  )
+  );
 }
 
 const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
-    marginTop: 20,
+    marginTop: 40,
+    paddingHorizontal: 20,
+  },
+  title: {
+    fontSize: 18,
+    marginBottom: 20,
+    textAlign: 'center',
   },
   button: {
     backgroundColor: '#007bff',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
     borderRadius: 8,
   },
   buttonText: {
     color: '#fff',
     fontSize: 16,
   },
-})
+});

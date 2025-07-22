@@ -35,7 +35,9 @@ export const UserProvider = ({ children }: UserProviderProps) => {
       season_parking: false,
       season_parking_type: 'nil',
       capped_pass:false,
-      profile_uri: 'https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png?20150327203541'
+      profile_uri: 'https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png?20150327203541',
+      season_application_status: undefined,
+      capped_application_status: undefined,
     });
     setLoggedIn(false);
   };
