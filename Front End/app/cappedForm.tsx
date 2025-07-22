@@ -254,8 +254,7 @@ const CappedParkingApplicationForm = () => {
               opacity: titleOpacity,
               transform: [{ translateY: titleTranslateY }],
               marginTop: 46,
-            }}
-          >
+            }}>
           Register Vehicle
           </Animated.Text>
         </View>
