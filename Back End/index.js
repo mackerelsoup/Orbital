@@ -654,10 +654,10 @@ app.post('/checkSeasonStatus', (request, response) => {
       return response.status(500).json({ error: 'Failed to end season parking' });
     }
 
-    console.log(result.rows[0]);
+    console.log(result.rows[0].season_pass);
     if (result.rowCount === 0) {
       return response.status(404).json({ error: 'No user found with that email' });
-    } else if (result.rows[0] === false) {
+    } else if (result.rows[0].season_pass === false) {
       return response.status(201).json({ season: false });
     }
     
