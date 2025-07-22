@@ -100,7 +100,8 @@ export default function PricingScreen() {
               </View>
             </View>
           </View>
-{/* card expanded */}
+
+          {/* card expanded */}
           {isExpanded && (
             <View style={styles.expandedContent}>
               
@@ -180,7 +181,7 @@ export default function PricingScreen() {
     inputRange: [0, 180],
     outputRange: Platform.select({
       ios: [172, 0],
-      android: [198, 100],
+      android: [198, 0],
       default: [172, 0],
     }),
     extrapolate: 'clamp',
@@ -202,6 +203,7 @@ export default function PricingScreen() {
 
         <View style={styles.headerContent}>
         </View>
+
         {/* search bar */}
         <View style={styles.searchContainer}>
           <View style={styles.searchBar}>
