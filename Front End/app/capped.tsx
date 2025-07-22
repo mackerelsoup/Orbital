@@ -203,7 +203,7 @@ const CappedParkingStatus = () => {
           <View style={styles.card}>
             <Text style={styles.heading}>Capped Parking</Text>
             <View style={styles.statusHeader}>
-              <FontAwesome name="check-circle" size={24} color="#6d62fe" />
+              <FontAwesome name="check-circle" size={24} color="#10B981" />
               <Text style={styles.statusTitle}>Vehicle Registered</Text>
             </View>
 
