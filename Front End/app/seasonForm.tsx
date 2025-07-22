@@ -170,7 +170,7 @@ const SeasonParkingApplicationForm = () => {
     };
 
     try {
-      const response = await fetch('https://back-end-o2lr.onrender.com/applySeasonParking', {
+      const response = await fetch('http://192.168.68.60:3000/applySeasonParking', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),

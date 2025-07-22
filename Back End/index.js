@@ -1,5 +1,5 @@
 require('dotenv').config()
-const { Client } = require('pg')
+const { Client, Pool } = require('pg')
 const express = require('express')
 const axios = require('axios')
 const { spawn } = require('child_process')
@@ -18,6 +18,13 @@ const app = express()
 //parses incoming request 
 app.use(express.json())
 
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false,
+  }
+})
+
 const connection = new Client({
   connectionString: process.env.DATABASE_URL,
   ssl: {
@@ -32,7 +39,7 @@ app.get('/', (req, res) => {
 
 
 //log that we are connected to the database
-connection.connect().then(() => console.log("connected"))
+//connection.connect().then(() => console.log("connected"))
 
 
 app.post('/computeDistance', async (request, response) => {
@@ -87,307 +94,199 @@ app.post('/computeDistance', async (request, response) => {
 
 
 //:id is a route param, acts as a placeholder for any value that is part of the URL
-app.get('/fetchbyUsername/:username', (request, response) => {
+app.get('/fetchbyUsername/:username', async (request, response) => {
   const username = request.params.username
-  //$1 takes the first index in an array
-  const fetch_id_query = "SELECT * FROM login WHERE username = $1"
-  connection.query(fetch_id_query, [username], (err, result) => {
-    if (err) {
-      response.send(err)
-      console.error(err)
-    }
-    else {
-      if (result.rowCount === 0) {
-        response.status(404).send("User not found")
-      }
-      else {
-        console.log("Userfound")
-        response.send(result.rows)
-      }
 
+  const fetch_id_query = "SELECT * FROM login WHERE username = $1"
+
+  try {
+    const fetchResult = await pool.query(fetch_id_query, [username])
+
+    if (fetchResult.rowCount === 0) {
+      return response.status(404).send("User not found")
     }
-  })
+    return response.status(200).send(fetchResult.rows)
+
+  } catch (err) {
+    console.error(err)
+    return response.status(500).send(err)
+
+  }
+
 })
 
-app.get('/fetchbyEmail/:email', (request, response) => {
+app.get('/fetchbyEmail/:email', async (request, response) => {
   const email = request.params.email
   const fetch_id_query = "SELECT * FROM login WHERE email = $1"
-  connection.query(fetch_id_query, [email], (err, result) => {
-    if (err) {
-      response.send(err)
-      console.error(err)
-    }
-    else {
-      if (result.rowCount === 0) {
-        response.status(404).send("Email not found")
-      }
-      else {
-        console.log("Email Found")
-        response.send(result.rows)
-      }
 
+  try {
+    const fetchResult = await pool.query(fetch_id_query, [username])
+
+    if (fetchResult.rowCount === 0) {
+      return response.status(404).send("Email not found")
     }
-  })
+    return response.status(200).send(fetchResult.rows)
+
+  } catch (err) {
+    console.error(err)
+    return response.status(500).send(err)
+
+  }
+
 })
 
-app.get('/fetchUserData/:username', (request, response) => {
+app.get('/fetchUserData/:username', async (request, response) => {
   const username = request.params.username
   const fetch_id_query = "SELECT * FROM user_info WHERE username = $1"
-  connection.query(fetch_id_query, [username], (err, result) => {
-    if (err) {
-      response.send(err)
-      console.error(err)
-    }
-    else {
-      if (result.rowCount === 0) {
-        response.status(404).send("User info not found")
-      }
-      else {
-        console.log("User info extracted")
-        response.send(result.rows)
-      }
+  try {
+    const fetchResult = await pool.query(fetch_id_query, [username])
 
+    if (fetchResult.rowCount === 0) {
+      return response.status(404).send("User info not found")
     }
-  })
+    return response.status(200).send(fetchResult.rows)
+
+  } catch (err) {
+    console.error(err)
+    return response.status(500).send(err)
+
+  }
 })
 
-app.get('/fetchUserDataEmail/:email', (request, response) => {
+app.get('/fetchUserDataEmail/:email', async (request, response) => {
   const email = request.params.email
   console.log(email)
   const fetch_id_query = "SELECT * FROM user_info WHERE email = $1"
-  connection.query(fetch_id_query, [email], (err, result) => {
-    if (err) {
-      response.send(err)
-      console.error(err)
-    }
-    else {
-      if (result.rowCount === 0) {
-        response.status(404).send("User info not found")
-      }
-      else {
-        console.log("User info extracted")
-        response.send(result.rows)
-      }
+  try {
+    const fetchResult = await pool.query(fetch_id_query, [username])
 
+    if (fetchResult.rowCount === 0) {
+      return response.status(404).send("User info not found")
     }
-  })
+    return response.status(200).send(fetchResult.rows)
+
+  } catch (err) {
+    console.error(err)
+    return response.status(500).send(err)
+
+  }
 })
 
-app.get('/fetchCarparkData/:id', (request, response) => {
+app.get('/fetchCarparkData/:id', async (request, response) => {
   const id = request.params.id
   const fetch_id_query = "SELECT * FROM carpark_info WHERE id = $1"
-  connection.query(fetch_id_query, [id], (err, result) => {
-    if (err) {
-      response.send(err)
-      console.error(err)
-    }
-    else {
-      if (result.rowCount === 0) {
-        response.status(404).send("Carpark info not found")
-      }
-      else {
-        console.log("Carpark info extracted")
-        response.send(result.rows)
-      }
-
-    }
-  })
-})
-
-app.get('/fetchCarparkHistory/:id/:startTime/:endTime', (request, response) => {
-  console.log("fethcding history")
-  const id = request.params.id
-  const startTime = request.params.startTime
-  const endTime = request.params.endTime
-  const fetch_id_query = "SELECT available, timestamp FROM carpark_availability_history WHERE carpark_id = $1 AND timestamp >= to_timestamp($2) AND timestamp <= to_timestamp($3) ORDER BY timestamp ASC"
-  connection.query(fetch_id_query, [id, startTime, endTime], (err, result) => {
-    if (err) {
-      response.send(err)
-      console.error(err)
-    }
-    else {
-      if (result.rowCount === 0) {
-        response.status(404).send("Carpark availability history not found")
-      }
-      else {
-        console.log("Carpark availability extracted")
-        response.send(result.rows)
-      }
-
-    }
-  })
-})
-
-app.get('/fetchCarparkHistoryDemo/:id/:startTime/:endTime', (request, response) => {
-  console.log("fethcding history")
-  const id = request.params.id
-  const startTime = request.params.startTime
-  const endTime = request.params.endTime
-  const fetch_id_query = "SELECT available, recorded_at FROM temp_carpark_avail WHERE carpark_id = $1 AND recorded_at >= to_timestamp($2) AND recorded_at <= to_timestamp($3) ORDER BY recorded_at ASC"
-  connection.query(fetch_id_query, [id, startTime, endTime], (err, result) => {
-    if (err) {
-      response.send(err)
-      console.error(err)
-    }
-    else {
-      if (result.rowCount === 0) {
-        response.status(404).send("Carpark availability history not found")
-      }
-      else {
-        console.log("Carpark availability extracted")
-        response.send(result.rows)
-      }
-
-    }
-  })
-})
-
-
-app.get('/getCurrentTime', (request, response) => {
-  console.log("fetching time")
-  const fetch_id_query = "SELECT MAX(timestamp) AS latest_time FROM carpark_availability_history WHERE carpark_id = 1"
-  connection.query(fetch_id_query, (err, result) => {
-    if (err) {
-      response.send(err)
-      console.error(err)
-    }
-    else {
-      if (result.rowCount === 0) {
-        response.status(404).send("Cannot get latest time")
-      }
-      else {
-        console.log("Latest time extracted")
-        response.send(result.rows)
-      }
-
-    }
-  })
-})
-
-app.get('/getCurrentTimeDemo', (request, response) => {
-  console.log("fetching time")
-  const fetch_id_query = "SELECT (MAX(recorded_at)) AS latest_time FROM temp_carpark_avail"
-  connection.query(fetch_id_query, (err, result) => {
-    if (err) {
-      response.send(err)
-      console.error(err)
-    }
-    else {
-      if (result.rowCount === 0) {
-        response.status(404).send("Cannot get latest time")
-      }
-      else {
-        console.log("Latest time extracted")
-        console.log(result.rows)
-        response.send(result.rows)
-      }
-
-    }
-  })
-})
-
-app.get('/getAllHistoricalData/:id', (request, response) => {
-  console.log("fecthing time")
-  const id = request.params.id
-  const fetch_id_query = "SELECT timestamp, available FROM carpark_availability_history WHERE carpark_id = $1 ORDER BY timestamp ASC"
-  connection.query(fetch_id_query, [id], (err, result) => {
-    if (err) {
-      response.send(err)
-      console.error(err)
-    }
-    else {
-      if (result.rowCount === 0) {
-        response.status(404).send("No carpark avail info ")
-      }
-      else {
-        console.log("all historical data obtained")
-        response.send(result.rows)
-      }
-
-    }
-  })
-})
-
-app.get('/getAllHistoricalDataDemo/:id', (request, response) => {
-  console.log("fecthing time")
-  const id = request.params.id
-  const fetch_id_query = "SELECT recorded_at, available FROM temp_carpark_avail WHERE carpark_id = $1 ORDER BY recorded_at ASC"
-  connection.query(fetch_id_query, [id], (err, result) => {
-    if (err) {
-      response.send(err)
-      console.error(err)
-    }
-    else {
-      if (result.rowCount === 0) {
-        response.status(404).send("No carpark avail info ")
-      }
-      else {
-        console.log("all historical data obtained")
-        response.send(result.rows)
-      }
-
-    }
-  })
-})
-
-app.post('/getAvailabilityForecastDemo/:id', async (request, response) => {
-  console.log("predicting avail");
-  const id = request.params.id;
-  console.log("Fetching forecast for carpark_id:", id);
 
   try {
-    console.log(process.env.API_BASE_URL)
-    const res = await fetch(`${process.env.API_BASE_URL}/getAllHistoricalDataDemo/${id}`);
-    if (!res.ok) {
-      return response.status(res.status).json({ error: `Failed to fetch carpark data: ${res.statusText}` });
+    const fetchResult = await pool.query(fetch_id_query, [id])
+    if (fetchResult.rowCount === 0) {
+      return response.status(404).send("Carpark info not found")
+    }
+    console.log("Carpark info extracted")
+    return response.status(200).send(fetchResult.rows)
+
+  } catch (err) {
+    console.error(err)
+    return response.status(500).send(err)
+  }
+
+})
+
+app.get('/fetchCarparkHistory/:id/:startTime/:endTime', async (request, response) => {
+  const { id, startTime, endTime } = request.params;
+
+  const fetch_id_query = `
+    SELECT available, timestamp
+    FROM carpark_availability_history
+    WHERE carpark_id = $1
+      AND timestamp >= to_timestamp($2)
+      AND timestamp <= to_timestamp($3)
+    ORDER BY timestamp ASC
+  `;
+
+  try {
+    const result = await pool.query(fetch_id_query, [id, startTime, endTime]);
+
+    if (result.rowCount === 0) {
+      return response.status(404).send("Carpark availability history not found");
     }
 
-    const carparkAvailData = await res.json();
+    console.log("Carpark availability extracted");
+    return response.status(200).json(result.rows);
 
-    console.log("Historical rows received:", carparkAvailData.length);
-
-    if (carparkAvailData.length === 0) {
-      return response.status(404).json({ error: "No historical data available" });
-    }
-
-
-    // Step 2: Send to Flask prediction API
-    const predictRes = await fetch(`${process.env.PYTHON_API_URL}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(carparkAvailData),
-    });
-
-    if (!predictRes.ok) {
-      const errorText = await predictRes.text();
-      return response.status(500).json({ error: 'Flask API error', details: errorText });
-    }
-
-    const forecast = await predictRes.json();
-    return response.json(forecast);
-
-  } catch (error) {
-    console.error('Server error:', error);
-    response.status(500).json({
-      error: 'Internal server error',
-      details: error.message || error.toString(),
-    });
+  } catch (err) {
+    console.error('Error fetching carpark history:', err);
+    return response.status(500).send("Internal server error");
   }
 });
+
+
+
+app.get('/getCurrentTime', async (request, response) => {
+  console.log("Fetching time");
+
+  const fetch_id_query = `
+    SELECT MAX(timestamp) AS latest_time
+    FROM carpark_availability_history
+    WHERE carpark_id = 1
+  `;
+
+  try {
+    const result = await pool.query(fetch_id_query);
+
+    if (result.rowCount === 0 || !result.rows[0].latest_time) {
+      return response.status(404).send("Cannot get latest time");
+    }
+
+    console.log("Latest time extracted");
+    return response.status(200).json(result.rows[0]); // returns single row as object
+
+  } catch (err) {
+    console.error('Error fetching latest time:', err);
+    return response.status(500).send("Internal server error");
+  }
+});
+
+app.get('/getAllHistoricalData/:id', async (request, response) => {
+  console.log("Fetching all historical carpark data");
+
+  const { id } = request.params;
+  const fetch_id_query = `
+    SELECT timestamp, available
+    FROM carpark_availability_history
+    WHERE carpark_id = $1
+    ORDER BY timestamp ASC
+  `;
+
+  try {
+    const result = await pool.query(fetch_id_query, [id]);
+
+    if (result.rowCount === 0) {
+      return response.status(404).send("No carpark availability info");
+    }
+
+    console.log("All historical data obtained");
+    return response.status(200).json(result.rows);
+
+  } catch (err) {
+    console.error("Error fetching historical data:", err);
+    return response.status(500).send("Internal server error");
+  }
+});
+
 
 app.post('/getAvailabilityForecast/:id', async (request, response) => {
-  console.log("predicting avail");
   const id = request.params.id;
-  console.log("Fetching forecast for carpark_id:", id);
 
   try {
-    console.log(process.env.API_BASE_URL)
-    const res = await fetch(`${process.env.API_BASE_URL}/getAllHistoricalData/${id}`);
-    if (!res.ok) {
-      return response.status(res.status).json({ error: `Failed to fetch carpark data: ${res.statusText}` });
-    }
+    const fetchQuery = `
+      SELECT timestamp, available
+      FROM carpark_availability_history
+      WHERE carpark_id = $1
+      ORDER BY timestamp ASC
+    `;
+    const result = await pool.query(fetchQuery, [id]);
 
-    const carparkAvailData = await res.json();
+    const carparkAvailData = result.rows;
 
     console.log("Historical rows received:", carparkAvailData.length);
     if (carparkAvailData.length === 0) {
@@ -395,7 +294,7 @@ app.post('/getAvailabilityForecast/:id', async (request, response) => {
     }
 
 
-    // Step 2: Send to Flask prediction API
+    // Step 2: Send to Python prediction API
     const predictRes = await fetch(`${process.env.PYTHON_API_URL}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -419,181 +318,215 @@ app.post('/getAvailabilityForecast/:id', async (request, response) => {
   }
 });
 
-app.post('/register', (request, response) => {
-  console.log("calling local regist")
+app.post('/register', async (request, response) => {
+  console.log("Calling /register");
+
   const { username, email, password, is_staff, season_pass, season_pass_type } = request.body;
+
   const login_update_query = "INSERT INTO login VALUES($1, $2, $3)";
-  const user_info_update_query = "INSERT INTO user_info VALUES($1, $2, $3, $4, $5)"
-  const user_profilepic_update_query = "INSERT INTO user_profile VALUES($1, $2)"
+  const user_info_update_query = "INSERT INTO user_info VALUES($1, $2, $3, $4, $5)";
+  const user_profilepic_update_query = "INSERT INTO user_profile VALUES($1, $2)";
+  const defaultProfilePicUrl = "https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png?20150327203541";
 
-  connection.query(login_update_query, [username, email, password], (err, result) => {
-    if (err) {
-      if (err.code == '23505') {
-        if (err.detail[5] == 'u') {
-          return response.status(409).send("Username already exists")
-        }
-        else {
-          return response.status(409).send("Email already exists")
-        }
+  const client = await pool.connect();
+
+  try {
+    await client.query('BEGIN');
+
+    await client.query(login_update_query, [username, email, password]);
+    await client.query(user_info_update_query, [username, is_staff, season_pass, season_pass_type, email]);
+    await client.query(user_profilepic_update_query, [username, defaultProfilePicUrl]);
+
+    await client.query('COMMIT');
+
+    return response.status(200).send("User registered successfully");
+
+  } catch (err) {
+    await client.query('ROLLBACK');
+
+    if (err.code === '23505') {
+      if (err.detail.includes('username')) {
+        return response.status(409).send("Username already exists");
+      } else if (err.detail.includes('email')) {
+        return response.status(409).send("Email already exists");
       }
-      console.error("log info update failed", err)
-      response.status(500).send("Login info update failed")
     }
-    else {
-      connection.query(user_info_update_query, [username, is_staff, season_pass, season_pass_type, email], (err, result) => {
-        if (err) {
-          console.error("user info update failed", err)
-          response.status(500).send("User info update failed");
-        }
-      })
-      connection.query(user_profilepic_update_query, [username, "https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png?20150327203541"], (err, result) => {
-        if (err) {
-          console.error("user profile pic update failed", err)
-          response.status(500).send("user profile update failed");
-        }
-      })
-      response.status(200).send("User registered successfully");
+
+    console.error("Registration failed:", err);
+    return response.status(500).send("Registration failed");
+
+  } finally {
+    client.release();
+  }
+});
+
+
+
+app.get('/getUserProfilePic/:username', async (request, response) => {
+  const { username } = request.params;
+
+  const pic_query = "SELECT profileuri FROM user_profile WHERE username = $1";
+
+  try {
+    const result = await pool.query(pic_query, [username]);
+
+    if (result.rowCount === 0) {
+      console.error("User not found");
+      return response.status(404).send("User not found");
     }
-  })
 
-})
+    return response.status(200).json(result.rows); 
+
+  } catch (err) {
+    console.error("Error fetching user profile picture:", err);
+    return response.status(500).send("Internal server error");
+  }
+});
 
 
-app.get('/getUserProfilePic/:username', (request, response) => {
-  const username = request.params.username
+app.put('/updateProfile/:username', async (request, response) => {
+  const { username } = request.params;
+  const { imageURI } = request.body;
 
-  const pic_query = "SELECT profileuri FROM user_profile WHERE username = $1"
-  connection.query(pic_query, [username], (err, result) => {
-    if (err) {
-      response.status(500).send(err)
-      console.error(error)
+  const update_query = "UPDATE user_profile SET profileuri = $2 WHERE username = $1";
+
+  try {
+    const result = await pool.query(update_query, [username, imageURI]);
+
+    if (result.rowCount === 0) {
+      return response.status(404).send("User not found");
     }
-    else {
-      if (result.rowCount === 0) {
-        response.status(404).send("User not found")
-        console.error("User not found")
-      }
-      else {
-        response.send(result.rows)
-      }
 
-    }
-  })
-})
+    return response.status(200).send("Image updated");
+  } catch (err) {
+    console.error("Error updating profile image:", err);
+    return response.status(500).send("Internal server error");
+  }
+});
 
 
-app.put('/updateProfile/:username', (request, response) => {
-  const username = request.params.username
-  const imageUri = request.body.imageURI
+app.get('/getSeasonApplication', async (request, response) => {
+  const application_query = "SELECT * FROM season_parking_applications";
 
-  const update_query = "UPDATE user_profile SET profileuri = $2 WHERE username = $1"
-  connection.query(update_query, [username, imageUri], (err, result) => {
-    if (err) {
-      response.status(500).send(err)
-      console.error(err)
-    }
-    else {
-      response.send("image updated")
-    }
-  })
-})
+  try {
+    const result = await pool.query(application_query);
+    return response.status(200).json(result.rows);
+  } catch (err) {
+    console.error('Database error in /getSeasonApplication:', err);
 
-app.get('/getSeasonApplication', (request, response) => {
-  const application_query = "SELECT * FROM season_parking_applications"
+    return response.status(500).json({
+      success: false,
+      message: 'Failed to retrieve season parking applications.',
+      error: process.env.NODE_ENV === 'development' ? err.message : undefined,
+    });
+  }
+});
 
-  connection.query(application_query, (err, result) => {
-    if (err) {
-      console.error('Database error in /getSeasonApplication:', err); // internal logging
 
-      response.status(500).json({
-        success: false,
-        message: 'Failed to retrieve season parking applications.',
-        error: process.env.NODE_ENV === 'development' ? err.message : undefined, // show error only in dev
-      });
-    }
-    else {
-      response.send(result.rows)
-    }
-  })
-})
 
-app.get('/getCappedApplication', (request, response) => {
-  const application_query = "SELECT * FROM capped_parking_applications"
+app.get('/getCappedApplication', async (request, response) => {
+  const application_query = "SELECT * FROM capped_parking_applications";
 
-  connection.query(application_query, (err, result) => {
-    if (err) {
-      console.error('Database error in /getCappedApplication:', err); // internal logging
+  try {
+    const result = await pool.query(application_query);
+    return response.status(200).json(result.rows);
+  } catch (err) {
+    console.error('Database error in /getCappedApplication:', err);
 
-      response.status(500).json({
-        success: false,
-        message: 'Failed to retrieve season parking applications.',
-        error: process.env.NODE_ENV === 'development' ? err.message : undefined, // show error only in dev
-      });
-    }
-    else {
-      response.send(result.rows)
-    }
-  })
-})
+    return response.status(500).json({
+      success: false,
+      message: 'Failed to retrieve capped parking applications.',
+      error: process.env.NODE_ENV === 'development' ? err.message : undefined,
+    });
+  }
+});
 
-app.post('/approveSeasonApplication', (request, response) => {
+
+app.post('/approveSeasonApplication', async (request, response) => {
   const { email, season_pass_type } = request.body;
 
-  const deletion_query = "DELETE FROM season_parking_applications WHERE email = $1";
-  const update_query = "UPDATE user_info SET season_pass = true, season_pass_type = $1, season_application_status = null WHERE email = $2";
+  const update_query = `
+    UPDATE user_info
+    SET season_pass = true,
+        season_pass_type = $1,
+        season_application_status = null
+    WHERE email = $2
+  `;
+  const deletion_query = `
+    DELETE FROM season_parking_applications
+    WHERE email = $1
+  `;
 
-  // First: Update user_info
-  connection.query(update_query, [season_pass_type, email], (updateErr, updateResult) => {
-    if (updateErr) {
-      console.error('Error updating user_info:', updateErr);
-      return response.status(500).json({ error: 'Failed to update user info' });
-    }
+  const client = await pool.connect(); // start transaction with client
 
-    // Then: Delete application
-    connection.query(deletion_query, [email], (deleteErr, deleteResult) => {
-      if (deleteErr) {
-        console.error('Error deleting from season_parking_application:', deleteErr);
-        return response.status(500).json({ error: 'Failed to delete season parking application' });
-      }
+  try {
+    await client.query('BEGIN'); // start transaction
 
-      // Success
-      return response.status(200).json({ message: 'Season pass approved and application deleted.' });
+    await client.query(update_query, [season_pass_type, email]);
+    await client.query(deletion_query, [email]);
+
+    await client.query('COMMIT'); // commit if both succeed
+
+    response.status(200).json({ message: 'Season pass approved and application deleted.' });
+  } catch (err) {
+    await client.query('ROLLBACK'); // rollback on any failure
+    console.error('Transaction error in /approveSeasonApplication:', err);
+
+    response.status(500).json({
+      error: 'Transaction failed',
+      details: err.message,
     });
-  });
+  } finally {
+    client.release(); // release client back to pool
+  }
 });
 
 
-app.post('/rejectSeasonApplication', (request, response) => {
+app.post('/rejectSeasonApplication', async (request, response) => {
   const { email } = request.body;
 
-  const deletion_query = "DELETE FROM season_parking_applications WHERE email = $1";
-  const update_query = "UPDATE user_info SET season_application_status = 'rejected' WHERE email = $1";
+  const update_query = `
+    UPDATE user_info
+    SET season_application_status = 'rejected'
+    WHERE email = $1
+  `;
+  const deletion_query = `
+    DELETE FROM season_parking_applications
+    WHERE email = $1
+  `;
 
-  connection.query(update_query, [email], (err, result) => {
-    if (err) {
-      console.error('Error updating seasonwe s_parking_applications:', err);
-      return response.status(500).json({ error: 'Failed to reject application' });
-    }
+  const client = await pool.connect();
 
-    // Check if a row was actually updated
-    if (result.rowCount === 0) {
+  try {
+    await client.query('BEGIN');
+
+    const updateResult = await client.query(update_query, [email]);
+
+    if (updateResult.rowCount === 0) {
+      await client.query('ROLLBACK');
       return response.status(404).json({ error: 'No application found for this email' });
     }
-    
-    connection.query(deletion_query, [email], (deleteErr, deleteResult) => {
-      if (deleteErr) {
-        console.error('Error deleting from capped_parking_application:', deleteErr);
-        return response.status(500).json({ error: 'Failed to delete season parking application' });
-      }
 
-      // Success
-      return response.status(200).json({ message: 'Capped pass rejected and application deleted.' });
+    await client.query(deletion_query, [email]);
+
+    await client.query('COMMIT');
+
+    return response.status(200).json({ message: 'Season pass rejected and application deleted.' });
+  } catch (err) {
+    await client.query('ROLLBACK');
+    console.error('Transaction error in /rejectSeasonApplication:', err);
+
+    return response.status(500).json({
+      error: 'Failed to reject season application',
+      details: err.message,
     });
-    
-  });
+  } finally {
+    client.release();
+  }
 });
 
-app.post('/resetSeasonStatus', (request, response) => {
+
+app.post('/resetSeasonStatus', async (request, response) => {
   const { email } = request.body;
 
   if (!email) {
@@ -602,21 +535,23 @@ app.post('/resetSeasonStatus', (request, response) => {
 
   const update_query = "UPDATE user_info SET season_application_status = NULL WHERE email = $1";
 
-  connection.query(update_query, [email], (err, result) => {
-    if (err) {
-      console.error('Error resetting season status:', err);
-      return response.status(500).json({ error: 'Failed to reset season status' });
-    }
+  try {
+    const updateResult = await pool.query(update_query, [email])
 
-    if (result.rowCount === 0) {
+    if (updateResult.rowCount === 0) {
       return response.status(404).json({ error: 'No user found with that email' });
     }
 
     return response.status(200).json({ message: 'Season status reset successfully' });
-  });
+
+  } catch (err) {
+    console.error('Error resetting season status:', err);
+    return response.status(500).json({ error: 'Failed to reset season status' });
+  }
+
 });
 
-app.post('/endSeason', (request, response) => {
+app.post('/endSeason', async (request, response) => {
   const { email } = request.body;
 
   if (!email) {
@@ -625,21 +560,23 @@ app.post('/endSeason', (request, response) => {
 
   const update_query = "UPDATE user_info SET season_pass = false, season_pass_type = NULL WHERE email = $1";
 
-  connection.query(update_query, [email], (err, result) => {
-    if (err) {
-      console.error('Error ending season parking:', err);
-      return response.status(500).json({ error: 'Failed to end season parking' });
-    }
+  try {
+    const updateResult = await pool.query(update_query, [email])
 
-    if (result.rowCount === 0) {
+    if (updateResult.rowCount === 0) {
       return response.status(404).json({ error: 'No user found with that email' });
     }
 
     return response.status(200).json({ message: 'Season parking ended successfully' });
-  });
+  } catch (err) {
+    console.error('Error ending season parking:', err);
+    return response.status(500).json({ error: 'Failed to end season parking' });
+  }
+
+
 });
 
-app.post('/checkSeasonStatus', (request, response) => {
+app.post('/checkSeasonStatus', async (request, response) => {
   const { email } = request.body;
 
   if (!email) {
@@ -648,21 +585,23 @@ app.post('/checkSeasonStatus', (request, response) => {
 
   const check_query = "SELECT season_pass FROM user_info WHERE email = $1";
 
-  connection.query(check_query, [email], (err, result) => {
-    if (err) {
-      console.error('Error ending season parking:', err);
-      return response.status(500).json({ error: 'Failed to end season parking' });
-    }
+  try {
+    const queryResult = await pool.query(check_query, [email])
 
-    console.log(result.rows[0].season_pass);
-    if (result.rowCount === 0) {
+    if (queryResult.rowCount === 0) {
       return response.status(404).json({ error: 'No user found with that email' });
-    } else if (result.rows[0].season_pass === false) {
+    }
+    else if (queryResult.rows[0].season_pass === false) {
       return response.status(201).json({ season: false });
     }
-    
-    return response.status(200).json({ season: true });
-  });
+
+    return response.status(200).json({ season: true })
+
+  } catch (error) {
+    console.error('Error ending season parking:', err);
+    return response.status(500).json({ error: 'Failed to end season parking' });
+  }
+
 });
 
 /*
@@ -687,7 +626,7 @@ app.post('/getSeasonApplicationStatus', (request, response) => {
 });
 */
 
-app.post('/deleteSeasonApplication', (request, response) => {
+app.post('/deleteSeasonApplication', async (request, response) => {
   const { email } = request.body;
 
   if (!email) {
@@ -696,79 +635,88 @@ app.post('/deleteSeasonApplication', (request, response) => {
 
   const deletion_query = "DELETE FROM season_parking_applications WHERE email = $1";
 
-  connection.query(deletion_query, [email], (err, result) => {
-    if (err) {
-      console.error('Error deleting season application:', err);
-      return response.status(500).json({ error: 'Failed to delete season application' });
-    }
+  try {
+    const deletionResult = await pool.query(deletion_query, [email]);
 
-    if (result.rowCount === 0) {
+    if (deletionResult.rowCount === 0) {
       return response.status(404).json({ error: 'No application found for this email' });
     }
 
-    return response.status(200).json({ message: 'Application deleted successfully' });
-  });
+    return response.status(200).json({ message: 'Season parking application deleted successfully.' });
+  } catch (err) {
+    console.error('Error deleting season application:', err);
+    return response.status(500).json({ error: 'Failed to delete season application' });
+  }
 });
 
 
-
-app.post('/approveCappedApplication', (request, response) => {
+app.post('/approveCappedApplication', async (request, response) => {
   const { email, season_pass_type } = request.body;
+
+  if (!email) {
+    return response.status(400).json({ error: 'Email is required' });
+  }
 
   const deletion_query = "DELETE FROM capped_parking_applications WHERE email = $1";
   const update_query = "UPDATE user_info SET capped_pass = true, capped_application_status = null WHERE email = $1";
 
-  // First: Update user_info
-  connection.query(update_query, [email], (updateErr, updateResult) => {
-    if (updateErr) {
-      console.error('Error updating user_info:', updateErr);
-      return response.status(500).json({ error: 'Failed to update user info' });
+  const client = await pool.connect()
+
+  try {
+    await client.query('BEGIN')
+
+    await client.query(update_query, [email])
+    if (updateResult.rowCount === 0) {
+      await client.query('ROLLBACK');
+      return response.status(404).json({ error: 'No user found for this email' });
     }
+    await client.query(deletion_query, [email])
 
-    // Then: Delete application
-    connection.query(deletion_query, [email], (deleteErr, deleteResult) => {
-      if (deleteErr) {
-        console.error('Error deleting from capped_parking_application:', deleteErr);
-        return response.status(500).json({ error: 'Failed to delete season parking application' });
-      }
+    await client.query('COMMIT')
+    return response.status(200).json({ message: 'Capped pass approved and application deleted' });
 
-      // Success
-      return response.status(200).json({ message: 'Capped pass approved and application deleted.' });
-    });
-  });
+  } catch (err) {
+    await client.query('ROLLBACK');
+    console.error('Transaction error in /approveCappedApplication', err)
+    return response.status(500).json({ error: 'Failed to approve capped application' })
+  } finally {
+    client.release();
+  }
+
 })
 
-app.post('/rejectCappedApplication', (request, response) => {
+app.post('/rejectCappedApplication', async (request, response) => {
   const { email } = request.body;
 
   const deletion_query = "DELETE FROM capped_parking_applications WHERE email = $1";
   const update_query = "UPDATE user_info SET capped_application_status = 'rejected' WHERE email = $1";
 
-  connection.query(update_query, [email], (err, result) => {
-    if (err) {
-      console.error('Error updating capped_parking_applications:', err);
-      return response.status(500).json({ error: 'Failed to reject application' });
-    }
+  const client = await pool.connect()
 
-    // Check if a row was actually updated
-    if (result.rowCount === 0) {
+  try {
+    await client.query('BEGIN');
+
+    const updateResult = await client.query(update_query, [email]);
+    if (updateResult.rowCount === 0) {
+      await client.query('ROLLBACK');
       return response.status(404).json({ error: 'No application found for this email' });
     }
-    
-    connection.query(deletion_query, [email], (deleteErr, deleteResult) => {
-      if (deleteErr) {
-        console.error('Error deleting from capped_parking_application:', deleteErr);
-        return response.status(500).json({ error: 'Failed to delete season parking application' });
-      }
 
-      // Success
-      return response.status(200).json({ message: 'Capped pass rejected and application deleted.' });
-    });
-    
-  });
+    await client.query(deletion_query, [email]);
+
+    await client.query('COMMIT');
+    return response.status(200).json({ message: 'Capped pass rejected and application deleted.' });
+  } catch (err) {
+    await client.query('ROLLBACK');
+    console.error('Transaction error in /rejectCappedApplication:', err);
+    return response.status(500).json({ error: 'Failed to reject application' });
+  } finally {
+    client.release();
+  }
+
 });
 
-app.post('/resetCappedStatus', (request, response) => {
+app.post('/resetCappedStatus', async (request, response) => {
   const { email } = request.body;
 
   if (!email) {
@@ -777,21 +725,23 @@ app.post('/resetCappedStatus', (request, response) => {
 
   const update_query = "UPDATE user_info SET capped_application_status = NULL WHERE email = $1";
 
-  connection.query(update_query, [email], (err, result) => {
-    if (err) {
-      console.error('Error resetting capped status:', err);
-      return response.status(500).json({ error: 'Failed to reset capped status' });
-    }
+  try {
+    const result = await pool.query(update_query, [email])
 
     if (result.rowCount === 0) {
       return response.status(404).json({ error: 'No user found with that email' });
     }
 
     return response.status(200).json({ message: 'Capped status reset successfully' });
-  });
+  } catch (error) {
+    console.error('Error resetting capped status:', error);
+    return response.status(500).json({ error: 'Failed to reset capped status' });
+  }
+
 });
 
-app.post('/endCapped', (request, response) => {
+
+app.post('/endCapped', async (request, response) => {
   const { email } = request.body;
 
   if (!email) {
@@ -800,21 +750,24 @@ app.post('/endCapped', (request, response) => {
 
   const update_query = "UPDATE user_info SET capped_pass = false WHERE email = $1";
 
-  connection.query(update_query, [email], (err, result) => {
-    if (err) {
-      console.error('Error ending capped parking:', err);
-      return response.status(500).json({ error: 'Failed to end capped parking' });
-    }
+  try {
+    const result = await pool.query(update_query, [email])
 
     if (result.rowCount === 0) {
       return response.status(404).json({ error: 'No user found with that email' });
     }
 
     return response.status(200).json({ message: 'Capped parking ended successfully' });
-  });
+
+  } catch (error) {
+    console.error('Error ending capped parking:', error);
+    return response.status(500).json({ error: 'Failed to end capped parking' });
+  }
+
 });
 
-app.post('/checkCappedStatus', (request, response) => {
+
+app.post('/checkCappedStatus', async (request, response) => {
   const { email } = request.body;
 
   if (!email) {
@@ -823,21 +776,20 @@ app.post('/checkCappedStatus', (request, response) => {
 
   const check_query = "SELECT capped_pass FROM user_info WHERE email = $1";
 
-  connection.query(check_query, [email], (err, result) => {
-    if (err) {
-      console.error('Error ending capped parking:', err);
-      return response.status(500).json({ error: 'Failed to end capped parking' });
-    }
+  try {
+    const result = await pool.query(check_query, [email])
 
-    console.log(result.rows[0].capped_pass);
     if (result.rowCount === 0) {
       return response.status(404).json({ error: 'No user found with that email' });
     } else if (result.rows[0].capped_pass === false) {
       return response.status(201).json({ capped: false });
+    } else {
+      return response.status(200).json({ capped: true });
     }
-    
-    return response.status(200).json({ capped: true });
-  });
+  } catch (error) {
+    console.error('Error ending capped parking:', error);
+    return response.status(500).json({ error: 'Failed to end capped parking' });
+  }
 });
 
 
@@ -864,7 +816,7 @@ app.post('/getCappedApplicationStatus', (request, response) => {
 */
 
 
-app.post('/deleteCappedApplication', (request, response) => {
+app.post('/deleteCappedApplication', async (request, response) => {
   const { email } = request.body;
 
   if (!email) {
@@ -873,57 +825,24 @@ app.post('/deleteCappedApplication', (request, response) => {
 
   const deletion_query = "DELETE FROM capped_parking_applications WHERE email = $1";
 
-  connection.query(deletion_query, [email], (err, result) => {
-    if (err) {
-      console.error('Error deleting capped application:', err);
-      return response.status(500).json({ error: 'Failed to delete capped application' });
-    }
+  try {
+    const result = await pool.query(deletion_query, [email]);
 
     if (result.rowCount === 0) {
       return response.status(404).json({ error: 'No application found for this email' });
     }
 
     return response.status(200).json({ message: 'Application deleted successfully' });
-  });
+  } catch (err) {
+    console.error('Error deleting capped application:', err);
+    return response.status(500).json({ error: 'Failed to delete capped application' });
+  }
 });
 
 
 
-
-
-app.put('/update/:id', (request, response) => {
-  const id = request.params.id
-  const name = request.body.name
-
-  const update_query = "UPDATE demotable SET name = $1 WHERE id = $2"
-  connection.query(update_query, [name, id], (err, result) => {
-    if (err) {
-      response.send(err)
-      console.error(err)
-    }
-    else {
-      response.send("Value updated")
-    }
-  })
-})
-
-app.delete('/delete/:id', (request, response) => {
-  const id = request.params.id
-
-  const delete_query = "DELETE FROM demotable WHERE id = $1"
-  connection.query(delete_query, [id], (err, result) => {
-    if (err) {
-      response.send(err)
-      console.error(err)
-    }
-    else {
-      response.send(result.rows)
-    }
-  })
-})
-
-// for storing season parking form data
-app.post('/applySeasonParking', (request, response) => {
+//for storing season parking data
+app.post('/applySeasonParking', async (request, response) => {
   const {
     salutation, name, address, studentNo, faculty, email, tel,
     vehicleRegNo, iuNo, vehicleOwner, relationship, engineCapacity, parkingType
@@ -946,47 +865,32 @@ app.post('/applySeasonParking', (request, response) => {
     vehicleRegNo, iuNo, vehicleOwner, relationship, engineCapacity, parkingType
   ];
 
-  connection.query('BEGIN', err => {
-    if (err) {
-      console.error('Error starting transaction', err);
-      return response.status(500).json({ success: false, error: 'Transaction error' });
-    }
+  const client = await pool.connect();
 
-    connection.query(insert_query, values, (insertErr, insertResult) => {
-      if (insertErr) {
-        console.error('Error inserting season application:', insertErr);
-        return connection.query('ROLLBACK', () => {
-          response.status(500).json({ success: false, error: 'Insert failed' });
-        });
-      }
+  try {
+    await client.query('BEGIN');
 
-      connection.query(update_query, [email], (updateErr, updateResult) => {
-        if (updateErr) {
-          console.error('Error updating user_info:', updateErr);
-          return connection.query('ROLLBACK', () => {
-            response.status(500).json({ success: false, error: 'Update failed' });
-          });
-        }
+    const insertResult = await client.query(insert_query, values);
+    await client.query(update_query, [email]);
 
-        connection.query('COMMIT', commitErr => {
-          if (commitErr) {
-            console.error('Error committing transaction', commitErr);
-            return response.status(500).json({ success: false, error: 'Commit failed' });
-          }
+    await client.query('COMMIT');
 
-          return response.status(201).json({
-            success: true,
-            data: insertResult.rows[0],
-            message: 'Season application submitted and status updated'
-          });
-        });
-      });
+    return response.status(201).json({
+      success: true,
+      data: insertResult.rows[0],
+      message: 'Season application submitted and status updated'
     });
-  });
+  } catch (error) {
+    await client.query('ROLLBACK');
+    console.error('Transaction error in /applySeasonParking:', error);
+    return response.status(500).json({ success: false, error: 'Database transaction failed' });
+  } finally {
+    client.release();
+  }
 });
 
 // for storing capped parking
-app.post('/applyCappedParking', (request, response) => {
+app.post('/applyCappedParking', async (request, response) => {
   const {
     salutation, name, address, email, tel, vehicleRegNo,
     iuNo, vehicleOwner, relationship, engineCapacity
@@ -1009,44 +913,30 @@ app.post('/applyCappedParking', (request, response) => {
     vehicleRegNo, iuNo, vehicleOwner, relationship, engineCapacity
   ];
 
-  connection.query('BEGIN', err => {
-    if (err) {
-      console.error('Error starting transaction:', err);
-      return response.status(500).json({ success: false, error: 'Transaction error' });
-    }
+  const client = await pool.connect();
 
-    connection.query(insert_query, values, (insertErr, insertResult) => {
-      if (insertErr) {
-        console.error('Error inserting capped application:', insertErr);
-        return connection.query('ROLLBACK', () => {
-          response.status(500).json({ success: false, error: 'Insert failed' });
-        });
-      }
+  try {
+    await client.query('BEGIN');
 
-      connection.query(update_query, [email], (updateErr, updateResult) => {
-        if (updateErr) {
-          console.error('Error updating user_info:', updateErr);
-          return connection.query('ROLLBACK', () => {
-            response.status(500).json({ success: false, error: 'Update failed' });
-          });
-        }
+    const insertResult = await client.query(insert_query, values);
+    await client.query(update_query, [email]);
 
-        connection.query('COMMIT', commitErr => {
-          if (commitErr) {
-            console.error('Error committing transaction:', commitErr);
-            return response.status(500).json({ success: false, error: 'Commit failed' });
-          }
+    await client.query('COMMIT');
 
-          return response.status(201).json({
-            success: true,
-            data: insertResult.rows[0],
-            message: 'Capped application submitted and status updated'
-          });
-        });
-      });
+    return response.status(201).json({
+      success: true,
+      data: insertResult.rows[0],
+      message: 'Capped application submitted and status updated'
     });
-  });
+  } catch (error) {
+    await client.query('ROLLBACK');
+    console.error('Transaction error in /applyCappedParking:', error);
+    return response.status(500).json({ success: false, error: 'Database transaction failed' });
+  } finally {
+    client.release();
+  }
 });
+
 
 
 // confirmation email

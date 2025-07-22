@@ -8,7 +8,7 @@ export default function CappedPending() {
 
   const cleanupUser = async () => {
     try {
-      const response = await fetch("https://back-end-o2lr.onrender.com/resetCappedStatus", {
+      const response = await fetch("http://192.168.68.60:3000/resetCappedStatus", {
         method: 'POST',
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: user.email }),
@@ -59,7 +59,7 @@ export default function CappedPending() {
 
   const handleRefresh = async () => {
     try {
-      const response = await fetch(`https://back-end-o2lr.onrender.com/fetchUserDataEmail/${user.email}`);
+      const response = await fetch(`http://192.168.68.60:3000/fetchUserDataEmail/${user.email}`);
 
       if (!response.ok) {
         if (response.status === 404) throw new Error("User info not found");
