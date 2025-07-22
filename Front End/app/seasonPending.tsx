@@ -4,7 +4,7 @@ import { UserContext } from '@/context/userContext';
 import { router } from 'expo-router';
 
 export default function SeasonPending() {
-  const { user } = useContext(UserContext)!;
+  const { user , setUser} = useContext(UserContext)!;
 
   const cleanupUser = async () => {
     try {
@@ -31,12 +31,22 @@ export default function SeasonPending() {
 
   const handleRejectedStatus = async () => {
     await cleanupUser();
+    setUser({
+      ...user,
+      season_application_status: undefined
+    })
     Alert.alert("Application Rejected", "Apply again or contact support", [
       { onPress: () => router.replace('/') }
     ]);
   };
 
-  const handleApprovedStatus = () => {
+  const handleApprovedStatus = (season_parking_type : string) => {
+    setUser({
+      ...user,
+      season_parking: true,
+      season_parking_type: season_parking_type,
+      season_application_status: undefined
+    })
     Alert.alert("Season Parking Application Approved, congratulations!", "", [
       { onPress: () => router.replace("/season?signedUp=true") }
     ]);
@@ -65,7 +75,7 @@ export default function SeasonPending() {
       console.log(userData)
 
       if (userData[0]?.season_pass) {
-        handleApprovedStatus();
+        handleApprovedStatus(userData[0].season_parking_type);
       }
       else {
         if (userData[0].season_application_status) {

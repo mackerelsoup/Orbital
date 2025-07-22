@@ -177,7 +177,7 @@ const SeasonParkingApplicationForm = () => {
         setShowModal(true);
         setTimeout(() => {
           setShowModal(false);
-          router.replace('/season?signedUp=true');
+          router.replace('/seasonPending');
         }, 2000);
       } else {
         Alert.alert('Submission failed', result.error);
