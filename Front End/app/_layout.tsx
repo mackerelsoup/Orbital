@@ -3,13 +3,27 @@ import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 import { Link, router, Stack } from 'expo-router';
 import { Drawer } from 'expo-router/drawer';
-import { useContext, useState, useEffect } from 'react';
+import { useContext, useState, useEffect, ComponentProps } from 'react';
 import { Platform, View, StyleSheet, Image } from 'react-native';
 import 'react-native-gesture-handler'
 import { GestureHandlerRootView, Pressable } from 'react-native-gesture-handler';
 import { Host } from 'react-native-portalize';
 
 export default function RootLayout() {
+
+
+  type FontAwesomeIconName = ComponentProps<typeof FontAwesome>['name'];
+  const DrawerIcon = ({ name, size, color }: { name: FontAwesomeIconName; size: number; color: string }) => (
+    <View style={{
+      width: size,
+      height: size,
+      justifyContent: 'center',
+      alignItems: 'center',
+    }}>
+      <FontAwesome name={name} size={size * 0.9} color={color} />
+    </View>
+  );
+
 
   return (
     <UserProvider>
@@ -21,7 +35,7 @@ export default function RootLayout() {
                 headerStyle: { height: 96 },
                 title: "Home",
                 drawerIcon: ({ color, size }) => (
-                  <FontAwesome name="home" size={size} color={color} />
+                  <DrawerIcon name="home" size={size} color={color} />
                 ),
                 headerTitle: "NUSpots",
                 headerRight: () => {
@@ -43,7 +57,7 @@ export default function RootLayout() {
                 headerStyle: { height: 96 },
                 title: "Pricing Information",
                 drawerIcon: ({ color, size }) => (
-                  <FontAwesome name="money" size={size} color={color} />
+                  <DrawerIcon name="money" size={size} color={color} />
                 ),
                 headerTitle: "Pricing Information",
                 headerRight: () => {
@@ -65,7 +79,7 @@ export default function RootLayout() {
                 headerStyle: { height: 96 },
                 title: "Fee Calculator",
                 drawerIcon: ({ color, size }) => (
-                  <FontAwesome name="calculator" size={size} color={color} />
+                  <DrawerIcon name="calculator" size={size} color={color} />
                 ),
                 headerTitle: "Calculator",
                 headerRight: () => {
@@ -87,7 +101,7 @@ export default function RootLayout() {
                 headerStyle: { height: 96 },
                 title: "Digital Permits",
                 drawerIcon: ({ color, size }) => (
-                  <FontAwesome name="id-card" size={size} color={color} />
+                  <DrawerIcon name="id-card" size={size} color={color} />
                 ),
                 headerTitle: "Digital Permits",
                 headerRight: () => {
@@ -109,7 +123,7 @@ export default function RootLayout() {
                 headerStyle: { height: 96 },
                 title: "Parking Trends",
                 drawerIcon: ({ color, size }) => (
-                  <FontAwesome name="line-chart" size={size} color={color} />
+                  <DrawerIcon name="line-chart" size={size} color={color} />
                 ),
                 headerTitle: "Parking Trends",
                 headerRight: () => {
@@ -126,6 +140,17 @@ export default function RootLayout() {
                   )
                 }
               }}></Drawer.Screen>
+
+
+              <Drawer.Screen
+                name="approvalSelector"
+                options={{
+                  title: "Approval",
+                  drawerIcon: ({ color, size }) => (
+                    <DrawerIcon name="check" size={size} color={color} />
+                  ),
+                  headerShown: false,
+                }} />
 
               {/* others + hidden drawers */}
               <Drawer.Screen
@@ -190,12 +215,6 @@ export default function RootLayout() {
                 name="approvalInfo"
                 options={{
                   drawerItemStyle: { display: 'none' },
-                  headerShown: false
-                }} />
-              <Drawer.Screen
-                name="approvalSelector"
-                options={{
-                  title: "Approval",
                   headerShown: false
                 }} />
               <Drawer.Screen
