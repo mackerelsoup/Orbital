@@ -118,7 +118,7 @@ export default function CarparkTrend() {
         const response = await fetch("https://back-end-o2lr.onrender.com/getCurrentTime");
         if (!response.ok) throw new Error("Current Time not Available");
         const data = await response.json();
-        const latestTime = new Date(data[0].latest_time).getTime();
+        const latestTime = new Date(data.latest_time).getTime();
         //console.log("latest", latestTime)
         //console.log(new Date(latestTime).toLocaleString("en-US", { timeZone: "Asia/Singapore" }))
         setCurrentTime(latestTime);
