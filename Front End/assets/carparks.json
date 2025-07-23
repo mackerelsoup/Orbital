@@ -10,7 +10,7 @@
     "longitudeDelta": 0.01,
     "pricing": {
       "rate_per_minute": 0.0214,
-      "charged_hours": "Charges apply only from 0830H to 1930H (Mon\u2013Fri) and 0830H to 1700H (Sat)"
+      "charged_hours": "Charges apply from 0830H to 1930H (Mon\u2013Fri) and 0830H to 1700H (Sat) only"
     },
     "season_parking_type": ["staff_open", "staff_covered"],
     "available_lots": 50
@@ -26,7 +26,7 @@
     "longitudeDelta": 0.01,
     "pricing": {
       "rate_per_minute": 0.0214,
-      "charged_hours": "Charges apply only from 0830H to 1930H (Mon\u2013Fri) and 0830H to 1700H (Sat)"
+      "charged_hours": "Charges apply from 0830H to 1930H (Mon\u2013Fri) and 0830H to 1700H (Sat) only"
     },
     "season_parking_type": ["staff_open", "staff_covered"],
     "available_lots": 50
@@ -42,7 +42,7 @@
     "longitudeDelta": 0.01,
     "pricing": {
       "rate_per_minute": 0.0214,
-      "charged_hours": "Charges apply only from 0830H to 1930H (Mon\u2013Fri) and 0830H to 1700H (Sat)"
+      "charged_hours": "Charges apply from 0830H to 1930H (Mon\u2013Fri) and 0830H to 1700H (Sat) only"
     },
     "season_parking_type": ["staff_open", "staff_covered", "student_open_2A"],
     "available_lots": 50
@@ -58,7 +58,7 @@
     "longitudeDelta": 0.01,
     "pricing": {
       "rate_per_minute": 0.0214,
-      "charged_hours": "Charges apply only from 0830H to 1930H (Mon\u2013Fri) and 0830H to 1700H (Sat)"
+      "charged_hours": "Charges apply from 0830H to 1930H (Mon\u2013Fri) and 0830H to 1700H (Sat) only"
     },
     "season_parking_type": ["staff_open", "staff_covered"],
     "available_lots": 50
@@ -91,7 +91,7 @@
     "pricing": {
       "rate_per_minute": 0.0214,
       "max_daily_cap": 2.568,
-      "charged_hours": "Charges apply only from 0830H to 1800H capped at $2.568 per exit per day for registered NUS staff and students, and from 1801H to 1930H (Mon\u2013Fri) and 0830H to 1700H (Sat)"
+      "charged_hours": "Charges apply from 0830H to 1800H capped at $2.568 per exit per day for registered NUS staff and students, and from 1801H to 1930H (Mon\u2013Fri) and 0830H to 1700H (Sat) only"
     },
     "season_parking_type": ["staff_covered", "student_covered"],
     "available_lots": 50
@@ -107,7 +107,7 @@
     "longitudeDelta": 0.01,
     "pricing": {
       "rate_per_minute": 0.0214,
-      "charged_hours": "Charges apply only from 0830H to 1930H (Mon\u2013Fri) and 0830H to 1700H (Sat)"
+      "charged_hours": "Charges apply from 0830H to 1930H (Mon\u2013Fri) and 0830H to 1700H (Sat) only"
     },
     "season_parking_type": ["staff_covered", "staff_open", "student_open", "student_open_2A", "student_open_10", "student_open_11", "student_covered"],
     "available_lots": 50
@@ -123,7 +123,7 @@
     "longitudeDelta": 0.01,
     "pricing": {
       "rate_per_minute": 0.0214,
-      "charged_hours": "Charges apply only from 0830H to 1930H (Mon\u2013Fri) and 0830H to 1700H (Sat)"
+      "charged_hours": "Charges apply from 0830H to 1930H (Mon\u2013Fri) and 0830H to 1700H (Sat) only"
     },
     "season_parking_type": ["staff_covered", "staff_open", "student_open", "student_open_2A", "student_open_10", "student_open_11", "student_covered"],
     "available_lots": 50
@@ -139,7 +139,7 @@
     "longitudeDelta": 0.01,
     "pricing": {
       "rate_per_minute": 0.0214,
-      "charged_hours": "Charges apply only from 0830H to 1930H (Mon\u2013Fri) and 0830H to 1700H (Sat)"
+      "charged_hours": "Charges apply from 0830H to 1930H (Mon\u2013Fri) and 0830H to 1700H (Sat) only"
     },
     "season_parking_type": ["staff_covered", "staff_open",  "student_open", "student_open_2A", "student_open_10", "student_open_11", "student_covered"],
     "available_lots": 50
@@ -187,7 +187,7 @@
     "longitudeDelta": 0.01,
     "pricing": {
       "rate_per_minute": 0.0214,
-      "charged_hours": "Charges apply only from 0830H to 1930H (Mon\u2013Fri) and 0830H to 1700H (Sat)"
+      "charged_hours": "Charges apply from 0830H to 1930H (Mon\u2013Fri) and 0830H to 1700H (Sat) only"
     },
     "season_parking_type": ["staff_covered"],
     "available_lots": 50
@@ -268,7 +268,7 @@
     "longitudeDelta": 0.01,
     "pricing": {
       "rate_per_minute": 0.0214,
-      "charged_hours": "Charges apply only from 0830H to 1930H (Mon\u2013Fri) and 0830H to 1700H (Sat)"
+      "charged_hours": "Charges apply from 0830H to 1930H (Mon\u2013Fri) and 0830H to 1700H (Sat) only"
     },
     "season_parking_type": ["staff_open", "staff_covered", "student_open_10"],
     "available_lots": 50
@@ -284,7 +284,7 @@
     "longitudeDelta": 0.01,
     "pricing": {
       "rate_per_minute": 0.0214,
-      "charged_hours": "Charges apply only from 0830H to 1930H (Mon\u2013Fri) and 0830H to 1700H (Sat)"
+      "charged_hours": "Charges apply from 0830H to 1930H (Mon\u2013Fri) and 0830H to 1700H (Sat) only"
     },
     "season_parking_type": ["staff_open", "staff_covered", "student_open", "student_open_2A", "student_open_10", "student_open_11", "student_covered"],
     "available_lots": 50
@@ -301,7 +301,7 @@
     "pricing": {
       "rate_per_minute": 0.0214,
       "max_daily_cap": 2.568,
-      "charged_hours": "Charges apply only from 0830H to 1800H capped at $2.568 per exit per day for registered NUS staff and students, and from 1801H to 1930H (Mon\u2013Fri) and 0830H to 1700H (Sat)"
+      "charged_hours": "Charges apply from 0830H to 1800H capped at $2.568 per exit per day for registered NUS staff and students, and from 1801H to 1930H (Mon\u2013Fri) and 0830H to 1700H (Sat) only"
     },
     "season_parking_type": [ "staff_covered", "student_covered"],
     "available_lots": 50
@@ -333,7 +333,7 @@
     "longitudeDelta": 0.01,
     "pricing": {
       "rate_per_minute": 0.0214,
-      "charged_hours": "Charges apply only from 0830H to 1930H (Mon\u2013Fri) and 0830H to 1700H (Sat)"
+      "charged_hours": "Charges apply from 0830H to 1930H (Mon\u2013Fri) and 0830H to 1700H (Sat) only"
     },
     "season_parking_type": [ "staff_covered", "student_covered", "student_open_11"],
     "available_lots": 50
@@ -365,7 +365,7 @@
     "longitudeDelta": 0.01,
     "pricing": {
       "rate_per_minute": 0.0214,
-      "charged_hours": "Charges apply only from 0830H to 1930H (Mon\u2013Fri) and 0830H to 1700H (Sat)"
+      "charged_hours": "Charges apply from 0830H to 1930H (Mon\u2013Fri) and 0830H to 1700H (Sat) only"
     },
     "season_parking_type": ["staff_open", "staff_covered"],
     "available_lots": 50
@@ -381,7 +381,7 @@
     "longitudeDelta": 0.01,
     "pricing": {
       "rate_per_minute": 0.0214,
-      "charged_hours": "Charges apply only from 0830H to 1930H (Mon\u2013Fri) and 0830H to 1700H (Sat)"
+      "charged_hours": "Charges apply from 0830H to 1930H (Mon\u2013Fri) and 0830H to 1700H (Sat) only"
     },
     "season_parking_type": ["staff_open", "staff_covered"],
     "available_lots": 50
@@ -413,7 +413,7 @@
     "longitudeDelta": 0.01,
     "pricing": {
       "rate_per_minute": 0.0214,
-      "charged_hours": "Charges apply only from 0830H to 1930H (Mon\u2013Fri) and 0830H to 1700H (Sat)"
+      "charged_hours": "Charges apply from 0830H to 1930H (Mon\u2013Fri) and 0830H to 1700H (Sat) only"
     },
     "season_parking_type": ["student_covered", "staff_covered"],
     "available_lots": 50
@@ -429,7 +429,7 @@
     "longitudeDelta": 0.01,
     "pricing": {
       "rate_per_minute": 0.0214,
-      "charged_hours": "Charges apply only from 0830H to 1930H (Mon\u2013Fri) and 0830H to 1700H (Sat) NOTE: THIS CARPARK IS CURRENTLY CLOSED"
+      "charged_hours": "Charges apply from 0830H to 1930H (Mon\u2013Fri) and 0830H to 1700H (Sat) only. NOTE: THIS CARPARK IS CURRENTLY CLOSED"
     },
     "season_parking_type": ["staff_open", "staff_covered", "student_open", "student_open_2A", "student_open_10", "student_open_11", "student_covered"],
     "available_lots": 50
@@ -477,7 +477,7 @@
     "longitudeDelta": 0.01,
     "pricing": {
       "rate_per_minute": 0.0214,
-      "charged_hours": "Charges apply only from 0830H to 1930H (Mon\u2013Fri) and 0830H to 1700H (Sat)"
+      "charged_hours": "Charges apply from 0830H to 1930H (Mon\u2013Fri) and 0830H to 1700H (Sat) only"
     },
     "season_parking_type": ["staff_open", "staff_covered","student_open", "student_open_2A", "student_open_10", "student_open_11", "student_covered"],
     "available_lots": 50
@@ -493,7 +493,7 @@
     "longitudeDelta": 0.01,
     "pricing": {
       "rate_per_minute": 0.0214,
-      "charged_hours": "Charges apply only from 0830H to 1930H (Mon\u2013Fri) and 0830H to 1700H (Sat)"
+      "charged_hours": "Charges apply from 0830H to 1930H (Mon\u2013Fri) and 0830H to 1700H (Sat) only"
     },
     "season_parking_type": ["staff_open", "staff_covered"],
     "available_lots": 50
@@ -541,7 +541,7 @@
     "longitudeDelta": 0.01,
     "pricing": {
       "rate_per_minute": 0.0214,
-      "charged_hours": "Charges apply only from 0830H to 1930H (Mon\u2013Fri) and 0830H to 1700H (Sat)"
+      "charged_hours": "Charges apply from 0830H to 1930H (Mon\u2013Fri) and 0830H to 1700H (Sat) only"
     },
     "season_parking_type": ["student_covered", "staff_covered"],
     "available_lots": 50

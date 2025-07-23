@@ -19,55 +19,19 @@ interface Carpark {
   staff: boolean;
 }
 
-const categories = [
-  { id: 'sheltered', name: 'Sheltered', icon: 'umbrella-outline' },
-  { id: 'open-air', name: 'Open Air', icon: 'sunny-outline' },
-  { id: 'public', name: 'Public', icon: 'globe-outline' },
-  { id: 'staff-only', name: 'Staff', icon: 'lock-closed-outline' },
-];
-
 export default function PricingScreen() {
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedCard, setExpandedCard] = useState<number | null>(null);
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [showDisclaimer, setShowDisclaimer] = useState(false);
   const router = useRouter();
 
   const filteredCarparks = useMemo(() => {
-    let filtered = carparks.filter((carpark: Carpark) =>
+    return carparks.filter((carpark: Carpark) =>
       carpark.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
-
-    if (selectedCategory) {
-      filtered = filtered.filter((carpark: Carpark) => {
-        switch (selectedCategory) {
-          case 'sheltered':
-            return carpark.type === 'sheltered';
-          case 'open-air':
-            return carpark.type !== 'sheltered';
-          case 'public':
-            return !carpark.staff;
-          case 'staff-only':
-            return carpark.staff;
-          default:
-            return true;
-        }
-      });
-    }
-
-    return filtered;
-  }, [searchQuery, selectedCategory]);
+  }, [searchQuery]);
 
   const clearSearch = () => {
     setSearchQuery("");
-  };
-
-  const toggleDisclaimer = () => {
-    setShowDisclaimer(!showDisclaimer);
-  };
-
-  const hideDisclaimer = () => {
-    setShowDisclaimer(false);
   };
 
   const handleCardPress = (carpark: Carpark) => {
@@ -143,7 +107,7 @@ export default function PricingScreen() {
               
               <View style={styles.detailsGrid}>
                 <View style={styles.detailCard}>
-                  <View style={styles.pricingIcon}>
+                  <View style={styles.detailIcon}>
                     <Ionicons 
                       name={item.type === "sheltered" ? "umbrella-outline" : "sunny-outline"} 
                       size={20} 
@@ -151,9 +115,9 @@ export default function PricingScreen() {
                     />
                   </View>
                   <View>
-                    <Text style={styles.pricingLabel}>Type</Text>
+                    <Text style={styles.detailLabel}>Type</Text>
                     <Text style={[
-                      styles.pricingValue,
+                      styles.detailValue,
                     ]}>
                       {item.type === "sheltered" ? "Sheltered" : "Open Air"}
                     </Text>
@@ -161,7 +125,7 @@ export default function PricingScreen() {
                 </View>
 
                 <View style={styles.detailCard}>
-                  <View style={styles.pricingIcon}>
+                  <View style={styles.detailIcon}>
                     <Ionicons 
                       name={item.staff ? "lock-closed-outline" : "globe-outline"} 
                       size={20} 
@@ -169,9 +133,9 @@ export default function PricingScreen() {
                     />
                   </View>
                   <View>
-                    <Text style={styles.pricingLabel}>Access</Text>
+                    <Text style={styles.detailLabel}>Access</Text>
                     <Text style={[
-                      styles.pricingValue,
+                      styles.detailValue,
                       { color: item.staff ? "#EF4444" : "#10B981" }
                     ]}>
                       {item.staff ? "Staff" : "Public"}
@@ -195,7 +159,7 @@ export default function PricingScreen() {
                 activeOpacity={0.8}
               >
                 <LinearGradient
-                  colors={["#6366F1", "#8B5CF6", "#EC4899"]}
+                  colors={["#6d62fe", "#3B82F6"]}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1.3, y: 0 }}
                   style={styles.selectButtonGradient}
@@ -213,82 +177,33 @@ export default function PricingScreen() {
 
   const scrollY = useRef(new Animated.Value(0)).current;
 
-  // hide disclaimer on scroll
-  const onScroll = Animated.event(
-    [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-    { 
-      useNativeDriver: false,
-      listener: () => {
-        if (showDisclaimer) {
-          hideDisclaimer();
-        }
-      }
-    }
-  );
-
-  // category tabs scroll
-  const categoryHeight = scrollY.interpolate({
-    inputRange: [0, 100, 150],
-    outputRange: [70, 35, 30],
+  const headerHeight = scrollY.interpolate({
+    inputRange: [0, 180],
+    outputRange: Platform.select({
+      ios: [172, 0],
+      android: [198, 0],
+      default: [172, 0],
+    }),
     extrapolate: 'clamp',
   });
 
-  const categoryIconOpacity = scrollY.interpolate({
-    inputRange: [0, 80, 120],
-    outputRange: [1, 0.3, 0],
+  const headerOpacity = scrollY.interpolate({
+    inputRange: [0, 180],
+    outputRange: [1, 0],
     extrapolate: 'clamp',
   });
 
-  const categoryTextSize = scrollY.interpolate({
-    inputRange: [0, 120], 
-    outputRange: [13, 13], // font size
-    extrapolate: 'clamp',
-  });
-
-  const categoryPaddingHorizontal = scrollY.interpolate({
-    inputRange: [0, 120],
-    outputRange: [12, 8],
-    extrapolate: 'clamp',
-  });
-
-  const renderCategoryTab = (category: any) => (
-    <TouchableOpacity
-      key={category.id}
-      style={[
-        styles.categoryTab,
-        selectedCategory === category.id && styles.categoryTabSelected
-      ]}
-      onPress={() => setSelectedCategory(selectedCategory === category.id ? null : category.id)}
-      activeOpacity={0.7}
-    >
-      <Animated.View style={[styles.categoryIcon, { opacity: categoryIconOpacity }]}>
-        <Ionicons 
-          name={category.icon} 
-          size={18} 
-          color={selectedCategory === category.id ? '#FF385C' : '#6B7280'} 
-        />
-      </Animated.View>
-      <Animated.Text 
-        style={[
-          styles.categoryText,
-          selectedCategory === category.id && styles.categoryTextSelected,
-          { 
-            fontSize: categoryTextSize,
-            paddingHorizontal: categoryPaddingHorizontal
-          }
-        ]}
-      >
-        {category.name}
-      </Animated.Text>
-    </TouchableOpacity>
-  );
 
   return (
     <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
+      <StatusBar barStyle="light-content" backgroundColor="#6d62fe" />
 
-      {/* header */}
-      <View style={styles.fixedHeader}>
+      <Animated.View style={[styles.header, { height: headerHeight, opacity: headerOpacity, overflow: 'hidden' }]}>
+        <LinearGradient colors={["#6d62fe", "#3B82F6"]} style={StyleSheet.absoluteFill}>
+
+        <View style={styles.headerContent}>
+        </View>
+
         {/* search bar */}
         <View style={styles.searchContainer}>
           <View style={styles.searchBar}>
@@ -308,45 +223,29 @@ export default function PricingScreen() {
           </View>
         </View>
 
-        {/* results + disclaimer */}
-        <View style={styles.resultsContainer}>
-          <View style={styles.resultsRow}>
-            <Text style={styles.resultsText}>
-              {filteredCarparks.length} carpark{filteredCarparks.length !== 1 ? "s" : ""} available
+        {/* available lots left */}
+        <Text style={styles.headerSubtitle}>
+          {filteredCarparks.length} carpark{filteredCarparks.length !== 1 ? "s" : ""} available
+        </Text>
+
+        {/* free parking disclaimer */}
+        <View style={styles.disclaimerContainer}>
+          <View style={styles.disclaimerBadge}>
+            <Ionicons name="information-circle-outline" size={16} color="#ffffff" />
+            <Text style={styles.disclaimerText}>
+              Free parking on Sundays and Public Holidays
             </Text>
-            
-            <TouchableOpacity onPress={toggleDisclaimer} style={styles.infoButton}>
-              <Ionicons name="information-circle-outline" size={16} color="#6d62fe" />
-            </TouchableOpacity>
           </View>
-
-          {/* disclaimer popup */}
-          {showDisclaimer && (
-            <View style={styles.disclaimerPopup}>
-              <Text style={styles.disclaimerPopupText}>
-                Free parking on Sundays and Public Holidays
-              </Text>
-              <View style={styles.disclaimerArrow} />
-            </View>
-          )}
         </View>
+      </LinearGradient>
+      </Animated.View>
 
-        {/* category tabs */}
-        <Animated.View style={[styles.categoryContainer, { height: categoryHeight }]}>
-          <View style={styles.categoryScrollContainer}>
-            {categories.map(renderCategoryTab)}
-          </View>
-        </Animated.View>
-      </View>
-
-      {/* content with touch handler to hide disclaimer */}
-      <TouchableOpacity 
-        style={styles.content} 
-        activeOpacity={1} 
-        onPress={hideDisclaimer}
-      >
+      <View style={styles.content}>
         <Animated.FlatList
-          onScroll={onScroll}
+          onScroll={Animated.event(
+            [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+            { useNativeDriver: false }
+          )}
           scrollEventThrottle={16}
           decelerationRate="fast"
           overScrollMode="never"
@@ -358,10 +257,8 @@ export default function PricingScreen() {
           showsVerticalScrollIndicator={false}
           ListEmptyComponent={() => (
             <View style={styles.emptyState}>
-              <Image 
-                source={require("../assets/images/undraw_page-eaten.png")}
-                style={{ width: 200, height: 200, resizeMode: "contain", backgroundColor: "transparent" }} 
-              />
+            <Image source={require("../assets/images/undraw_page-eaten.png")}
+              style={{ width: 200, height: 200, resizeMode: "contain", backgroundColor: "transparent" }} />
               <Text style={styles.emptyStateTitle}>No carparks found</Text>
               <Text style={styles.emptyStateText}>
                 Try adjusting your search terms or browse all available carparks.
@@ -369,7 +266,7 @@ export default function PricingScreen() {
             </View>
           )}
         />
-      </TouchableOpacity>
+      </View>
     </SafeAreaView>
   );
 }
@@ -377,170 +274,96 @@ export default function PricingScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FBFCFD',
+    backgroundColor: '#F9FAFB',
   },
-  fixedHeader: {
-    backgroundColor: '#FFFFFF',
-    paddingTop: Platform.OS === 'ios' ? 0 : 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 3,
-    zIndex: 1000,
+  header: {
+    paddingBottom: 24,
+    backgroundColor: '#6d62fe',
+  },
+  headerContent: {
+    paddingHorizontal: 24,
+    paddingTop: 16,
+    paddingBottom: 24,
+  },
+  headerSubtitle: {
+    fontSize: 14,
+    color: '#ffffffcc',
+    fontWeight: '500',
+    marginLeft: 26,
+    marginTop: -4,
+    marginBottom: 24,
   },
   searchContainer: {
-    paddingHorizontal: 20,
-    paddingVertical: 16,
+    paddingHorizontal: 24,
+    marginBottom: 16,
   },
   searchBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#fff',
     borderRadius: 16,
-    paddingHorizontal: 20,
-    paddingVertical: 14,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
     shadowRadius: 8,
-    elevation: 2,
-    borderWidth: 1.5,
-    borderColor: '#F1F5F9',
-    marginBottom: -9,
+    elevation: 3,
+    minHeight: 0,
+    marginTop: -16,
   },
   searchInput: {
     flex: 1,
     fontSize: 16,
-    color: '#1E293B',
+    color: '#1F2937',
     marginLeft: 12,
-    fontWeight: '500',
   },
-  categoryContainer: {
-    backgroundColor: '#FFFFFF',
-    borderBottomWidth: 0.5,
-    borderBottomColor: '#E2E8F0',
+  disclaimerContainer: {
+    paddingHorizontal: 24,
   },
-  categoryScrollContainer: {
+  disclaimerBadge: {
     flexDirection: 'row',
-    paddingHorizontal: 20,
     alignItems: 'center',
-    justifyContent: 'space-between',
-    height: '100%',
-    flex: 1,
-  },
-  categoryTab: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    flex: 1,
+    backgroundColor: '#ffffff26',
+    paddingHorizontal: 12,
     paddingVertical: 8,
-    borderBottomWidth: 2,
-    borderBottomColor: 'transparent',
-    minHeight: 34,
-    marginTop: -4,
-  },
-  categoryTabSelected: {
-    borderBottomColor: '#FF385C',
-  },
-  categoryIcon: {
-    marginBottom: 4,
-  },
-  categoryText: {
-    fontSize: 13,
-    color: '#64748B',
-    fontWeight: '600',
-    textAlign: 'center',
-  },
-  categoryTextSelected: {
-    color: '#FF385C',
-  },
-  resultsContainer: {
-    paddingHorizontal: 20,
-    paddingVertical: 8,
-    borderBottomWidth: 0.5,
-    borderBottomColor: '#E2E8F0',
-    position: 'relative',
-  },
-  resultsRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  resultsText: {
-    fontSize: 14,
-    color: '#334155',
-    fontWeight: '600',
-  },
-  infoButton: {
-    padding: 6,
-    marginRight: 4,
-    borderRadius: 8,
-  },
-  disclaimerPopup: {
-    position: 'absolute',
-    top: 42,
-    right: 20,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 14,
-    padding: 14,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.1,
-    shadowRadius: 16,
-    elevation: 12,
+    borderRadius: 20,
+    alignSelf: 'flex-start',
     borderWidth: 1,
-    borderColor: '#E2E8F0',
-    maxWidth: 220,
-    zIndex: 1000,
+    borderColor: '#ffffff33',
   },
-  disclaimerPopupText: {
+  disclaimerText: {
     fontSize: 12,
+    color: '#ffffffe6',
+    marginLeft: 6,
     fontWeight: '500',
-    textAlign: 'center',
-    color: '#475569',
-    lineHeight: 16,
-  },
-  disclaimerArrow: {
-    position: 'absolute',
-    top: -6,
-    right: 16,
-    width: 12,
-    height: 12,
-    backgroundColor: '#FFFFFF',
-    borderLeftWidth: 1,
-    borderTopWidth: 1,
-    borderColor: '#E2E8F0',
-    transform: [{ rotate: '45deg' }],
   },
   content: {
     flex: 1,
-    backgroundColor: '#F8FAFC',
   },
   listContainer: {
-    paddingHorizontal: 20,
-    paddingTop: 20,
+    paddingHorizontal: 24,
+    paddingTop: 24,
     paddingBottom: 100,
   },
   cardContainer: {
-    marginBottom: 20,
+    marginBottom: 16,
   },
   card: {
     backgroundColor: '#fff',
-    borderRadius: 24,
+    borderRadius: 20,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 16,
-    elevation: 3,
-    borderWidth: 0.5,
-    borderColor: '#F1F5F9',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 4,
   },
   cardHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 24,
-    borderBottomWidth: 0.5,
-    borderBottomColor: '#F1F5F9',
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F3F4F6',
   },
   cardHeaderLeft: {
     flex: 1,
@@ -548,72 +371,58 @@ const styles = StyleSheet.create({
   carparkName: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#1E293B',
-    marginBottom: 6,
-    letterSpacing: -0.2,
+    color: '#1F2937',
+    marginBottom: 4,
   },
   carparkId: {
     fontSize: 14,
-    color: '#64748B',
+    color: '#6B7280',
     fontWeight: '500',
-    marginBottom: -6,
+    marginBottom: -8,
   },
   expandButton: {
-    padding: 10,
-    backgroundColor: '#F8FAFC',
-    borderRadius: 14,
-    borderWidth: 0.5,
-    borderColor: '#E2E8F0',
+    padding: 8,
+    backgroundColor: '#F9FAFB',
+    borderRadius: 12,
   },
   pricingContainer: {
     flexDirection: 'row',
-    padding: 24,
+    padding: 20,
     gap: 16,
   },
   pricingCard: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FAFBFC',
-    padding: 12,
-    borderRadius: 18,
+    backgroundColor: '#F9FAFB',
+    padding: 16,
+    borderRadius: 16,
     borderWidth: 1,
-    borderColor: '#F1F5F9',
+    borderColor: '#E5E7EB',
   },
   pricingIcon: {
-    width: 40,
-    height: 40,
+    width: 36,
+    height: 36,
     backgroundColor: '#fff',
-    borderRadius: 14,
+    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
-    marginLeft: -4,
     marginRight: 8,
-    shadowColor: '#3B82F6',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
   },
   pricingLabel: {
     fontSize: 12,
-    color: '#64748B',
+    color: '#6B7280',
     fontWeight: '600',
-    marginBottom: 3,
-    letterSpacing: 0.2,
+    marginBottom: 2,
   },
   pricingValue: {
     fontSize: 16,
     fontWeight: '700',
-    color: '#1E293B',
-    letterSpacing: -0.1,
+    color: '#1F2937',
   },
   expandedContent: {
-    padding: 24,
-    paddingTop: 8,
-    backgroundColor: '#FEFEFE',
-    borderBottomLeftRadius: 24,
-    borderBottomRightRadius: 24,
+    padding: 20,
+    paddingTop: 0,
   },
   detailsGrid: {
     flexDirection: 'row',
@@ -624,100 +433,91 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FAFBFC',
-    padding: 12,
-    borderRadius: 18,
+    backgroundColor: '#F9FAFB',
+    padding: 16,
+    borderRadius: 16,
     borderWidth: 1,
-    borderColor: '#F1F5F9',
-    marginTop: -16,
+    borderColor: '#E5E7EB',
   },
   detailIcon: {
-    width: 40,
-    height: 40,
+    width: 36,
+    height: 36,
     backgroundColor: '#fff',
-    borderRadius: 14,
+    borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 8,
-    marginLeft: -4,
-    marginTop: -2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 3,
-    elevation: 1,
   },
   detailLabel: {
     fontSize: 12,
-    color: '#64748B',
+    color: '#6B7280',
     fontWeight: '600',
-    marginBottom: 3,
-    letterSpacing: 0.2,
+    marginBottom: 2,
   },
   detailValue: {
     fontSize: 14,
     fontWeight: '700',
-    color: '#1E293B',
   },
   chargedHoursCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F0F4FF',
-    padding: 18,
-    borderRadius: 18,
+    backgroundColor: '#EEF2FF',
+    padding: 16,
+    borderRadius: 16,
     marginBottom: 20,
     borderWidth: 1,
-    borderColor: '#DDD6FE',
+    borderColor: '#C7D2FE',
   },
   chargedHoursIcon: {
-    marginRight: 14,
+    marginRight: 12,
   },
   chargedHoursText: {
     fontSize: 14,
-    color: '#6366F1',
+    color: '',
     fontWeight: '600',
     flex: 1,
     lineHeight: 20,
     flexWrap: 'wrap',
   },
   selectButton: {
-    borderRadius: 18,
+    borderRadius: 16,
     overflow: 'hidden',
-    shadowColor: '#6366F1',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.15,
-    shadowRadius: 12,
-    elevation: 6,
+    shadowColor: '#6d62fe',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 4,
   },
   selectButtonGradient: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 18,
-    paddingHorizontal: 28,
-    gap: 10,
+    paddingVertical: 16,
+    paddingHorizontal: 24,
+    gap: 8,
   },
   selectButtonText: {
     color: '#ffffff',
     fontSize: 16,
     fontWeight: '700',
-    letterSpacing: 0.2,
   },
   emptyState: {
     alignItems: 'center',
     paddingVertical: 60,
     paddingHorizontal: 32,
   },
+  emptyStateIcon: {
+    marginBottom: 24,
+  },
   emptyStateTitle: {
     fontSize: 20,
     fontWeight: '700',
-    color: '#1E293B',
+    color: '#1F2937',
     marginBottom: 8,
-    letterSpacing: -0.2,
   },
   emptyStateText: {
     fontSize: 16,
-    color: '#64748B',
+    color: '#6B7280',
     textAlign: 'center',
     lineHeight: 24,
     marginBottom: 32,
