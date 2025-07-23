@@ -17,6 +17,7 @@ const SeasonParkingStatus = () => {
   const router = useRouter();
   const { signedUp } = useLocalSearchParams();
   const [hasSeasonParking, setHasSeasonParking] = useState(false);
+  const [seasonParkingType, setSeasonParkingType] = useState("")
   const scrollY = useRef(new Animated.Value(0)).current;
 
   const userContext = useContext(UserContext);
@@ -24,6 +25,20 @@ const SeasonParkingStatus = () => {
     throw new Error("UserContext not available");
   }
   const { user } = userContext;
+
+  const processParking = (seasonPassType : string) => {
+    switch(seasonPassType) {
+      case 'staff_covered': 
+        return 'Staff sheltered Lot - $65/month';
+      case 'staff_open':
+        return 'Staff unsheltered Lot - $35/month';
+      case 'student_covered':
+        return 'Student sheltered Lot - $65/month';
+      default:
+        return 'Student unshltered Lot - $35/month'
+      
+    }
+  }
 
   useFocusEffect(
     useCallback(() => {
@@ -38,9 +53,10 @@ const SeasonParkingStatus = () => {
           });
           console.log("checking season status");
           const result = await response.json();
-          console.log(result.season)
+          console.log(result)
           if (result.season === true) {
             setHasSeasonParking(true);
+            setSeasonParkingType(processParking(result.season_pass_type))
             console.log('set to true')
           } else {
             setHasSeasonParking(false);
@@ -223,7 +239,7 @@ const SeasonParkingStatus = () => {
                 <FontAwesome name="map-marker" size={14} color="#6B7280" />  Parking Type
               </Text> 
               <View style={styles.detailValue}>
-                <Text style={styles.detailText}>Unsheltered Lot - $35/month</Text>
+                <Text style={styles.detailText}>{seasonParkingType}</Text>
               </View>
             </View>
 

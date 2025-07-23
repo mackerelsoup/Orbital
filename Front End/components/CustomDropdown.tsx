@@ -20,6 +20,7 @@ export default function CustomDropdown( {data, handleChange} : customDropdownPro
     <View>
       <Dropdown
         style={[styles.dropdown, isFocus && { borderColor: 'blue' }]}
+        containerStyle= {{padding: 10}}
         placeholderStyle={styles.placeholderStyle}
         selectedTextStyle={styles.selectedTextStyle}
         inputSearchStyle={styles.inputSearchStyle}
