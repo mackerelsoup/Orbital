@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View, Dimensions, Modal, Pressable } from 'react-native'
-import React, { useEffect, useState, useMemo } from 'react'
+import React, { useEffect, useState, useMemo, useLayoutEffect } from 'react'
 import { CartesianChart, Line, useChartPressState } from "victory-native"
 import { useFont, Circle, Text as SKText, RoundedRect } from '@shopify/react-native-skia'
 import { SharedValue, useDerivedValue, Easing } from 'react-native-reanimated'
@@ -8,9 +8,9 @@ import { subMonths, subYears, subWeeks } from 'date-fns';
 import { scaleTime } from 'd3-scale';
 import { timeMinute } from 'd3-time';
 import SquareButton from '@/components/SquareButton'
-import { useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams, useNavigation } from 'expo-router';
 import { Portal } from 'react-native-portalize'
-
+import carparks from '../../assets/carparks.json';
 
 
 
@@ -110,7 +110,13 @@ export default function CarparkTrend() {
     x: 0,
     y: { availability: 0 }   // Note: This should match the yKeys in CartesianChart
   });
+  const navigation = useNavigation()
 
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      title: `${carparks[Number(carparkId) - 1].name} Trend`
+    })
+  })
 
   useEffect(() => {
     const getCurrentTime = async () => {
@@ -395,7 +401,7 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   modalButton: {
-    backgroundColor: '#007aff',
+    backgroundColor: '#3B82F6',
     borderRadius: 8,
     paddingVertical: 10,
     paddingHorizontal: 20,

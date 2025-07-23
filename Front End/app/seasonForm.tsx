@@ -34,7 +34,7 @@ const SeasonParkingApplicationForm = () => {
   const [showModal, setShowModal] = useState(false);
   const [isFocus, setIsFocus] = useState(false)
   const router = useRouter();
-  
+
   const userContext = useContext(UserContext);
   if (!userContext) {
     throw new Error("UserContext not available");
@@ -80,7 +80,7 @@ const SeasonParkingApplicationForm = () => {
         {
           text: "Leave",
           onPress: () => {
-            resetForm(); 
+            resetForm();
             router.push('/season')
           },
           style: "destructive"
@@ -109,7 +109,7 @@ const SeasonParkingApplicationForm = () => {
     // same email check
     if (user.email != formData.email) {
       Alert.alert('Wrong or Invalid Email', 'Please enter your account\'s email address.');
-      clearField('email');  
+      clearField('email');
       return false;
     }
 
@@ -144,7 +144,7 @@ const SeasonParkingApplicationForm = () => {
       clearField('vehicleRegNo');
       return false;
     }
-    
+
     // engine capacity check
     if (!engineCapacity) {
       Alert.alert('Missing Information', 'Select vehicle engine capacity');
@@ -213,6 +213,25 @@ const SeasonParkingApplicationForm = () => {
     { label: 'Dr.', value: 'Dr' }
   ]
 
+  const parseLabel = (label: string) => {
+    switch (label) {
+      case "Staff (Covered)":
+        return "staff_covered";
+      case "Staff (Open)":
+        return "staff_open";
+      case "Student (Covered)":
+        return "student_covered";
+      case "Student (Open)":
+        return "student_open";
+      case "Student (Open 2A)":
+        return "student_open_2A";
+      case "Student (Open 10)":
+        return "student_open_10";
+      case "Student (Open 11)":
+        return "student_open_11";
+    }
+  }
+
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}
@@ -235,7 +254,7 @@ const SeasonParkingApplicationForm = () => {
       >
         {/* back arrow */}
         <TouchableOpacity
-          onPress={() => {handleLeavePress()}}
+          onPress={() => { handleLeavePress() }}
           style={{
             position: 'absolute',
             left: 16,
@@ -501,13 +520,38 @@ const SeasonParkingApplicationForm = () => {
                 <Text style={styles.label}>Choose Parking Type <Text style={styles.required}>*</Text></Text>
                 <View style={styles.checkboxContainer}>
                   <CheckBox
-                    selected={parkingType === 'Open'}
-                    onPress={() => setParkingType('Open')}
+                    selected={
+                      [
+                        'staff_open',
+                        'student_open',
+                        'student_open_2A',
+                        'student_open_10',
+                        'student_open_11',
+                      ].includes(parkingType)
+                    }
+                    onPress={() => setParkingType(user.staff ? 'staff_open' : 'student_open')}
                     label="Unsheltered"
                   />
+                  {  ['student_open',
+                        'student_open_2A',
+                        'student_open_10',
+                        'student_open_11',
+                      ].includes(parkingType) &&
+                    <CustomDropdown
+                      data={
+                        [
+                          { label: "Student (Open)", value: "Student (Open)" },
+                          { label: "Student (Open 2A)", value: "Student (Open 2A)" },
+                          { label: "Student (Open 10)", value: "Student (Open 10)" },
+                          { label: "Student (Open 11)", value: "Student (Open 11)" },
+                        ]
+                      }
+                      handleChange={(item) => { setParkingType(parseLabel(item.label)!) }}
+                    />
+                  }
                   <CheckBox
-                    selected={parkingType === 'Covered'}
-                    onPress={() => setParkingType('Covered')}
+                    selected={parkingType === 'staff_covered' || parkingType === 'student_covered'}
+                    onPress={() => setParkingType(user.staff ? 'staff_covered' : 'student_covered')}
                     label="Sheltered"
                   />
                 </View>
@@ -747,28 +791,28 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   dropdown: {
-      height: 50,
-      borderColor: 'gray',
-      borderWidth: 0.5,
-      borderRadius: 8,
-      paddingHorizontal: 8,
-      backgroundColor: '#F9FAFB'
-    },
+    height: 50,
+    borderColor: 'gray',
+    borderWidth: 0.5,
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    backgroundColor: '#F9FAFB'
+  },
   placeholderStyle: {
-      fontSize: 16,
-      color: '#9CA3AF'
-    },
-    selectedTextStyle: {
-      fontSize: 16,
-    },
-    iconStyle: {
-      width: 20,
-      height: 20,
-    },
-    inputSearchStyle: {
-      height: 40,
-      fontSize: 16,
-    },
+    fontSize: 16,
+    color: '#9CA3AF'
+  },
+  selectedTextStyle: {
+    fontSize: 16,
+  },
+  iconStyle: {
+    width: 20,
+    height: 20,
+  },
+  inputSearchStyle: {
+    height: 40,
+    fontSize: 16,
+  },
 });
 
 export default SeasonParkingApplicationForm;

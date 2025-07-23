@@ -81,6 +81,28 @@ export default function Profile() {
     setIsModalVisible(!isModalVisible)
   }
 
+  const parseValue = (value: string) => {
+  switch (value) {
+    case "staff_covered":
+      return "Staff (Covered)";
+    case "staff_open":
+      return "Staff (Open)";
+    case "student_covered":
+      return "Student (Covered)";
+    case "student_open":
+      return "Student (Open)";
+    case "student_open_2A":
+      return "Student (Open 2A)";
+    case "student_open_10":
+      return "Student (Open 10)";
+    case "student_open_11":
+      return "Student (Open 11)";
+    default:
+      return ""; // or null, or a fallback label
+  }
+};
+
+
   useEffect(() => {
     if (updateImage){
       const updateImage = async () => {
@@ -182,7 +204,7 @@ export default function Profile() {
           <InfoCard
             icon="directions-car"
             label="Parking Type"
-            value={user.season_parking_type}
+            value={parseValue(user.season_parking_type)}
             iconColor="#F59E0B"
           />
         )}
