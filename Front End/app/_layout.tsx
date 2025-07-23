@@ -1,9 +1,9 @@
 import { UserContext, UserProvider } from '@/context/userContext';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
-import { Link, router, Stack } from 'expo-router';
+import { Link} from 'expo-router';
 import { Drawer } from 'expo-router/drawer';
-import { useContext, useState, useEffect, ComponentProps } from 'react';
+import { useContext, ComponentProps } from 'react';
 import { Platform, View, StyleSheet, Image } from 'react-native';
 import 'react-native-gesture-handler'
 import { GestureHandlerRootView, Pressable } from 'react-native-gesture-handler';

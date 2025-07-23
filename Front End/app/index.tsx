@@ -23,6 +23,7 @@ export default function App() {
 
   // allows for car park modal to pop up when clicked from pricing file
   useEffect(() => {
+    console.log(carparks[3])
     if (carparkId && triggerClick === 'true') {
       const id = parseInt(carparkId.toString(), 10);
       const target = carparks.find(cp => cp.id === id);
