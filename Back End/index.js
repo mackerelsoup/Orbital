@@ -583,7 +583,7 @@ app.post('/checkSeasonStatus', async (request, response) => {
     return response.status(400).json({ error: 'Email is required' });
   }
 
-  const check_query = "SELECT season_pass FROM user_info WHERE email = $1";
+  const check_query = "SELECT season_pass, season_pass_type FROM user_info WHERE email = $1";
 
   try {
     const queryResult = await pool.query(check_query, [email])
@@ -595,7 +595,7 @@ app.post('/checkSeasonStatus', async (request, response) => {
       return response.status(201).json({ season: false });
     }
 
-    return response.status(200).json({ season: true })
+    return response.status(200).json({ season: true, season_pass_type: queryResult.rows[0].season_pass_type })
 
   } catch (error) {
     console.error('Error ending season parking:', err);
