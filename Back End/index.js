@@ -158,7 +158,7 @@ app.get('/fetchUserDataEmail/:email', async (request, response) => {
   console.log(email)
   const fetch_id_query = "SELECT * FROM user_info WHERE email = $1"
   try {
-    const fetchResult = await pool.query(fetch_id_query, [username])
+    const fetchResult = await pool.query(fetch_id_query, [email])
 
     if (fetchResult.rowCount === 0) {
       return response.status(404).send("User info not found")
