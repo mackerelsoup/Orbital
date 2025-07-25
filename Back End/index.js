@@ -955,7 +955,7 @@ app.post('/sendConfirmationEmail', async (req, res) => {
       from: process.env.EMAIL_USER,
       to: email,
       subject: "NUSpots Vehicle Registration Confirmation",
-      text: `Hi ${username},\n\nThank you for registering your vehicle! Please wait for us to approve your application. If appproved, your parking will now be capped at $2.568 per exit per day on weekdays, from 0830 to 1800 at:\n\n CP3: University Cultural Centre/Yong Siew Toh Conservatory of Music\nCP10B: Prince George's Park Residences\n\nBest regards,\nNUSpots`,
+      text: `Hi ${username},\n\nThank you for registering your vehicle! Please wait for us to approve your application. If appproved, your parking will now be capped at $2.568 per exit per day on weekdays, from 0830 to 1800 at:\n\nCP3: University Cultural Centre/Yong Siew Toh Conservatory of Music\nCP10B: Prince George's Park Residences\n\nBest regards,\nNUSpots`,
     };
   } 
 
