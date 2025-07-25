@@ -946,7 +946,7 @@ app.post('/sendConfirmationEmail', async (req, res) => {
   const mailOptions = {
     from: process.env.EMAIL_USER,
     to: email,
-    subject: "NUSpots Seaspn Parking Confirmation",
+    subject: "NUSpots Season Parking Confirmation",
     text: `Hi ${username},\n\nThank you for applying for season parking! Your validity period will be reflected in the app once we have approved your application.\n\nBest regards,\nNUSpots`,
   };
 
