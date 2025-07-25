@@ -4,6 +4,7 @@ import { useRouter } from 'expo-router';
 import React, { useMemo, useState, useRef } from 'react';
 import { Animated, Dimensions, FlatList, Image, Platform, SafeAreaView, StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import carparks from '../assets/carparks.json';
+import debounce from 'lodash';
 
 const { width } = Dimensions.get("window");
 
@@ -258,7 +259,11 @@ export default function PricingScreen() {
         styles.categoryTab,
         selectedCategory === category.id && styles.categoryTabSelected
       ]}
-      onPress={() => setSelectedCategory(selectedCategory === category.id ? null : category.id)}
+      onPress={() => {
+        setTimeout (() => {
+          setSelectedCategory(selectedCategory === category.id ? null : category.id)
+        }, 50);
+      }}
       activeOpacity={0.7}
     >
       <Animated.View style={[styles.categoryIcon, { opacity: categoryIconOpacity }]}>
@@ -347,6 +352,10 @@ export default function PricingScreen() {
       >
         <Animated.FlatList
           onScroll={onScroll}
+          initialNumToRender={5}
+          maxToRenderPerBatch={5}
+          windowSize={10}
+          removeClippedSubviews={true}
           scrollEventThrottle={16}
           decelerationRate="fast"
           overScrollMode="never"
@@ -386,7 +395,6 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.06,
     shadowRadius: 8,
-    elevation: 3,
     zIndex: 1000,
   },
   searchContainer: {
@@ -487,7 +495,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.1,
     shadowRadius: 16,
-    elevation: 12,
+    elevation: 8,
     borderWidth: 1,
     borderColor: '#E2E8F0',
     maxWidth: 220,
