@@ -28,6 +28,7 @@ const CappedParkingApplicationForm = () => {
   const [showModal, setShowModal] = useState(false);
   const router = useRouter();
   const scrollY = useRef(new Animated.Value(0)).current;
+  const [hasSubmitted, setHasSubmitted] = useState(false);
 
   const userContext = useContext(UserContext);
   if (!userContext) {
@@ -139,7 +140,9 @@ const CappedParkingApplicationForm = () => {
 
   // handle submit and store info to database by communicating with backend first
   const handleSubmit = async () => {
+    if (hasSubmitted) return;
     if (!validateForm()) return;
+    setHasSubmitted(true);
 
     const payload = {
       ...formData, // ... to include all user input key-value pairs  
@@ -159,7 +162,7 @@ const CappedParkingApplicationForm = () => {
         await fetch("https://back-end-o2lr.onrender.com/sendConfirmationEmail", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email: formData.email, username: formData.name }),
+          body: JSON.stringify({ email: formData.email, username: formData.name, type: 'capped' }),
         });
         console.log("vehicle registered")
         setShowModal(true);
@@ -168,10 +171,12 @@ const CappedParkingApplicationForm = () => {
           router.replace('/cappedPending');
         }, 2000);
       } else {
+        setHasSubmitted(false);
         Alert.alert('Submission failed', result.error);
       }
     } catch (err) {
       // if no response, likely network error
+      setHasSubmitted(false);
       Alert.alert('Network error', 'Unable to connect to server');
     }
   };
@@ -430,7 +435,7 @@ const CappedParkingApplicationForm = () => {
             </View>
 
             {/* submit button */}
-            <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
+            <TouchableOpacity style={[styles.submitButton, hasSubmitted && { opacity: 0.6 }]} onPress={handleSubmit} disabled={hasSubmitted}>
               <FontAwesome name="paper-plane" size={18} color="#FFFFFF" style={styles.buttonIcon} />
               <Text style={styles.submitButtonText}>  Submit Application</Text>
             </TouchableOpacity>

@@ -34,6 +34,7 @@ const SeasonParkingApplicationForm = () => {
   const [showModal, setShowModal] = useState(false);
   const [isFocus, setIsFocus] = useState(false)
   const router = useRouter();
+  const [hasSubmitted, setHasSubmitted] = useState(false);
 
   const userContext = useContext(UserContext);
   if (!userContext) {
@@ -161,7 +162,9 @@ const SeasonParkingApplicationForm = () => {
 
   // handle submit and store info to database by communicating with backend first
   const handleSubmit = async () => {
+    if (hasSubmitted) return;
     if (!validateForm()) return;
+    setHasSubmitted(true);
 
     const payload = {
       ...formData, // ... to include all user input key-value pairs  
@@ -179,6 +182,11 @@ const SeasonParkingApplicationForm = () => {
       // get response and decode whether it is successful or not
       const result = await response.json();
       if (result.success) {
+        await fetch("https://back-end-o2lr.onrender.com/sendConfirmationEmail", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: formData.email, username: formData.name, type: 'season' }),
+        });
         console.log("season parking form submitted")
         setShowModal(true);
         setTimeout(() => {
@@ -186,10 +194,12 @@ const SeasonParkingApplicationForm = () => {
           router.replace('/seasonPending');
         }, 2000);
       } else {
+        setHasSubmitted(false);
         Alert.alert('Submission failed', result.error);
       }
     } catch (err) {
       // if no response, likely network error
+      setHasSubmitted(false);
       Alert.alert('Network error', 'Unable to connect to server');
     }
   };
@@ -559,7 +569,7 @@ const SeasonParkingApplicationForm = () => {
             </View>
 
             {/* submit button */}
-            <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
+            <TouchableOpacity style={[styles.submitButton, hasSubmitted && { opacity: 0.6 }]} onPress={handleSubmit} disabled={hasSubmitted}>
               <FontAwesome name="paper-plane" size={18} color="#FFFFFF" style={styles.buttonIcon} />
               <Text style={styles.submitButtonText}>  Submit Application</Text>
             </TouchableOpacity>
