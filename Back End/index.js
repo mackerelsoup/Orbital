@@ -943,7 +943,7 @@ app.post('/applyCappedParking', async (request, response) => {
 app.post('/sendConfirmationEmail', async (req, res) => {
   const { email, username, type } = req.body;
 
-  const mailOptions = {
+  let mailOptions = {
     from: process.env.EMAIL_USER,
     to: email,
     subject: "NUSpots Season Parking Confirmation",
