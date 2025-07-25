@@ -665,7 +665,7 @@ app.post('/approveCappedApplication', async (request, response) => {
   try {
     await client.query('BEGIN')
 
-    await client.query(update_query, [email])
+    const updateResult = await client.query(update_query, [email])
     if (updateResult.rowCount === 0) {
       await client.query('ROLLBACK');
       return response.status(404).json({ error: 'No user found for this email' });
