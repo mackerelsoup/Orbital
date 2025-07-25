@@ -943,21 +943,21 @@ app.post('/applyCappedParking', async (request, response) => {
 app.post('/sendConfirmationEmail', async (req, res) => {
   const { email, username, type } = req.body;
 
+  const mailOptions = {
+    from: process.env.EMAIL_USER,
+    to: email,
+    subject: "NUSpots Seaspn Parking Confirmation",
+    text: `Hi ${username},\n\nThank you for applying for season parking! Your validity period will be reflected in the app once we have approved your application.\n\nBest regards,\nNUSpots`,
+  };
+
   if (type === 'capped') {
-    const mailOptionCapped = {
+    mailOptions = {
       from: process.env.EMAIL_USER,
       to: email,
       subject: "NUSpots Vehicle Registration Confirmation",
       text: `Hi ${username},\n\nThank you for registering your vehicle! Please wait for us to approve your application. If appproved, your parking will now be capped at $2.568 per exit per day on weekdays, from 0830 to 1800 at:\n\n CP3: University Cultural Centre/Yong Siew Toh Conservatory of Music\nCP10B: Prince George's Park Residences\n\nBest regards,\nNUSpots`,
     };
-  } else {
-    const mailOptionCapped = {
-      from: process.env.EMAIL_USER,
-      to: email,
-      subject: "NUSpots Seaspn Parking Confirmation",
-      text: `Hi ${username},\n\nThank you for applying for season parking! Your validity period will be reflected in the app once we have approved your application.\n\nBest regards,\nNUSpots`,
-    };
-  }
+  } 
 
   try {
     await transporter.sendMail(mailOptions);
