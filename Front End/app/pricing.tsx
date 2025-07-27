@@ -93,11 +93,11 @@ export default function PricingScreen() {
 
   const renderCarparkCard = ({ item }: { item: Carpark }) => {
     const isExpanded = expandedCard === item.id;
-    
+
     return (
       <Animated.View style={styles.cardContainer}>
         <View style={styles.card}>
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.cardHeader}
             onPress={() => toggleExpanded(item.id)}
             activeOpacity={0.8}
@@ -107,15 +107,15 @@ export default function PricingScreen() {
               <Text style={styles.carparkId}>#{item.id}</Text>
             </View>
             <View style={styles.expandButton}>
-              <Ionicons 
-                name={isExpanded ? "chevron-up" : "chevron-down"} 
-                size={20} 
-                color="#667085" 
+              <Ionicons
+                name={isExpanded ? "chevron-up" : "chevron-down"}
+                size={20}
+                color="#667085"
               />
             </View>
           </TouchableOpacity>
 
-          {/* pricing */}
+          {/* unexpanded */}
           <View style={styles.pricingContainer}>
             <View style={styles.pricingCard}>
               <View style={styles.pricingIcon}>
@@ -126,14 +126,23 @@ export default function PricingScreen() {
                 <Text style={styles.pricingValue}>${formatPrice(item.pricing?.rate_per_minute)}</Text>
               </View>
             </View>
-            
+
             <View style={styles.pricingCard}>
               <View style={styles.pricingIcon}>
-                <Ionicons name="calendar-outline" size={18} color="#3B82F6" />
+                <Ionicons
+                  name={item.staff ? "lock-closed-outline" : "globe-outline"}
+                  size={18}
+                  color={item.staff ? "#EF4444" : "#10B981"}
+                />
               </View>
               <View>
-                <Text style={styles.pricingLabel}>Daily Cap</Text>
-                <Text style={styles.pricingValue}>{formatDailyCap(item.pricing?.max_daily_cap)}</Text>
+                <Text style={styles.pricingLabel}>Access</Text>
+                <Text style={[
+                  styles.pricingValue,
+                  { color: item.staff ? "#EF4444" : "#10B981" }
+                ]}>
+                  {item.staff ? "Staff" : "Public"}
+                </Text>
               </View>
             </View>
           </View>
@@ -141,21 +150,18 @@ export default function PricingScreen() {
           {/* card expanded */}
           {isExpanded && (
             <View style={styles.expandedContent}>
-              
               <View style={styles.detailsGrid}>
                 <View style={styles.detailCard}>
                   <View style={styles.pricingIcon}>
-                    <Ionicons 
-                      name={item.type === "sheltered" ? "umbrella-outline" : "sunny-outline"} 
-                      size={20} 
-                      color={item.type === "sheltered" ? "#3B82F6" : "#F59E0B"} 
+                    <Ionicons
+                      name={item.type === "sheltered" ? "umbrella-outline" : "sunny-outline"}
+                      size={20}
+                      color={item.type === "sheltered" ? "#3B82F6" : "#F59E0B"}
                     />
                   </View>
                   <View>
                     <Text style={styles.pricingLabel}>Type</Text>
-                    <Text style={[
-                      styles.pricingValue,
-                    ]}>
+                    <Text style={styles.pricingValue}>
                       {item.type === "sheltered" ? "Sheltered" : "Open Air"}
                     </Text>
                   </View>
@@ -163,19 +169,12 @@ export default function PricingScreen() {
 
                 <View style={styles.detailCard}>
                   <View style={styles.pricingIcon}>
-                    <Ionicons 
-                      name={item.staff ? "lock-closed-outline" : "globe-outline"} 
-                      size={20} 
-                      color={item.staff ? "#EF4444" : "#10B981"} 
-                    />
+                    <Ionicons name="calendar-outline" size={20} color="#3B82F6" />
                   </View>
                   <View>
-                    <Text style={styles.pricingLabel}>Access</Text>
-                    <Text style={[
-                      styles.pricingValue,
-                      { color: item.staff ? "#EF4444" : "#10B981" }
-                    ]}>
-                      {item.staff ? "Staff" : "Public"}
+                    <Text style={styles.pricingLabel}>Daily Cap</Text>
+                    <Text style={styles.pricingValue}>
+                      {formatDailyCap(item.pricing?.max_daily_cap)}
                     </Text>
                   </View>
                 </View>
@@ -190,7 +189,7 @@ export default function PricingScreen() {
                 </View>
               )}
 
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={styles.selectButton}
                 onPress={() => handleCardPress(item)}
                 activeOpacity={0.8}
@@ -209,6 +208,7 @@ export default function PricingScreen() {
           )}
         </View>
       </Animated.View>
+
     );
   };
 
@@ -217,7 +217,7 @@ export default function PricingScreen() {
   // hide disclaimer on scroll
   const onScroll = Animated.event(
     [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-    { 
+    {
       useNativeDriver: false,
       listener: () => {
         if (showDisclaimer) {
@@ -241,7 +241,7 @@ export default function PricingScreen() {
   });
 
   const categoryTextSize = scrollY.interpolate({
-    inputRange: [0, 120], 
+    inputRange: [0, 120],
     outputRange: [13, 13], // font size
     extrapolate: 'clamp',
   });
@@ -267,17 +267,17 @@ export default function PricingScreen() {
       activeOpacity={0.7}
     >
       <Animated.View style={[styles.categoryIcon, { opacity: categoryIconOpacity }]}>
-        <Ionicons 
-          name={category.icon} 
-          size={18} 
-          color={selectedCategory === category.id ? '#FF385C' : '#6B7280'} 
+        <Ionicons
+          name={category.icon}
+          size={18}
+          color={selectedCategory === category.id ? '#FF385C' : '#6B7280'}
         />
       </Animated.View>
-      <Animated.Text 
+      <Animated.Text
         style={[
           styles.categoryText,
           selectedCategory === category.id && styles.categoryTextSelected,
-          { 
+          {
             fontSize: categoryTextSize,
             paddingHorizontal: categoryPaddingHorizontal
           }
@@ -319,7 +319,7 @@ export default function PricingScreen() {
             <Text style={styles.resultsText}>
               {filteredCarparks.length} carpark{filteredCarparks.length !== 1 ? "s" : ""} available
             </Text>
-            
+
             <TouchableOpacity onPress={toggleDisclaimer} style={styles.infoButton}>
               <Ionicons name="information-circle-outline" size={16} color="#6d62fe" />
             </TouchableOpacity>
@@ -345,9 +345,9 @@ export default function PricingScreen() {
       </View>
 
       {/* content with touch handler to hide disclaimer */}
-      <TouchableOpacity 
-        style={styles.content} 
-        activeOpacity={1} 
+      <TouchableOpacity
+        style={styles.content}
+        activeOpacity={1}
         onPress={hideDisclaimer}
       >
         <Animated.FlatList
@@ -367,9 +367,9 @@ export default function PricingScreen() {
           showsVerticalScrollIndicator={false}
           ListEmptyComponent={() => (
             <View style={styles.emptyState}>
-              <Image 
+              <Image
                 source={require("../assets/images/undraw_page-eaten.png")}
-                style={{ width: 200, height: 200, resizeMode: "contain", backgroundColor: "transparent" }} 
+                style={{ width: 200, height: 200, resizeMode: "contain", backgroundColor: "transparent" }}
               />
               <Text style={styles.emptyStateTitle}>No carparks found</Text>
               <Text style={styles.emptyStateText}>
@@ -399,7 +399,7 @@ const styles = StyleSheet.create({
   },
   searchContainer: {
     paddingHorizontal: 20,
-    paddingVertical: 16,
+    paddingVertical: 8,
   },
   searchBar: {
     flexDirection: 'row',
@@ -407,7 +407,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderRadius: 16,
     paddingHorizontal: 20,
-    paddingVertical: 14,
+    paddingVertical: 8,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,

@@ -43,7 +43,7 @@ export default function approvalInfo() {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                   email: parsed.email,
-                  season_pass_type: 'student_covered'
+                  season_pass_type: parsed.season_pass_type
                 }),
               });
 

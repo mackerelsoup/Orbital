@@ -1,0 +1,13 @@
+appId: 'com.mackerelsoup.NUSpots' # This is an example app id. Replace it with your app id.
+---
+- launchApp
+- assertVisible: "NUSpots"
+- tapOn:
+    point: "54, 180"
+- tapOn: "Fee Calculator"
+- assertVisible: "Calculator"
+- tapOn:
+    point: "500, 1400"
+- inputText: "00"
+- tapOn: "Calculate Fee"
+- assertVisible: ".*Estimated Fee:.*"

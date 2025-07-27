@@ -1,0 +1,31 @@
+appId: 'com.mackerelsoup.NUSpots' # This is an example app id. Replace it with your app id.
+---
+- launchApp
+- assertVisible: "NUSpots"
+- tapOn:
+    point: "54, 180"
+- assertVisible: ".*Home"
+- tapOn: ".*Home"
+- assertVisible: "NUSpots"
+- tapOn:
+    point: "54, 180"
+- tapOn: ".*Pricing Information"
+- assertVisible: "Pricing Information"
+- tapOn:
+    point: "54, 180"
+- tapOn: ".*Fee Calculator"
+- assertVisible: "Calculator"
+- tapOn:
+    point: "54, 180"
+- tapOn: ".*Digital Permits"
+- assertVisible: "Digital Permits"
+- tapOn:
+    point: "54, 180"
+- tapOn: ".*Parking Trends"
+- assertVisible: "Parking Trends"
+- tapOn:
+    point: "54, 180"
+- tapOn: ".*Approval"
+- assertVisible: "Access Restricted"
+- tapOn: ".*Go Back"
+- assertVisible: "NUSpots"

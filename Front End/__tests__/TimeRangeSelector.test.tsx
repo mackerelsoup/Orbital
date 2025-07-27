@@ -1,40 +1,39 @@
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react-native';
-import TimeRangeSelector from '../components/TimeRangeSelector'; // adjust the path as needed
+import TimeRangeSelector from '../components/TimeRangeSelector';
 
 describe('TimeRangeSelector', () => {
+  const mockOnSelect = jest.fn();
+
   it('renders all time ranges', () => {
     const { getByText } = render(
-      <TimeRangeSelector selected="Day" onSelect={() => {}} />
+      <TimeRangeSelector selected="Day" onSelect={mockOnSelect} />
     );
 
-    expect(getByText('4HR')).toBeTruthy();
-    expect(getByText('Day')).toBeTruthy();
-    expect(getByText('Week')).toBeTruthy();
-    expect(getByText('Month')).toBeTruthy();
-    expect(getByText('Year')).toBeTruthy();
+    ['4HR', 'Day', 'Week', 'Month', 'Year'].forEach((label) => {
+      expect(getByText(label)).toBeTruthy();
+    });
   });
 
-  it('calls onSelect when a range is pressed', () => {
-    const onSelectMock = jest.fn();
+  it('applies selected styles to the selected range', () => {
     const { getByText } = render(
-      <TimeRangeSelector selected="Day" onSelect={onSelectMock} />
+      <TimeRangeSelector selected="Week" onSelect={mockOnSelect} />
     );
 
-    fireEvent.press(getByText('Week'));
-    expect(onSelectMock).toHaveBeenCalledWith('Week');
-  });
-
-  it('applies selected style correctly', () => {
-    const { getByText } = render(
-      <TimeRangeSelector selected="Month" onSelect={() => {}} />
-    );
-
-    const selectedText = getByText('Month');
-    expect(selectedText.props.style).toEqual(
+    const selectedButton = getByText('Week');
+    expect(selectedButton.props.style).toEqual(
       expect.arrayContaining([
         expect.objectContaining({ color: 'white' })
       ])
     );
+  });
+
+  it('calls onSelect when a time range is pressed', () => {
+    const { getByText } = render(
+      <TimeRangeSelector selected="Day" onSelect={mockOnSelect} />
+    );
+
+    fireEvent.press(getByText('Month'));
+    expect(mockOnSelect).toHaveBeenCalledWith('Month');
   });
 });

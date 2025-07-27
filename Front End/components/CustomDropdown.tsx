@@ -19,6 +19,7 @@ export default function CustomDropdown( {data, handleChange} : customDropdownPro
   return (
     <View>
       <Dropdown
+        testID='custom-dropdown'
         style={[styles.dropdown, isFocus && { borderColor: 'blue' }]}
         containerStyle= {{padding: 10}}
         placeholderStyle={styles.placeholderStyle}
