@@ -2,9 +2,9 @@
   "expo": {
     "name": "NUSpots",
     "slug": "NUSpots",
-    "version": "1.0.0",
+    "version": "2.0.2",
     "orientation": "default",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/aaron.png",
     "scheme": "nuspots",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
@@ -13,8 +13,8 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "foregroundImage": "./assets/images/nuspotsIcon.png",
+        "backgroundColor": "#dd851e"
       },
       "config": {
         "googleMaps": {
@@ -34,13 +34,14 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/splash-icon.png",
+          "image": "./assets/images/nuspotsIcon.png",
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
         }
       ],
-      "expo-font"
+      "expo-font",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true

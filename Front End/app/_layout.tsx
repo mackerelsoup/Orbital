@@ -41,7 +41,10 @@ export default function RootLayout() {
                 headerRight: () => {
                   const { user } = useContext(UserContext)!
                   return (
-                    <View style={{ marginTop: Platform.OS === 'ios' ? -10 : 0, paddingRight: 8 }}>
+                    <View 
+                      style={{ marginTop: Platform.OS === 'ios' ? -10 : 0, paddingRight: 8 }}
+                      testID='profileIcon'
+                      >
                       <Link href={user.username ? '/profile' : '/login'} asChild style={styles.profileContainer}>
                         <Pressable>
                           <Image source={{ uri: user.profile_uri }} width={40} height={40} style={styles.profileIcon} />
@@ -220,11 +223,13 @@ export default function RootLayout() {
               <Drawer.Screen
                 name="seasonPending"
                 options={{
+                  title: 'Pending Approval',
                   drawerItemStyle: { display: 'none' }
                 }} />
               <Drawer.Screen
                 name="cappedPending"
                 options={{
+                  title: 'Pending Approval',
                   drawerItemStyle: { display: 'none' }
                 }} />
 
