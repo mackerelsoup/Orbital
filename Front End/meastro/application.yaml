@@ -1,0 +1,52 @@
+appId: 'com.mackerelsoup.NUSpots' # This is an example app id. Replace it with your app id.
+---
+- launchApp
+- assertVisible: "NUSpots"
+- tapOn:
+    id: profileIcon
+- assertVisible: "Username or Email"
+- tapOn: "example@example.com"
+- inputText: "maestro"
+- tapOn: "Enter password"
+- inputText: "1"
+- tapOn: "Log in"
+- assertVisible: "NUSpots"
+- tapOn:
+    point: "54, 180"
+- tapOn: ".*Digital Permits"
+- assertVisible: "Digital Permits"
+- tapOn: ".*Manage Season Parking"
+- assertVisible: "Sign Up"
+- tapOn: "Sign Up"
+- assertVisible: "Season Application"
+- tapOn: "Select Item"
+- tapOn: "Mr."
+- tapOn: "Enter your full name"
+- inputText: "maestro"
+- tapOn: "Enter your address"
+- inputText: "maestro ave"
+- tapOn: "your.email.*"
+- inputText: "maestro@gmail.com"
+- tapOn: 
+    point: "200, 1900"
+- inputText: "90000000"
+- scroll
+- tapOn: "A0.*"
+- inputText: "A0000000P"
+- tapOn: "e.g.*"
+- inputText: "SOC"
+- tapOn: "SX.*"
+- inputText: "SSS0000P"
+- tapOn: "XX.*"
+- inputText: "1234567891"
+- scroll
+- tapOn: "Vehicle owner.*"
+- inputText: "maestro"
+- tapOn: "e.g.*"
+- inputText: "Self"
+- tapOn: "> 2.0 L"
+- scroll
+- tapOn: "Unsheltered"
+- tapOn: ".*Submit Application"
+- assertVisible: "Application Successful!"
+- assertVisible: "Refresh"

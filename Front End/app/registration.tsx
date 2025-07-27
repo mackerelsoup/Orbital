@@ -277,6 +277,8 @@ export default function RegisterForm() {
               style={styles.passwordInput}
               placeholder="Create a strong password"
               placeholderTextColor="#A0A0A0"
+              textContentType="password"
+              autoComplete="password"
               secureTextEntry={!showPassword}
               value={password}
               onChangeText={setPassword}
