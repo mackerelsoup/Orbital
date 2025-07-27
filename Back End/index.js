@@ -120,7 +120,7 @@ app.get('/fetchbyEmail/:email', async (request, response) => {
   const fetch_id_query = "SELECT * FROM login WHERE email = $1"
 
   try {
-    const fetchResult = await pool.query(fetch_id_query, [username])
+    const fetchResult = await pool.query(fetch_id_query, [email])
 
     if (fetchResult.rowCount === 0) {
       return response.status(404).send("Email not found")
