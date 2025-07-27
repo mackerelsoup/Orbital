@@ -230,7 +230,7 @@ const SeasonParkingStatus = () => {
                 <FontAwesome name="calendar" size={14} color="#6B7280" />  Valid Period
               </Text>
               <View style={styles.detailValue}>
-                <Text style={styles.detailText}>12 May 2025 - 27 Aug 2025</Text>
+                <Text style={styles.detailText}>4 Aug 2025 - 6 Dec 2025</Text>
               </View>
             </View>
 
@@ -247,7 +247,7 @@ const SeasonParkingStatus = () => {
             <TouchableOpacity
               style={styles.primaryButton}
               onPress={() => {
-                alert("Season Parking valid from 01/06/2025 to 31/08/2025")
+                alert("Season Parking valid from 04/08/2025 to 06/12/2025")
               }}
             >
               <FontAwesome name="info-circle" size={18} color="#FFFFFF" style={styles.buttonIcon} />

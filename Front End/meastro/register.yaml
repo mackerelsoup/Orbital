@@ -1,0 +1,21 @@
+appId: 'com.mackerelsoup.NUSpots' # This is an example app id. Replace it with your app id.
+---
+- launchApp
+- assertVisible: "NUSpots"
+- tapOn:
+    id: profileIcon
+- tapOn: ".*Create an Account"
+- tapOn: "Choose a username"
+- inputText: "maestro"
+- tapOn: "example@example.com"
+- inputText: "maestro@gmail.com"
+- tapOn: "Create a strong password"
+- inputText: "1"
+- tapOn: "Retype the same password"
+- inputText: "1"
+- scroll
+- tapOn: "Student"
+- tapOn: "Create Account"
+- assertVisible: "Registration Successful!"
+- tapOn: "Go to Login"
+- assertVisible: "Username or Email"

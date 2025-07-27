@@ -218,7 +218,7 @@ export default function LoginForm() {
           <View style={styles.innerContainer}>
             <Text style={styles.title}>Log into account</Text>
 
-            <Text style={styles.label}>Email</Text>
+            <Text style={styles.label}>Username or Email</Text>
             <TextInput
               style={styles.input}
               placeholder="example@example.com"

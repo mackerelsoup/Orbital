@@ -20,7 +20,7 @@ export default function Button({ label, onPress, children, style, labelStyle }: 
                     styles.button,
                     { opacity: pressed ? 0.5 : 1 },
                 ]}
-                onTouchEnd={onPress}
+                onPress={onPress}
                 >
                 <View style = {{flexDirection: 'column', justifyContent: 'center', alignItems: 'center'}}>
                     <Text style={[styles.buttonLabel, labelStyle]}>{label}</Text>
