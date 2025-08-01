@@ -224,6 +224,7 @@ export default function CarparkTrend() {
       //console.log("CarparkTrend received carpark:", carpark);
       setGraphData([]);
       try {
+        console.log(startTime, "  " ,endTime)
         const response = await fetch(`https://back-end-o2lr.onrender.com/fetchCarparkHistory/${carparkId}/${startTime / 1000}/${endTime / 1000}`);
         if (!response.ok) throw new Error("Carpark History not Available");
         const data: CarparkAvailability[] = await response.json();
