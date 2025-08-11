@@ -32,7 +32,7 @@ const CappedParkingStatus = () => {
       const checkCappedStatus = async () => {
         try {
           console.log(user.email)
-          const response = await fetch("https://back-end-o2lr.onrender.com/checkCappedStatus", {
+          const response = await fetch("http://10.54.169.229:3000/checkCappedStatus", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ email: user.email }),
@@ -84,7 +84,7 @@ const CappedParkingStatus = () => {
           onPress: async () => {
             try {
               console.log(user.email)
-              const response = await fetch('https://back-end-o2lr.onrender.com/endCapped', {
+              const response = await fetch('http://10.54.169.229:3000/endCapped', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email: user.email }),

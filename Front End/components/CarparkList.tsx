@@ -38,7 +38,7 @@ const FILTER_OPTIONS = {
 };
 
 // API URLs
-const API_BASE_URL = 'https://back-end-o2lr.onrender.com';
+const API_BASE_URL = 'http://10.54.169.229:3000';
 const API_ENDPOINTS = {
   DISTANCE: `${API_BASE_URL}/computeDistance`,
   AVAILABILITY: (id: number) => `${API_BASE_URL}/fetchCarparkData/${id}`

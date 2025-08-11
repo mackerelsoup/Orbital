@@ -31,6 +31,15 @@ export default function RegisterForm() {
     }
   }
 
+  class PasswordError extends Error {
+    constructor(message: string) {
+      super(message)
+      this.name = 'Password Error'
+      Object.setPrototypeOf(this, PasswordError.prototype);
+    }
+  }
+
+
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -102,11 +111,11 @@ export default function RegisterForm() {
     console.log(payload.season_pass_type)
 
     try {
-      const response = await fetch("https://back-end-o2lr.onrender.com/register", {
+      const response = await fetch("http://10.54.169.229:3000/newRegister", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
-      });
+      })
 
       if (!response.ok) {
         const message = await response.text()
@@ -117,9 +126,12 @@ export default function RegisterForm() {
           else {
             setEmail("")
           }
-          console.log(message)
-          Alert.alert("Registration failed", message)
           throw new DuplicateError("Duplicate info")
+        }
+        else if (response.status === 422) {
+          setPassword("")
+          setConfirmPassword("")
+          throw new PasswordError("Insufficient password length")
         }
         else
           throw new Error("Failed to register.");
@@ -128,8 +140,15 @@ export default function RegisterForm() {
       resetForm()
       router.replace("/registrationSuccess");
     } catch (err) {
-      if (!(err instanceof DuplicateError))
-        Alert.alert("Registration failed. Please try again later.");
+      if (err instanceof DuplicateError){
+        Alert.alert("Username or email already exists")
+      }
+      else if (err instanceof PasswordError) {
+        Alert.alert("Registration failed, enter a password of at least length 6")
+      }
+      else {
+        Alert.alert("Registration failed, try again later")
+      }
     }
   };
 
