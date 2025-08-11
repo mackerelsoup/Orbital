@@ -107,7 +107,7 @@ export default function Profile() {
     if (updateImage){
       const updateImage = async () => {
       try {
-        const response = await fetch(`https://back-end-o2lr.onrender.com/updateProfile/${user.username}`, {
+        const response = await fetch(`http://10.54.169.229:3000/updateProfile/${user.username}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',

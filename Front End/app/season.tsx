@@ -46,7 +46,7 @@ const SeasonParkingStatus = () => {
       const checkSeasonStatus = async () => {
         try {
           console.log(user.email)
-          const response = await fetch("https://back-end-o2lr.onrender.com/checkSeasonStatus", {
+          const response = await fetch("http://10.54.169.229:3000/checkSeasonStatus", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ email: user.email }),
@@ -99,7 +99,7 @@ const SeasonParkingStatus = () => {
           onPress: async () => {
             try {
               console.log(user.email)
-              const response = await fetch('https://back-end-o2lr.onrender.com/endSeason', {
+              const response = await fetch('http://10.54.169.229:3000/endSeason', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email: user.email }),

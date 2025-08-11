@@ -105,65 +105,14 @@ app.post('/computeDistance', async (request, response) => {
 }
 )
 
-
-//:id is a route param, acts as a placeholder for any value that is part of the URL
-app.get('/fetchbyUsername/:username', async (req, res) => {
-  const username = req.params.username;
-
-  try {
-    const { data, error } = await supabase
-      .from('login')
-      .select('*')
-      .eq('username', username)
-
-    if (error) {
-      if (error.code === 'PGRST116') { // Row not found
-        return res.status(404).send("User not found");
-      }
-      console.error(error);
-      return res.status(500).json({ error: error.message });
-    }
-
-    return res.status(200).json(data);
-  } catch (err) {
-    console.error(err);
-    return res.status(500).send(err.message);
-  }
-});
-
-
-app.get('/fetchbyEmail/:email', async (req, res) => {
-  const email = req.params.email;
-
-  try {
-    const { data, error } = await supabase
-      .from('login')
-      .select('*')
-      .eq('email', email)
-
-    if (error) {
-      if (error.code === 'PGRST116') {
-        // PGRST116 = no rows found
-        return res.status(404).send("Email not found");
-      }
-      console.error(error);
-      return res.status(500).send(error.message || 'Unexpected error');
-    }
-
-    return res.status(200).send(data);
-
-  } catch (err) {
-    console.error(err);
-    return res.status(500).send("Server error");
-  }
-})
-
 app.get('/fetchUserData/:username', async (req, res) => {
+  console.log("called")
   const username = req.params.username;
+  console.log(username)
 
   try {
     const { data, error } = await supabase
-      .from('user_info')
+      .from('profiles')
       .select('*')
       .eq('username', username)
 
@@ -183,7 +132,7 @@ app.get('/fetchUserDataEmail/:email', async (req, res) => {
 
   try {
     const { data, error } = await supabase
-      .from('user_info')
+      .from('profiles')
       .select('*')
       .eq('email', email)
 
@@ -341,10 +290,11 @@ app.post('/getAvailabilityForecast/:id', async (req, res) => {
   }
 });
 
-app.post('newRegister', async (req, res) => {
+app.post('/newRegister', async (req, res) => {
   const { username, email, password, is_staff, season_pass, season_pass_type } = req.body;
+  console.log(req.body)
 
-  const {data, error} = await supabase
+  const {data} = await supabase
   .from("profiles")
   .select('username')
   .eq('username', username)
@@ -355,7 +305,7 @@ app.post('newRegister', async (req, res) => {
 
   const {
     data : {session},
-    signUpError,
+    error,
   } = await supabase.auth.signUp({
     email: email,
     password: password,
@@ -369,9 +319,18 @@ app.post('newRegister', async (req, res) => {
     }
   })
 
-  if (signUpError) {
-    if (signUpError.error === 'email_exits') {
+  console.log(session)
+
+
+  if (error) {
+    if (error.code === 'email_exists') {
       return res.status(409).send("Email already exists")
+    }
+    else if (error.code === 'weak_password') {
+      return res.status(422).send("Password too weak")
+    }
+    else {
+      return res.status(500).send("Registration Failed")
     }
   }
 
@@ -573,7 +532,7 @@ app.post('/resetSeasonStatus', async (req, res) => {
   }
 
   const { data, error, count } = await supabase
-    .from('user_info')
+    .from('profiles')
     .update({ season_application_status: null })
     .eq('email', email)
     .select('email', { count: 'exact' }); // allows rowCount checking
@@ -599,7 +558,7 @@ app.post('/endSeason', async (request, response) => {
   }
 
   const { data, error, count } = await supabase
-    .from('user_info')
+    .from('profiles')
     .update({
       season_pass: false,
       season_pass_type: null
@@ -628,7 +587,7 @@ app.post('/checkSeasonStatus', async (request, response) => {
   }
 
   const { data, error } = await supabase
-    .from('user_info')
+    .from('profiles')
     .select('season_pass, season_pass_type')
     .eq('email', email)
     .maybeSingle();
@@ -753,7 +712,7 @@ app.post('/resetCappedStatus', async (request, response) => {
 
   try {
     const { data, error, count } = await supabase
-      .from('user_info')
+      .from('profiles')
       .update({ capped_application_status: null })
       .eq('email', email)
       .select('email', { count: 'exact' });
@@ -786,7 +745,7 @@ app.post('/endCapped', async (request, response) => {
 
   try {
     const { data, error, count } = await supabase
-      .from('user_info')
+      .from('profiles')
       .update({ capped_pass: false })
       .eq('email', email)
       .select('email', { count: 'exact' });
