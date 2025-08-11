@@ -6,6 +6,7 @@ const { spawn } = require('child_process')
 const fetch = require('node-fetch');
 const nodemailer = require("nodemailer");
 const { createClient } = require('@supabase/supabase-js')
+const port = process.env.PORT || 3000
 
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY)
 
@@ -339,6 +340,44 @@ app.post('/getAvailabilityForecast/:id', async (req, res) => {
     });
   }
 });
+
+app.post('newRegister', async (req, res) => {
+  const { username, email, password, is_staff, season_pass, season_pass_type } = req.body;
+
+  const {data, error} = await supabase
+  .from("profiles")
+  .select('username')
+  .eq('username', username)
+
+  if (data.length !== 0){
+    return res.status(409).send("Username already exists");
+  }
+
+  const {
+    data : {session},
+    signUpError,
+  } = await supabase.auth.signUp({
+    email: email,
+    password: password,
+    options: {
+      data: {
+        username: username,
+        is_staff: is_staff,
+        season_pass: season_pass,
+        season_pass_type: season_pass_type
+      }
+    }
+  })
+
+  if (signUpError) {
+    if (signUpError.error === 'email_exits') {
+      return res.status(409).send("Email already exists")
+    }
+  }
+
+  return res.status(200).send("Successfully registered")
+
+})
 
 
 app.post('/register', async (req, res) => {
