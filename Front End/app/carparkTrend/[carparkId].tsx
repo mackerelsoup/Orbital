@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, Dimensions, Modal, Pressable } from 'react-native'
+import { StyleSheet, Text, View, Dimensions, Modal, Pressable, ActivityIndicator, Alert } from 'react-native'
 import React, { useEffect, useState, useMemo, useLayoutEffect } from 'react'
 import { CartesianChart, Line, useChartPressState } from "victory-native"
 import { useFont, Circle, Text as SKText, RoundedRect } from '@shopify/react-native-skia'
@@ -111,6 +111,7 @@ export default function CarparkTrend() {
     y: { availability: 0 }   // Note: This should match the yKeys in CartesianChart
   });
   const navigation = useNavigation()
+  const [loadingForecast, setLoadingForecast] = useState(true)
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -136,6 +137,7 @@ export default function CarparkTrend() {
     const getForecast = async () => {
       console.log("running forcecast:", carparkId);
       setForecastData([])
+      setLoadingForecast(true);
       try {
 
 
@@ -174,6 +176,12 @@ export default function CarparkTrend() {
         } else {
           console.log("Failed to get forecast", error);
         }
+        Alert.alert(
+          "Forecast failed",
+          "Could not fetch forecast. Please try again later."
+        );
+      } finally {
+        setLoadingForecast(false);
       }
     }
 
@@ -336,6 +344,15 @@ export default function CarparkTrend() {
         <TimeRangeSelector selected={selectedRange} onSelect={setSelectedRange}></TimeRangeSelector>
       </View>
       <View style={{ alignItems: 'center' }}>
+        <Portal>
+          {loadingForecast && (
+            <View style={styles.loadingOverlay} pointerEvents="auto">
+              <ActivityIndicator size="large" />
+              <Text style={styles.loadingText}>Fetching forecast…</Text>
+            </View>
+          )}
+        </Portal>
+
         <SquareButton
           label='Forecast'
           size={150}
@@ -405,5 +422,18 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingVertical: 10,
     paddingHorizontal: 20,
+  },
+  loadingOverlay: {
+    position: 'absolute',
+    top: 0, left: 0, right: 0, bottom: 0,
+    backgroundColor: '#00000060',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 99,
+  },
+  loadingText: {
+    marginTop: 10,
+    color: 'white',
+    fontSize: 14,
   },
 })
