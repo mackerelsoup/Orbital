@@ -89,8 +89,8 @@ export default function LoginForm() {
       let response;
 
       if (isEmail())
-        response = await fetch(`http://10.54.169.229:3000/fetchUserDataEmail/${username}`);
-      else response = await fetch(`http://10.54.169.229:3000/fetchUserData/${username}`);
+        response = await fetch(`https://migrated-backend.onrender.com/fetchUserDataEmail/${username}`);
+      else response = await fetch(`https://migrated-backend.onrender.com/fetchUserData/${username}`);
 
       if (response.status === 404) throw new UserNotFoundError("User not found");
       if (!response.ok) throw new ConnectionError("Network response was not ok");

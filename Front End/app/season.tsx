@@ -46,7 +46,7 @@ const SeasonParkingStatus = () => {
       const checkSeasonStatus = async () => {
         try {
           console.log(user.email)
-          const response = await fetch("http://10.54.169.229:3000/checkSeasonStatus", {
+          const response = await fetch("https://migrated-backend.onrender.com/checkSeasonStatus", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ email: user.email }),
@@ -99,7 +99,7 @@ const SeasonParkingStatus = () => {
           onPress: async () => {
             try {
               console.log(user.email)
-              const response = await fetch('http://10.54.169.229:3000/endSeason', {
+              const response = await fetch('https://migrated-backend.onrender.com/endSeason', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email: user.email }),

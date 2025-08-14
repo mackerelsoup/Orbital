@@ -121,7 +121,7 @@ export default function CarparkTrend() {
   useEffect(() => {
     const getCurrentTime = async () => {
       try {
-        const response = await fetch("http://10.54.169.229:3000/getCurrentTime");
+        const response = await fetch("https://migrated-backend.onrender.com/getCurrentTime");
         if (!response.ok) throw new Error("Current Time not Available");
         const data = await response.json();
         const latestTime = new Date(data.latest_time).getTime();
@@ -139,7 +139,7 @@ export default function CarparkTrend() {
       try {
 
 
-        const response = await fetch(`http://10.54.169.229:3000/getAvailabilityForecast/${carparkId}`, {
+        const response = await fetch(`https://migrated-backend.onrender.com/getAvailabilityForecast/${carparkId}`, {
           method: 'POST',
         });
         if (!response.ok || response.status == 500) throw new Error("Forecast not available");
@@ -225,7 +225,7 @@ export default function CarparkTrend() {
       setGraphData([]);
       try {
         console.log(startTime, "  " ,endTime)
-        const response = await fetch(`http://10.54.169.229:3000/fetchCarparkHistory/${carparkId}/${startTime / 1000}/${endTime / 1000}`);
+        const response = await fetch(`https://migrated-backend.onrender.com/fetchCarparkHistory/${carparkId}/${startTime / 1000}/${endTime / 1000}`);
         if (!response.ok) throw new Error("Carpark History not Available");
         const data: CarparkAvailability[] = await response.json();
         //console.log(data)
