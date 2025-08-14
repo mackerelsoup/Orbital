@@ -111,7 +111,7 @@ export default function RegisterForm() {
     console.log(payload.season_pass_type)
 
     try {
-      const response = await fetch("http://10.54.169.229:3000/newRegister", {
+      const response = await fetch("https://migrated-backend.onrender.com/newRegister", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),

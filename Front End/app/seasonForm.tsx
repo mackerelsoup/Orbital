@@ -173,7 +173,7 @@ const SeasonParkingApplicationForm = () => {
     };
 
     try {
-      const response = await fetch('http://10.54.169.229:3000/applySeasonParking', {
+      const response = await fetch('https://migrated-backend.onrender.com/applySeasonParking', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
@@ -182,7 +182,7 @@ const SeasonParkingApplicationForm = () => {
       // get response and decode whether it is successful or not
       const result = await response.json();
       if (result.success) {
-        await fetch("http://10.54.169.229:3000/sendConfirmationEmail", {
+        await fetch("https://migrated-backend.onrender.com/sendConfirmationEmail", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email: formData.email, username: formData.name, type: 'season' }),
