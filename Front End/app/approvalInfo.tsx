@@ -34,8 +34,8 @@ export default function approvalInfo() {
           onPress: async () => {
             setIsProcessing(true);
             const URL = type === 'season' ?
-              "https://back-end-o2lr.onrender.com/approveSeasonApplication" :
-              "https://back-end-o2lr.onrender.com/approveCappedApplication";
+              "https://migrated-backend.onrender.com/approveSeasonApplication" :
+              "https://migrated-backend.onrender.com/approveCappedApplication";
 
             try {
               const response = await fetch(URL, {
@@ -80,8 +80,8 @@ export default function approvalInfo() {
           onPress: async () => {
             setIsProcessing(true);
             const URL = type === 'season' ?
-              "https://back-end-o2lr.onrender.com/rejectSeasonApplication" :
-              "https://back-end-o2lr.onrender.com/rejectCappedApplication";
+              "https://migrated-backend.onrender.com/rejectSeasonApplication" :
+              "https://migrated-backend.onrender.com/rejectCappedApplication";
 
             try {
               const response = await fetch(URL, {

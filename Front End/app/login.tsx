@@ -16,6 +16,7 @@ import {
   View,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import {supabase} from "../lib/supabase"
 
 type FormErrors = {
   username?: string;
@@ -86,26 +87,55 @@ export default function LoginForm() {
 
     try {
       let response;
+
       if (isEmail())
-        response = await fetch(`https://back-end-o2lr.onrender.com/fetchbyEmail/${username}`);
-      else response = await fetch(`https://back-end-o2lr.onrender.com/fetchbyUsername/${username}`);
+        response = await fetch(`https://migrated-backend.onrender.com/fetchUserDataEmail/${username}`);
+      else response = await fetch(`https://migrated-backend.onrender.com/fetchUserData/${username}`);
 
       if (response.status === 404) throw new UserNotFoundError("User not found");
       if (!response.ok) throw new ConnectionError("Network response was not ok");
 
       const data = await response.json();
-      console.log("data:", data[0].username)
+      console.log("data:", data)
 
-      if (data[0].password !== password) {
-        setInlineError("Email or password incorrect. Please try again.");
-        setPassword("");
-        return;
+      const dataProcessed = data[0]
+
+      const userEmail = dataProcessed.email
+
+      //stop gap measure to get it working
+      const {error} = await supabase.auth.signInWithPassword({
+        email: userEmail,
+        password: password
+      })
+
+      if (error) {
+        throw new UserNotFoundError("Wrong email")
+      }
+
+      if (dataProcessed.is_staff) {
+        setUserType("Staff")
+      } else {
+        setUserType("Student")
       }
 
       setInlineError("");
-      setUserData(data[0]);
       setUsername("");
       setPassword("");
+      
+      const userData = {
+        username: dataProcessed.username,
+        email: dataProcessed.email,
+        staff: dataProcessed.is_staff,
+        season_parking: dataProcessed.season_pass,
+        season_parking_type: dataProcessed.season_pass_type,
+        season_application_status: dataProcessed.season_application_status,
+        capped_pass: dataProcessed.capped_pass,
+        capped_application_status: dataProcessed.capped_application_status,
+        profile_uri: dataProcessed.avatar_url,
+      }
+      setUser(userData)
+      setLoggedIn(true)
+
       router.replace((from?.toString() || "/") as any);
     } catch (error) {
       if (error instanceof ConnectionError) {
@@ -118,58 +148,6 @@ export default function LoginForm() {
     }
   };
 
-  const setUserData = async (data: userDataIncomplete) => {
-    try {
-      let response = await fetch(`https://back-end-o2lr.onrender.com/fetchUserData/${data.username}`);
-      if (response.status === 404) {
-        console.log("user not found")
-        throw new userDataNotFoundError("User not found");
-      }
-
-      if (!response.ok) throw new ConnectionError("Network response was not ok");
-
-      const userdata = await response.json();
-      // set user type
-      if (userdata[0].is_staff) {
-        setUserType('Staff');
-      } else {
-        setUserType('Student');
-      }
-
-      response = await fetch(`https://back-end-o2lr.onrender.com/getUserProfilePic/${data.username}`)
-      if (response.status === 404) {
-        console.log("user not found")
-        throw new userDataNotFoundError("User not found");
-      }
-
-      if (!response.ok) throw new ConnectionError("Network response was not ok");
-
-      const userProfilePic = await response.json()
-
-      const mergedData = {
-        username: data.username,
-        email: data.email,
-        staff: userdata[0].is_staff,
-        season_parking: userdata[0].season_pass,
-        season_parking_type: userdata[0].season_pass_type,
-        season_application_status: userdata[0].season_application_status,
-        capped_pass: userdata[0].capped_pass,
-        capped_application_status: userdata[0].capped_application_status,
-        profile_uri: userProfilePic[0].profileuri,
-      };
-
-      setUser(mergedData);
-      setLoggedIn(true);
-    } catch (error) {
-      if (error instanceof ConnectionError) {
-        Alert.alert("Login failed. Please try again later.");
-      } else if (error instanceof userDataNotFoundError) {
-        Alert.alert("User info not in database, contact support");
-      }
-      setUsername("");
-      setPassword("");
-    }
-  };
 
   return (
     <>
