@@ -376,25 +376,16 @@ app.post('/register', async (req, res) => {
 app.post('/getUserProfilePic', async (req, res) => {
   const { imagePath } = req.body;
 
-  try {
-    const { data, error } = supabase.storage
+    const { data} = supabase.storage
       .from("avatars")
       .getPublicUrl(imagePath);
-
-    if (error) {
-      console.error("Supabase error:", error.message);
-      return res.status(500).json({ error: error.message });
-    }
 
     if (!data || !data.publicUrl) {
       return res.status(404).json({ error: "Image not found" });
     }
 
     res.json({ publicUrl: data.publicUrl });
-  } catch (err) {
-    console.error("Unexpected error:", err.message);
-    res.status(500).json({ error: err.message });
-  }
+
 });
 
 
@@ -407,7 +398,8 @@ app.put('/updateProfilePic/:username', async (req, res) => {
     const { data, error } = await supabase
       .from('profiles')
       .update({ avatar_url: imagePath })
-      .eq('username', username);
+      .eq('username', username)
+      .select();
 
     if (error) {
       console.error("Error updating profile image:", error.message);
@@ -427,18 +419,18 @@ app.put('/updateProfilePic/:username', async (req, res) => {
 });
 
 app.post('/storeImage', upload.single("image"), async (req, res) => {
-  if (!req.image)
+  if (!req.file)
     return res.status(400).json({ error: "No image" })
 
 
   try {
-    const fileExt = req.image.fileName?.split('.').pop()?.toLowerCase() ?? 'jpeg'
+    const fileExt = req.file.originalname?.split('.').pop()?.toLowerCase() ?? 'jpeg'
     const path = `${Date.now()}.${fileExt}`
 
     const { data, error: uploadError } = await supabase.storage
       .from('avatars')
       .upload(path, req.file.buffer, {
-        contentType: req.image.mimeType ?? 'image/jpeg',
+        contentType: req.file.mimeType ?? 'image/jpeg',
       })
 
     if (uploadError) {
