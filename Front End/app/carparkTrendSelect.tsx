@@ -1,8 +1,11 @@
-import React from 'react';
-import { View, Text, Pressable, StyleSheet, FlatList, Dimensions } from 'react-native';
+import React, { useContext, useLayoutEffect } from 'react';
+import { View, Text, Pressable, StyleSheet, FlatList, Dimensions, Image, Platform } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { router } from 'expo-router';
+import { Link, router, useNavigation } from 'expo-router';
 import carparks from '../assets/carparks.json';
+import { UserContext } from '@/context/userContext';
+import ProfileAvatar from '@/components/ProfileAvatar';
+
 
 const { width } = Dimensions.get('window');
 
@@ -13,6 +16,9 @@ interface Carpark {
 }
 
 export default function CarparkTrendSelect() {
+  const { user } = useContext(UserContext)!
+  const navigation = useNavigation()
+
   const handleSelect = (carpark: Carpark) => {
     router.push(`./carparkTrend/${carpark.id}`);
   };
@@ -30,7 +36,7 @@ export default function CarparkTrendSelect() {
             <Text style={styles.itemSubtitle}>View parking trends</Text>
           </View>
         </View>
-        
+
         <View style={styles.arrowContainer}>
           <Text style={styles.arrow}>→</Text>
         </View>
@@ -47,6 +53,12 @@ export default function CarparkTrendSelect() {
       </Text>
     </View>
   );
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => <ProfileAvatar />
+    })
+  }, [navigation])
 
   return (
     <View style={styles.container}>
@@ -88,7 +100,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#e2e8f0',
     paddingVertical: 10,
-    justifyContent:'center',
+    justifyContent: 'center',
   },
   headerSubtitle: {
     textAlign: 'center',
@@ -158,7 +170,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     flex: 1,
-    justifyContent:'center'
+    justifyContent: 'center'
   },
   itemInfo: {
     flex: 1,
@@ -212,4 +224,10 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 24,
   },
+  profileContainer: {
+    marginRight: 2.5
+  },
+  profileIcon: {
+    borderRadius: 75
+  }
 });

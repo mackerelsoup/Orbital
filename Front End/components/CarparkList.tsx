@@ -38,7 +38,7 @@ const FILTER_OPTIONS = {
 };
 
 // API URLs
-const API_BASE_URL = 'https://migrated-backend.onrender.com';
+const API_BASE_URL = 'http://192.168.68.58:3000';
 const API_ENDPOINTS = {
   DISTANCE: `${API_BASE_URL}/computeDistance`,
   AVAILABILITY: (id: number) => `${API_BASE_URL}/fetchCarparkData/${id}`

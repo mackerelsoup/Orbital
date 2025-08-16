@@ -1,9 +1,10 @@
 import { FontAwesome } from '@expo/vector-icons';
 import * as WebBrowser from 'expo-web-browser';
-import { Href, useRouter } from 'expo-router';
-import React, { useState, useContext, useEffect } from 'react';
-import { Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Href, Link, useNavigation, useRouter } from 'expo-router';
+import React, { useState, useContext, useEffect, useLayoutEffect } from 'react';
+import { Alert, Platform, Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View, Image } from 'react-native';
 import { UserContext } from "@/context/userContext";
+import ProfileAvatar from '@/components/ProfileAvatar';
 
 /*
 Parent file of:
@@ -18,6 +19,7 @@ export default function DigitalPermits() {
   const { logout } = useContext(UserContext)!;
   const [seasonRedirect, setSeasonRedirect] = useState<Href>('/')
   const [cappedRedirect, setCappedRedirect] = useState<Href>('/')
+  const navigation = useNavigation()
 
   useEffect(() => {
     if (user.season_parking) {
@@ -32,7 +34,7 @@ export default function DigitalPermits() {
           Alert.alert("Application rejected", "Apply again or contact support")
           setUser({
             ...user,
-            season_application_status:undefined
+            season_application_status: undefined
           })
         }
       }
@@ -208,6 +210,13 @@ export default function DigitalPermits() {
       </View>
     </TouchableOpacity>
   );
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => <ProfileAvatar />
+    })
+  }, [navigation])
+
 
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer}>
@@ -484,4 +493,10 @@ const styles = StyleSheet.create({
     color: '#6B7280',
     fontWeight: '500',
   },
+  profileContainer: {
+    marginRight: 2.5
+  },
+  profileIcon: {
+    borderRadius: 75
+  }
 });

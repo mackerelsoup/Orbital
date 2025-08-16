@@ -3,12 +3,15 @@ import { getLocation } from '@/components/LocationService';
 import MapComponent from '@/components/MapComponent';
 import { Portal } from 'react-native-portalize'
 import { Link, useLocalSearchParams, router } from 'expo-router';
-import React, { useEffect, useRef, useState } from 'react';
-import { Pressable, StyleSheet, Text, View, Linking, Dimensions, Platform } from 'react-native';
+import React, { useEffect, useRef, useState, useLayoutEffect, useContext } from 'react';
+import { Pressable, StyleSheet, Text, View, Linking, Dimensions, Platform, Image } from 'react-native';
 import MapView, { MapMarker, Region } from 'react-native-maps';
 import Modal from 'react-native-modal';
 import carparks from '../assets/carparks.json';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { useNavigation } from 'expo-router';
+import { UserContext } from '@/context/userContext';
+import ProfileAvatar from '@/components/ProfileAvatar';
+
 
 
 export default function App() {
@@ -20,6 +23,8 @@ export default function App() {
   const [selectedCarpark, setSelectedCarpark] = useState<Carpark | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
   const { carparkId, triggerClick } = useLocalSearchParams();
+  const navigation = useNavigation()
+  const { user } = useContext(UserContext)!
 
   // allows for car park modal to pop up when clicked from pricing file
   useEffect(() => {
@@ -113,6 +118,13 @@ export default function App() {
       setModalVisible(false);
     }
   };
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => <ProfileAvatar />
+    })
+  }, [navigation])
+
 
   return (
     <View style={styles.container}>
@@ -344,5 +356,11 @@ const styles = StyleSheet.create({
     color: "#333",
     fontSize: 16,
     fontWeight: "500",
+  },
+  profileContainer: {
+    marginRight: 2.5
+  },
+  profileIcon: {
+    borderRadius: 75
   }
 })

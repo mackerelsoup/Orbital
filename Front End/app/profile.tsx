@@ -9,7 +9,6 @@ import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
 import * as ImagePicker from 'expo-image-picker'
-import { setup } from '@testing-library/react-native/build/user-event/setup';
 
 type InfoCardProps = {
   icon: keyof typeof MaterialIcons.glyphMap; // restrict to MaterialIcons icon names
@@ -21,9 +20,83 @@ type InfoCardProps = {
 
 export default function Profile() {
   const { logout, user, setUser } = useContext(UserContext)!;
-  const [updateImage, setUpdateImage] = useState(false)
-  const [image, setImage] = useState<string>(user.profile_uri)
+  const [imagePath, setImagePath] = useState<string | null>(null)
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(user.profile_uri)
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false)
+
+
+  useEffect(() => {
+    console.log("avatar path", avatarUrl)
+    console.log("user:", user)
+    if (imagePath) {
+        getImage(imagePath)
+        updateUser(imagePath)
+    } else if (avatarUrl === null) {
+      setAvatarUrl("https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png?20150327203541")
+      setUser(prev => ({
+        ...prev,
+        profile_uri: "https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png?20150327203541"
+      }))
+
+    }
+  }, [imagePath, avatarUrl])
+
+  const updateUser = async (path: string|null) => {
+    try {
+      if (!user?.username) {
+        throw new Error("User not logged in")
+      }
+
+      const response = await fetch(`http://192.168.68.58:3000/updateProfilePic/${user.username}`,
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ imagePath: path }),
+        }
+      )
+      
+      if (!response.ok) {
+        throw new Error(await response.text())
+      }
+      
+      
+    } catch (error: any) {
+      console.error("Error updating profile picture:", error.message);
+      Alert.alert("Error", "Unable to update user profile picture");
+    }
+  }
+
+  const getImage = async (path: string) => {
+    try {
+      const response = await fetch('http://192.168.68.58:3000/getUserProfilePic', {
+        method: "POST",
+        headers: {
+            'Content-Type': 'application/json',
+          },
+        body: JSON.stringify({ imagePath: path })
+      })
+
+      if (!response.ok) {
+        throw new Error("Cant retrieve image")
+      }
+
+      const {publicUrl} = await response.json()
+      setAvatarUrl(publicUrl)
+
+      setUser(prev => ({
+        ...prev,
+        profile_uri: publicUrl
+      }))
+
+
+    } catch (error: any) {
+      Alert.alert("Unable to retrieve user image")
+    }
+  }
+
+
 
   const handleLogout = () => {
     Alert.alert(
@@ -41,100 +114,146 @@ export default function Profile() {
     );
   };
 
-  const onChoosePhoto = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1
-    })
-
-    if (!result.canceled) {
-      setImage(result.assets[0].uri)
-    }
-    setIsModalVisible(false)
-    setUpdateImage(true)
-  }
-
   const onTakePhoto = async () => {
-    let result = await ImagePicker.launchCameraAsync({
-      mediaTypes: ['images'],
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1
-    })
+    try {
+      const result = await ImagePicker.launchCameraAsync({
+        mediaTypes: ['images'],
+        allowsMultipleSelection: false,
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 1,
+        exif: false
+      })
 
-    if (!result.canceled) {
-      setImage(result.assets[0].uri)
+      if (result.canceled || !result.assets || result.assets.length === 0) {
+        console.log('User cancelled camera.')
+        toggleModal()
+        return
+      }
+
+      const image = result.assets[0]
+      if (!image.uri) {
+        throw new Error('No image uri!') // Realistically, this should never happen, but just in case...
+      }
+
+      const formData = new FormData()
+      formData.append("image", {
+        uri: image.uri,
+        name: image.fileName,
+        type: image.mimeType ?? "image/jpeg"
+      } as any)
+
+      const response = await fetch('http://192.168.68.58:3000/storeImage', {
+        method: 'POST',
+        body: formData
+      })
+
+      if (!response.ok) {
+        throw new Error("tf")
+      }
+
+      const data = await response.json();
+      setImagePath(data.path)
+    } catch (error) {
+      Alert.alert("Error, failed to store image")
     }
-    setIsModalVisible(false)
-    setUpdateImage(true)
+    finally {
+      toggleModal()
+    }
   }
 
-  const onRemovePhoto = () => {
-    setImage("https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png?20150327203541")
-    setIsModalVisible(false)
-    setUpdateImage(true)
+  const onChoosePhoto = async () => {
+
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images'],
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 1,
+        exif: false,
+        allowsMultipleSelection: false
+      })
+
+      if (result.canceled || !result.assets || result.assets.length === 0) {
+        console.log('User cancelled image picker.')
+        toggleModal()
+        return
+      }
+
+      const image = result.assets[0]
+      if (!image.uri) {
+        throw new Error('No image uri!') // Realistically, this should never happen, but just in case...
+      }
+
+      const formData = new FormData()
+      formData.append("image", {
+        uri: image.uri,
+        name: image.fileName,
+        type: image.mimeType ?? "image/jpeg"
+      } as any)
+
+      const response = await fetch('http://192.168.68.58:3000/storeImage', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+        body: formData
+      })
+
+      if (!response.ok) {
+        throw new Error("tf")
+      }
+
+      const data = await response.json();
+      setImagePath(data.path)
+
+    } catch (error) {
+
+    } finally {
+      toggleModal()
+    }
+
   }
+
+  const onRemovePhoto = async () => {
+    console.log("remove")
+    updateUser(null)
+    setImagePath(null)
+    setAvatarUrl(null)
+    setUser(prev => ({
+      ...prev,
+      profile_uri: "https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png?20150327203541",
+    }))
+    toggleModal()
+  }
+
 
   const toggleModal = () => {
     setIsModalVisible(!isModalVisible)
   }
 
   const parseValue = (value: string) => {
-  switch (value) {
-    case "staff_covered":
-      return "Staff (Covered)";
-    case "staff_open":
-      return "Staff (Open)";
-    case "student_covered":
-      return "Student (Covered)";
-    case "student_open":
-      return "Student (Open)";
-    case "student_open_2A":
-      return "Student (Open 2A)";
-    case "student_open_10":
-      return "Student (Open 10)";
-    case "student_open_11":
-      return "Student (Open 11)";
-    default:
-      return ""; // or null, or a fallback label
-  }
-};
-
-
-  useEffect(() => {
-    if (updateImage){
-      const updateImage = async () => {
-      try {
-        const response = await fetch(`https://migrated-backend.onrender.com/updateProfile/${user.username}`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            imageURI: image
-          }),
-        })
-        if (!response.ok) {
-          console.log(response)
-          throw new Error("Unable to update profile picture")
-        } 
-
-      } catch (error) {
-        Alert.alert("Unable to update profile picture")
-      }
+    switch (value) {
+      case "staff_covered":
+        return "Staff (Covered)";
+      case "staff_open":
+        return "Staff (Open)";
+      case "student_covered":
+        return "Student (Covered)";
+      case "student_open":
+        return "Student (Open)";
+      case "student_open_2A":
+        return "Student (Open 2A)";
+      case "student_open_10":
+        return "Student (Open 10)";
+      case "student_open_11":
+        return "Student (Open 11)";
+      default:
+        return ""; // or null, or a fallback label
     }
-    updateImage()
+  };
 
-    setUser(prev => ({
-      ...prev,
-      profile_uri: image
-    }))
-    }
-  }, [image])
-
-  const InfoCard = ({ icon, label, value, iconColor = '#6d62fe' } : InfoCardProps) => (
+  const InfoCard = ({ icon, label, value, iconColor = '#6d62fe' }: InfoCardProps) => (
     <View style={styles.infoCard}>
       <View style={styles.infoIconContainer}>
         <MaterialIcons name={icon} size={24} color={iconColor} />
@@ -152,7 +271,7 @@ export default function Profile() {
       <View style={styles.header}>
         <View style={styles.imageContainer}>
           <Image
-            source={{ uri: image }}
+            source={{ uri: avatarUrl! }}
             style={styles.profilePicture}
           />
           <Pressable

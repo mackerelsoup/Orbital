@@ -38,22 +38,6 @@ export default function RootLayout() {
                   <DrawerIcon name="home" size={size} color={color} />
                 ),
                 headerTitle: "NUSpots",
-                headerRight: () => {
-                  const { user } = useContext(UserContext)!
-                  return (
-                    <View 
-                      style={{ marginTop: Platform.OS === 'ios' ? -10 : 0, paddingRight: 8 }}
-                      testID='profileIcon'
-                      >
-                      <Link href={user.username ? '/profile' : '/login'} asChild style={styles.profileContainer}>
-                        <Pressable>
-                          <Image source={{ uri: user.profile_uri }} width={40} height={40} style={styles.profileIcon} />
-                        </Pressable>
-                      </Link>
-                    </View>
-
-                  )
-                }
               }}></Drawer.Screen>
 
               <Drawer.Screen name="pricing" options={{
@@ -63,19 +47,6 @@ export default function RootLayout() {
                   <DrawerIcon name="money" size={size} color={color} />
                 ),
                 headerTitle: "Pricing Information",
-                headerRight: () => {
-                  const { user } = useContext(UserContext)!
-                  return (
-                    <View style={{ marginTop: Platform.OS === 'ios' ? -10 : 0, paddingRight: 8 }}>
-                      <Link href={user.username ? '/profile' : '/login'} asChild style={styles.profileContainer}>
-                        <Pressable>
-                          <Image source={{ uri: user.profile_uri }} width={40} height={40} style={styles.profileIcon} />
-                        </Pressable>
-                      </Link>
-                    </View>
-
-                  )
-                }
               }}></Drawer.Screen>
 
               <Drawer.Screen name="calculator" options={{
@@ -85,19 +56,6 @@ export default function RootLayout() {
                   <DrawerIcon name="calculator" size={size} color={color} />
                 ),
                 headerTitle: "Calculator",
-                headerRight: () => {
-                  const { user } = useContext(UserContext)!
-                  return (
-                    <View style={{ marginTop: Platform.OS === 'ios' ? -10 : 0, paddingRight: 8 }}>
-                      <Link href={user.username ? '/profile' : '/login'} asChild style={styles.profileContainer}>
-                        <Pressable>
-                          <Image source={{ uri: user.profile_uri }} width={40} height={40} style={styles.profileIcon} />
-                        </Pressable>
-                      </Link>
-                    </View>
-
-                  )
-                }
               }}></Drawer.Screen>
 
               <Drawer.Screen name="digitalpermits" options={{
@@ -107,19 +65,6 @@ export default function RootLayout() {
                   <DrawerIcon name="id-card" size={size} color={color} />
                 ),
                 headerTitle: "Digital Permits",
-                headerRight: () => {
-                  const { user } = useContext(UserContext)!
-                  return (
-                    <View style={{ marginTop: Platform.OS === 'ios' ? -10 : 0, paddingRight: 8 }}>
-                      <Link href={user.username ? '/profile' : '/login'} asChild style={styles.profileContainer}>
-                        <Pressable>
-                          <Image source={{ uri: user.profile_uri }} width={40} height={40} style={styles.profileIcon} />
-                        </Pressable>
-                      </Link>
-                    </View>
-
-                  )
-                }
               }}></Drawer.Screen>
 
               <Drawer.Screen name="carparkTrendSelect" options={{
@@ -129,19 +74,6 @@ export default function RootLayout() {
                   <DrawerIcon name="line-chart" size={size} color={color} />
                 ),
                 headerTitle: "Parking Trends",
-                headerRight: () => {
-                  const { user } = useContext(UserContext)!
-                  return (
-                    <View style={{ marginTop: Platform.OS === 'ios' ? -10 : 0, paddingRight: 8 }}>
-                      <Link href={user.username ? '/profile' : '/login'} asChild style={styles.profileContainer}>
-                        <Pressable>
-                          <Image source={{ uri: user.profile_uri }} width={40} height={40} style={styles.profileIcon} />
-                        </Pressable>
-                      </Link>
-                    </View>
-
-                  )
-                }
               }}></Drawer.Screen>
 
 
