@@ -6,9 +6,12 @@ const { spawn } = require('child_process')
 const fetch = require('node-fetch');
 const nodemailer = require("nodemailer");
 const { createClient } = require('@supabase/supabase-js')
+const multer = require('multer')
 const port = process.env.PORT || 3000
 
+
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY)
+const upload = multer()
 
 const transporter = nodemailer.createTransport({
   service: "gmail",
@@ -294,17 +297,17 @@ app.post('/newRegister', async (req, res) => {
   const { username, email, password, is_staff, season_pass, season_pass_type } = req.body;
   console.log(req.body)
 
-  const {data} = await supabase
-  .from("profiles")
-  .select('username')
-  .eq('username', username)
+  const { data } = await supabase
+    .from("profiles")
+    .select('username')
+    .eq('username', username)
 
-  if (data.length !== 0){
+  if (data.length !== 0) {
     return res.status(409).send("Username already exists");
   }
 
   const {
-    data : {session},
+    data: { session },
     error,
   } = await supabase.auth.signUp({
     email: email,
@@ -370,45 +373,40 @@ app.post('/register', async (req, res) => {
 
 
 
-app.get('/getUserProfilePic/:username', async (req, res) => {
-  const { username } = req.params;
-
+app.post('/getUserProfilePic', async (req, res) => {
+  const { imagePath } = req.body;
 
   try {
-    const { data, error } = await supabase
-      .from('user_profile')
-      .select('profileuri')
-      .eq('username', username);
+    const { data, error } = supabase.storage
+      .from("avatars")
+      .getPublicUrl(imagePath);
 
     if (error) {
-      console.error("Error querying Supabase:", error.message);
-      return res.status(500).send("Internal server error");
+      console.error("Supabase error:", error.message);
+      return res.status(500).json({ error: error.message });
     }
 
-    if (!data || data.length === 0) {
-      console.error("User not found");
-      return res.status(404).send("User not found");
+    if (!data || !data.publicUrl) {
+      return res.status(404).json({ error: "Image not found" });
     }
 
-    return res.status(200).json(data);
-
+    res.json({ publicUrl: data.publicUrl });
   } catch (err) {
-    console.error("Unexpected error fetching user profile picture:", err);
-    return res.status(500).send("Internal server error");
+    console.error("Unexpected error:", err.message);
+    res.status(500).json({ error: err.message });
   }
 });
 
 
-
-app.put('/updateProfile/:username', async (req, res) => {
+app.put('/updateProfilePic/:username', async (req, res) => {
   const { username } = req.params;
-  const { imageURI } = req.body;
+  const { imagePath } = req.body;
 
 
   try {
     const { data, error } = await supabase
-      .from('user_profile')
-      .update({ profileuri: imageURI })
+      .from('profiles')
+      .update({ avatar_url: imagePath })
       .eq('username', username);
 
     if (error) {
@@ -427,6 +425,36 @@ app.put('/updateProfile/:username', async (req, res) => {
     return res.status(500).send("Internal server error");
   }
 });
+
+app.post('/storeImage', upload.single("image"), async (req, res) => {
+  if (!req.image)
+    return res.status(400).json({ error: "No image" })
+
+
+  try {
+    const fileExt = req.image.fileName?.split('.').pop()?.toLowerCase() ?? 'jpeg'
+    const path = `${Date.now()}.${fileExt}`
+
+    const { data, error: uploadError } = await supabase.storage
+      .from('avatars')
+      .upload(path, req.file.buffer, {
+        contentType: req.image.mimeType ?? 'image/jpeg',
+      })
+
+    if (uploadError) {
+      throw uploadError
+    }
+
+    return res.json({ path: data.path })
+
+  } catch (error) {
+    console.error("Upload error:", err.message)
+    res.status(500).json({ error: err.message })
+  }
+})
+
+
+
 
 
 app.get('/getSeasonApplication', async (req, res) => {
