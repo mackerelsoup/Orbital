@@ -1,10 +1,13 @@
 import { FontAwesome } from '@expo/vector-icons';
 import DateTimePicker, { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
-import React, { useState } from 'react';
-import { Alert, Keyboard, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Switch, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import React, { useContext, useLayoutEffect, useState } from 'react';
+import { Alert, Keyboard, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Switch, Text, TextInput, TouchableOpacity, View, Image } from 'react-native';
 import ModalSelector from 'react-native-modal-selector';
 import carparks from '../assets/carparks.json';
 import { PUBLIC_HOLIDAYS } from '../assets/publicHolidays';
+import { UserContext } from '@/context/userContext';
+import { Link, useNavigation } from 'expo-router';
+import ProfileAvatar from '@/components/ProfileAvatar';
 
 interface FeeBreakdownItem {
   period: string;
@@ -34,21 +37,23 @@ export default function CalculatorScreen() {
   const [showBreakdown, setShowBreakdown] = useState<boolean>(false);
   const [feeBreakdown, setFeeBreakdown] = useState<FeeBreakdown | null>(null);
   const selectorRef = React.useRef<any>(null);
+  const navigation = useNavigation()
+  const { user } = useContext(UserContext)!
 
   const formatTime = (date: Date) => {
-    return date.toLocaleString("en-US", { 
-      month: "short", 
-      day: "numeric", 
-      hour: "2-digit", 
-      minute: "2-digit", 
+    return date.toLocaleString("en-US", {
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
       hour12: false
     });
   };
 
   const formatTimeOnly = (date: Date) => {
-    return date.toLocaleString("en-US", { 
-      hour: "2-digit", 
-      minute: "2-digit", 
+    return date.toLocaleString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
       hour12: false
     });
   };
@@ -67,7 +72,7 @@ export default function CalculatorScreen() {
       onChange: (event, selectedDate) => {
         if (event.type === "set" && selectedDate) {
           const updatedDate = new Date(selectedDate);
-          DateTimePickerAndroid.open({ 
+          DateTimePickerAndroid.open({
             value: updatedDate,
             mode: "time",
             is24Hour: true,
@@ -100,7 +105,7 @@ export default function CalculatorScreen() {
       return;
     }
 
-    if (duration <= 10){
+    if (duration <= 10) {
       Alert.alert("All carparks have a grace period of 10 minutes")
       setFee(0);
       setFeeBreakdown({
@@ -140,7 +145,7 @@ export default function CalculatorScreen() {
     let freeMinutes = 0;
     let chargedMinutes = 0;
     const breakdownItems: FeeBreakdownItem[] = [];
-    
+
     // track periods for breakdown
     let currentPeriod = {
       start: new Date(start),
@@ -166,7 +171,7 @@ export default function CalculatorScreen() {
 
     let cursor = new Date(start);
     let lastDescription = "";
-    
+
     // grace period
     let graceMinutes = 0;
     if (duration <= 10) {
@@ -275,7 +280,7 @@ export default function CalculatorScreen() {
     if (cappedMinutes > 0) {
       cappedAmount = Math.min(rate * cappedMinutes, 2.568);
       charge += cappedAmount;
-      
+
       // Add capped period to breakdown
       breakdownItems.push({
         period: "Capped Period Total",
@@ -287,7 +292,7 @@ export default function CalculatorScreen() {
     }
 
     const finalFee = charge >= 1000 ? 999.99 : Math.floor(charge * 100) / 100;
-    
+
     setFee(finalFee);
     setFeeBreakdown({
       items: breakdownItems,
@@ -299,14 +304,20 @@ export default function CalculatorScreen() {
     });
   };
 
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => <ProfileAvatar />
+    })
+  }, [navigation])
+
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       keyboardVerticalOffset={Platform.OS === "ios" ? 50 : 0}
     >
-      <ScrollView 
-        contentContainerStyle={styles.scrollContainer} 
+      <ScrollView
+        contentContainerStyle={styles.scrollContainer}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
@@ -357,8 +368,8 @@ export default function CalculatorScreen() {
                     Registered Vehicle?
                   </Text>
                 </View>
-                <Switch 
-                  value={isRegistered} 
+                <Switch
+                  value={isRegistered}
                   onValueChange={setIsRegistered}
                   trackColor={{ false: "#E5E7EB", true: "#B8B3FF" }}
                   thumbColor={isRegistered ? "#6d62fe" : "#F9FAFB"}
@@ -372,19 +383,19 @@ export default function CalculatorScreen() {
               <Text style={styles.label}>
                 Start Time
               </Text>
-              <TouchableOpacity 
-                style={styles.timeButton} 
+              <TouchableOpacity
+                style={styles.timeButton}
                 onPress={Platform.OS === "ios" ? toggleDatePicker : showAndroidDatePicker}
               >
                 <Text style={styles.timeButtonText}>{formatTime(startTime)}</Text>
                 <FontAwesome name="calendar" size={18} color="#6d62fe" />
               </TouchableOpacity>
-              
+
               {showDatePicker && Platform.OS === "ios" && (
                 <View style={styles.datePickerContainer}>
                   <View style={styles.datePickerHeader}>
                     <Text style={styles.datePickerTitle}>Select Date & Time</Text>
-                    <TouchableOpacity 
+                    <TouchableOpacity
                       style={styles.closeButton}
                       onPress={toggleDatePicker}
                     >
@@ -395,9 +406,9 @@ export default function CalculatorScreen() {
                     <DateTimePicker
                       value={startTime}
                       mode="datetime"
-                      display="compact" 
+                      display="compact"
                       onChange={(e, date) => {
-                        if (e.type === "dismissed" ) {
+                        if (e.type === "dismissed") {
                           setShowDatePicker(false);
                           return;
                         }
@@ -408,7 +419,7 @@ export default function CalculatorScreen() {
                       style={styles.datePicker}
                     />
                   </View>
-                  <TouchableOpacity 
+                  <TouchableOpacity
                     style={styles.doneButton}
                     onPress={toggleDatePicker}
                   >
@@ -462,17 +473,17 @@ export default function CalculatorScreen() {
 
             {/* Breakdown Toggle */}
             {fee !== null && feeBreakdown && (
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={styles.breakdownToggle}
                 onPress={() => setShowBreakdown(!showBreakdown)}
               >
                 <Text style={styles.breakdownToggleText}>
                   {showBreakdown ? "Hide" : "Show"} Fee Breakdown
                 </Text>
-                <FontAwesome 
-                  name={showBreakdown ? "chevron-up" : "chevron-down"} 
-                  size={14} 
-                  color="#6d62fe" 
+                <FontAwesome
+                  name={showBreakdown ? "chevron-up" : "chevron-down"}
+                  size={14}
+                  color="#6d62fe"
                 />
               </TouchableOpacity>
             )}
@@ -480,22 +491,22 @@ export default function CalculatorScreen() {
             {/* Fee Breakdown */}
             {fee !== null && feeBreakdown && showBreakdown && (
               <View style={styles.breakdownCard}>
-                  <View style={styles.summaryRow}>
-                    <Text style={styles.summaryLabel}>Total Duration:</Text>
-                    <Text style={styles.summaryValue}>{feeBreakdown.totalMinutes} minutes</Text>
-                  </View>
-                  <View style={styles.summaryRow}>
-                    <Text style={styles.summaryLabel}>Free Minutes:</Text>
-                    <Text style={[styles.summaryValue, { color: "#10B981" }]}>
-                      {feeBreakdown.freeMinutes} minutes
-                    </Text>
-                  </View>
-                  <View style={styles.summaryRow}>
-                    <Text style={styles.summaryLabel}>Charged Minutes:</Text>
-                    <Text style={[styles.summaryValue, { color: "#F59E0B" }]}>
-                      {feeBreakdown.chargedMinutes} minutes
-                    </Text>
-                  </View>
+                <View style={styles.summaryRow}>
+                  <Text style={styles.summaryLabel}>Total Duration:</Text>
+                  <Text style={styles.summaryValue}>{feeBreakdown.totalMinutes} minutes</Text>
+                </View>
+                <View style={styles.summaryRow}>
+                  <Text style={styles.summaryLabel}>Free Minutes:</Text>
+                  <Text style={[styles.summaryValue, { color: "#10B981" }]}>
+                    {feeBreakdown.freeMinutes} minutes
+                  </Text>
+                </View>
+                <View style={styles.summaryRow}>
+                  <Text style={styles.summaryLabel}>Charged Minutes:</Text>
+                  <Text style={[styles.summaryValue, { color: "#F59E0B" }]}>
+                    {feeBreakdown.chargedMinutes} minutes
+                  </Text>
+                </View>
 
                 {/* Detailed Breakdown */}
                 <Text style={styles.breakdownSubtitle}>Detailed Breakdown:</Text>
@@ -888,4 +899,10 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#10B981',
   },
+  profileContainer: {
+    marginRight: 2.5
+  },
+  profileIcon: {
+    borderRadius: 75
+  }
 })

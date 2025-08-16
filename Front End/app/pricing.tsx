@@ -1,10 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { useRouter } from 'expo-router';
-import React, { useMemo, useState, useRef } from 'react';
-import { Animated, Dimensions, FlatList, Image, Platform, SafeAreaView, StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Link, useNavigation, useRouter } from 'expo-router';
+import React, { useMemo, useState, useRef, useLayoutEffect, useContext } from 'react';
+import { Animated, Dimensions, FlatList, Image, Platform, Pressable, SafeAreaView, StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import carparks from '../assets/carparks.json';
-import debounce from 'lodash';
+import { UserContext } from '@/context/userContext';
+import ProfileAvatar from '@/components/ProfileAvatar';
 
 const { width } = Dimensions.get("window");
 
@@ -33,6 +34,8 @@ export default function PricingScreen() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [showDisclaimer, setShowDisclaimer] = useState(false);
   const router = useRouter();
+  const navigation = useNavigation()
+  const { user } = useContext(UserContext)!
 
   const filteredCarparks = useMemo(() => {
     let filtered = carparks.filter((carpark: Carpark) =>
@@ -260,7 +263,7 @@ export default function PricingScreen() {
         selectedCategory === category.id && styles.categoryTabSelected
       ]}
       onPress={() => {
-        setTimeout (() => {
+        setTimeout(() => {
           setSelectedCategory(selectedCategory === category.id ? null : category.id)
         }, 50);
       }}
@@ -287,6 +290,12 @@ export default function PricingScreen() {
       </Animated.Text>
     </TouchableOpacity>
   );
+
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => <ProfileAvatar />
+    })
+  }, [navigation])
 
   return (
     <SafeAreaView style={styles.container}>
@@ -730,4 +739,10 @@ const styles = StyleSheet.create({
     lineHeight: 24,
     marginBottom: 32,
   },
+  profileContainer: {
+    marginRight: 2.5
+  },
+  profileIcon: {
+    borderRadius: 75
+  }
 });

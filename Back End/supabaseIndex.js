@@ -122,6 +122,15 @@ app.get('/fetchUserData/:username', async (req, res) => {
     if (error) return res.status(500).send(error.message);
     if (!data) return res.status(404).send("User info not found");
 
+    if (data[0].avatar_url) {
+      const { data: publicURL } = supabase.storage
+        .from("avatars")
+        .getPublicUrl(data[0].avatar_url)
+
+      data[0].avatar_url = publicURL.publicUrl
+
+    }
+
     return res.status(200).json(data);
   } catch (err) {
     console.error(err);
@@ -146,6 +155,18 @@ app.get('/fetchUserDataEmail/:email', async (req, res) => {
 
     if (!data) {
       return res.status(404).send("User info not found");
+    }
+
+
+
+    if (data[0].avatar_url) {
+      console.log(data[0].avatar_url)
+      const { data: publicURL } = supabase.storage
+        .from("avatars")
+        .getPublicUrl(data[0].avatar_url)
+
+      data[0].avatar_url = publicURL.publicUrl
+
     }
 
     return res.status(200).json(data);
@@ -315,6 +336,7 @@ app.post('/newRegister', async (req, res) => {
     options: {
       data: {
         username: username,
+        avatar_url: null,
         is_staff: is_staff,
         season_pass: season_pass,
         season_pass_type: season_pass_type
@@ -376,15 +398,15 @@ app.post('/register', async (req, res) => {
 app.post('/getUserProfilePic', async (req, res) => {
   const { imagePath } = req.body;
 
-    const { data} = supabase.storage
-      .from("avatars")
-      .getPublicUrl(imagePath);
+  const { data } = supabase.storage
+    .from("avatars")
+    .getPublicUrl(imagePath);
 
-    if (!data || !data.publicUrl) {
-      return res.status(404).json({ error: "Image not found" });
-    }
+  if (!data || !data.publicUrl) {
+    return res.status(404).json({ error: "Image not found" });
+  }
 
-    res.json({ publicUrl: data.publicUrl });
+  res.json({ publicUrl: data.publicUrl });
 
 });
 

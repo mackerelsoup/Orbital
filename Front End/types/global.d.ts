@@ -32,5 +32,5 @@ type UserData = {
   season_application_status?: string;
   capped_pass:boolean;
   capped_application_status?: string;
-  profile_uri:string;
+  profile_uri:string|null;
 }
