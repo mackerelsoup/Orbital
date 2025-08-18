@@ -472,7 +472,6 @@ app.post('/storeImage', upload.single("image"), async (req, res) => {
 
 
 app.get('/getSeasonApplication', async (req, res) => {
-  const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
 
   try {
     const { data, error } = await supabase
