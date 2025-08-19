@@ -23,6 +23,7 @@ export default function approvalInfo() {
   const parsed = JSON.parse(formData);
 
   const onApprove = async () => {
+    console.log("parsed:", parsed)
     Alert.alert(
       "Approve Application",
       "Are you sure you want to approve this parking application?",
@@ -34,8 +35,8 @@ export default function approvalInfo() {
           onPress: async () => {
             setIsProcessing(true);
             const URL = type === 'season' ?
-              "http://192.168.68.58:3000/approveSeasonApplication" :
-              "http://192.168.68.58:3000/approveCappedApplication";
+              "https://migrated-backend.onrender.com/approveSeasonApplication" :
+              "https://migrated-backend.onrender.com/approveCappedApplication";
 
             try {
               const response = await fetch(URL, {
@@ -43,7 +44,7 @@ export default function approvalInfo() {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                   email: parsed.email,
-                  season_pass_type: parsed.season_pass_type
+                  season_pass_type: parsed.parking_type
                 }),
               });
 
@@ -80,8 +81,8 @@ export default function approvalInfo() {
           onPress: async () => {
             setIsProcessing(true);
             const URL = type === 'season' ?
-              "http://192.168.68.58:3000/rejectSeasonApplication" :
-              "http://192.168.68.58:3000/rejectCappedApplication";
+              "https://migrated-backend.onrender.com/rejectSeasonApplication" :
+              "https://migrated-backend.onrender.com/rejectCappedApplication";
 
             try {
               const response = await fetch(URL, {

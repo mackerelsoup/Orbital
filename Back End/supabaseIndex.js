@@ -529,6 +529,7 @@ app.get('/getCappedApplication', async (req, res) => {
 
 app.post('/approveSeasonApplication', async (req, res) => {
   const { email, season_pass_type } = req.body;
+  console.log(req.body)
 
   const { error } = await supabase.rpc('approve_season_application', {
     input_email: email,
@@ -957,7 +958,7 @@ app.post('/applyCappedParking', async (request, response) => {
       iu_no: iuNo,
       vehicle_owner: vehicleOwner,
       relationship,
-      engine_capacity: engineCapacity
+      engine_capacity: engineCapacity,
     });
 
     if (error) {

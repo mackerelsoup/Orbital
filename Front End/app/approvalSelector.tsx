@@ -82,7 +82,7 @@ export default function approvalSelector() {
     if (activeTab === 'Season') {
       const getSeasonParking = async () => {
         try {
-          const response = await fetch('http://192.168.68.58:3000/getSeasonApplication')
+          const response = await fetch('https://migrated-backend.onrender.com/getSeasonApplication')
           if (!response.ok) {
             if (response.status === 500) {
               Alert.alert("Failed to retrieve parking information")
@@ -113,7 +113,7 @@ export default function approvalSelector() {
     else {
       const getCappedParking = async () => {
         try {
-          const response = await fetch('http://192.168.68.58:3000/getCappedApplication')
+          const response = await fetch('https://migrated-backend.onrender.com/getCappedApplication')
           if (!response.ok) {
             if (response.status === 500) {
               Alert.alert("Failed to retrieve parking information")
@@ -231,7 +231,7 @@ export default function approvalSelector() {
         <View style={styles.content}>
           <FlatList
             data={activeTab === 'Season' ? seasonApplicationData : cappedApplicationData}
-            keyExtractor={(item) => item.id.toString()}
+            keyExtractor={(item) => item.email.toString()}
             renderItem={renderApplicationItem}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={styles.listContainer}
