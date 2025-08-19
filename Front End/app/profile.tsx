@@ -47,7 +47,7 @@ export default function Profile() {
         throw new Error("User not logged in")
       }
 
-      const response = await fetch(`http://192.168.68.58:3000/updateProfilePic/${user.username}`,
+      const response = await fetch(`https://migrated-backend.onrender.com/updateProfilePic/${user.username}`,
         {
           method: 'PUT',
           headers: {
@@ -70,7 +70,7 @@ export default function Profile() {
 
   const getImage = async (path: string) => {
     try {
-      const response = await fetch('http://192.168.68.58:3000/getUserProfilePic', {
+      const response = await fetch('https://migrated-backend.onrender.com/getUserProfilePic', {
         method: "POST",
         headers: {
             'Content-Type': 'application/json',
@@ -107,7 +107,7 @@ export default function Profile() {
         {
           text: 'Logout',
           style: 'destructive',
-          onPress: () => { logout(); router.replace('/'); }
+          onPress: () => {logout(); router.replace('/'); }
         },
       ],
       { cancelable: true }
@@ -143,7 +143,7 @@ export default function Profile() {
         type: image.mimeType ?? "image/jpeg"
       } as any)
 
-      const response = await fetch('http://192.168.68.58:3000/storeImage', {
+      const response = await fetch('https://migrated-backend.onrender.com/storeImage', {
         method: 'POST',
         body: formData
       })
@@ -192,7 +192,7 @@ export default function Profile() {
         type: image.mimeType ?? "image/jpeg"
       } as any)
 
-      const response = await fetch('http://192.168.68.58:3000/storeImage', {
+      const response = await fetch('https://migrated-backend.onrender.com/storeImage', {
         method: 'POST',
         headers: {
           'Content-Type': 'multipart/form-data',
