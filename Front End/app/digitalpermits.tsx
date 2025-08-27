@@ -44,12 +44,12 @@ export default function DigitalPermits() {
     }
 
     if (user.capped_pass) {
-      setSeasonRedirect('/capped?signedUp=true')
+      setCappedRedirect('/capped?signedUp=true')
     }
     else {
       if (user.capped_application_status) {
         if (user.capped_application_status === 'pending') {
-          setSeasonRedirect('/cappedPending')
+          setCappedRedirect('/cappedPending')
         }
         else if (user.capped_application_status === 'rejected') {
           Alert.alert("Application rejected", "Apply again or contact support")
@@ -212,10 +212,10 @@ export default function DigitalPermits() {
   );
 
   useLayoutEffect(() => {
-    navigation.setOptions({
-      headerRight: () => <ProfileAvatar />
-    })
-  }, [navigation])
+    // Guard inside if you only want this when logged in
+    if (!loggedIn) return;
+    navigation.setOptions({ headerRight: () => <ProfileAvatar /> });
+  }, [navigation, loggedIn]);
 
 
   return (
